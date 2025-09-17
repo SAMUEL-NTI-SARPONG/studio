@@ -1,8 +1,6 @@
 'use client';
 import { CalendarCheck } from 'lucide-react';
-import { UserNav } from './user-nav';
 import { TickingClock } from '../timetable/ticking-clock';
-import { ConnectionStatus } from '../timetable/connection-status';
 
 export default function Header() {
   return (
@@ -14,10 +12,8 @@ export default function Header() {
         </div>
         <div className="flex flex-1 items-center justify-end space-x-4">
           <div className="flex items-center space-x-2">
-             <ConnectionStatus />
              <TickingClock />
           </div>
-          <UserNav />
         </div>
       </div>
     </header>
