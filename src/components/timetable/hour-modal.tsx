@@ -25,7 +25,6 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useTimetable } from '@/hooks/use-timetable';
 import type { TimetableEntry } from '@/lib/types';
-import { AiSuggestionTool } from './ai-suggestion-tool';
 import { Loader2, Trash2 } from 'lucide-react';
 
 type HourModalProps = {
@@ -119,14 +118,14 @@ export function HourModal({ isOpen, setIsOpen, entry, day, time }: HourModalProp
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="sm:max-w-[425px] md:max-w-2xl">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{entry ? 'Edit Event' : 'Create Event'}</DialogTitle>
           <DialogDescription>
             {entry ? 'Update the details of your event.' : 'Add a new event to your timetable.'}
           </DialogDescription>
         </DialogHeader>
-        <div className="grid md:grid-cols-2 gap-6 py-4">
+        <div className="py-4">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
@@ -205,7 +204,6 @@ export function HourModal({ isOpen, setIsOpen, entry, day, time }: HourModalProp
               </DialogFooter>
             </form>
           </Form>
-          <AiSuggestionTool formValues={form.watch()} />
         </div>
       </DialogContent>
     </Dialog>
