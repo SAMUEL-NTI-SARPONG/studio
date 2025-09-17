@@ -4,7 +4,6 @@ import { useState, useMemo, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { useTimetable } from '@/hooks/use-timetable';
-import { useAuth } from '@/hooks/use-auth';
 import { DAYS_OF_WEEK } from '@/lib/constants';
 import type { TimetableEntry } from '@/lib/types';
 import { HourModal } from './hour-modal';
@@ -19,11 +18,13 @@ const parseTime = (time: string): number => {
 
 export function TimetableGrid() {
   const { entries, loading } = useTimetable();
-  const { user } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState<TimetableEntry | null>(null);
   const [selectedDay, setSelectedDay] = useState<number>(new Date().getDay());
   const [selectedTime, setSelectedTime] = useState<string>('00:00');
+
+  // Mock user for UI development
+  const user = { id: 'mock-user-id' };
 
   const handleSlotClick = (day: number, hour: number) => {
     setSelectedDay(day);

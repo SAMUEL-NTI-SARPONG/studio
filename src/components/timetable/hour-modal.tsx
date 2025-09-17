@@ -24,7 +24,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useTimetable } from '@/hooks/use-timetable';
-import { useAuth } from '@/hooks/use-auth';
 import type { TimetableEntry } from '@/lib/types';
 import { AiSuggestionTool } from './ai-suggestion-tool';
 import { Loader2, Trash2 } from 'lucide-react';
@@ -53,9 +52,11 @@ const formSchema = z.object({
 
 export function HourModal({ isOpen, setIsOpen, entry, day, time }: HourModalProps) {
   const { addEntry, updateEntry, deleteEntry } = useTimetable();
-  const { user } = useAuth();
   const [isDeleting, setIsDeleting] = useState(false);
   
+  // Mock user for UI development
+  const user = { id: 'mock-user-id' };
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -99,8 +100,6 @@ export function HourModal({ isOpen, setIsOpen, entry, day, time }: HourModalProp
       success = await addEntry({
         ...values,
         day_of_week: day,
-        user_id: user.id,
-        user_email: user.email!,
       });
     }
     if (success) {

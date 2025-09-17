@@ -1,15 +1,21 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useAuth } from './use-auth';
 import type { TimetableEntry } from '@/lib/types';
 import { useToast } from './use-toast';
+import { createClient } from '@/lib/supabase/client';
 
 export function useTimetable() {
-  const { supabase, user } = useAuth();
+  const supabase = createClient();
   const { toast } = useToast();
   const [entries, setEntries] = useState<TimetableEntry[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Mock user for UI development without auth
+  const user = {
+    id: 'mock-user-id',
+    email: 'user@example.com',
+  };
 
   const fetchEntries = useCallback(async () => {
     setLoading(true);
@@ -18,9 +24,10 @@ export function useTimetable() {
       console.error('Error fetching timetable entries:', error);
       toast({
         title: 'Error',
-        description: 'Could not fetch timetable data.',
+        description: 'Could not fetch timetable data. Using mock data.',
         variant: 'destructive',
       });
+      setEntries([]); // Or set mock data
     } else {
       setEntries(data || []);
     }
@@ -28,10 +35,8 @@ export function useTimetable() {
   }, [supabase, toast]);
 
   useEffect(() => {
-    if (user) {
-      fetchEntries();
-    }
-  }, [user, fetchEntries]);
+    fetchEntries();
+  }, [fetchEntries]);
 
   useEffect(() => {
     const channel = supabase
@@ -60,8 +65,14 @@ export function useTimetable() {
     };
   }, [supabase, setEntries]);
 
-  const addEntry = async (newEntry: Omit<TimetableEntry, 'id' | 'created_at' | 'user_id' | 'user_email'> & { user_id: string, user_email: string}) => {
-    const { error } = await supabase.from('timetable_entries').insert(newEntry);
+  const addEntry = async (newEntry: Omit<TimetableEntry, 'id' | 'created_at' | 'user_id' | 'user_email'>) => {
+    if (!user) return false;
+    const fullEntry = {
+        ...newEntry,
+        user_id: user.id,
+        user_email: user.email!,
+    }
+    const { error } = await supabase.from('timetable_entries').insert(fullEntry);
     if (error) {
       console.error('Error adding entry:', error);
       toast({ title: 'Error saving event', description: error.message, variant: 'destructive' });
