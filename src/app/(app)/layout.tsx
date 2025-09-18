@@ -18,7 +18,7 @@ import { TimetableProvider, useTimetableContext } from '@/contexts/timetable-con
 import { CopyScheduleProvider } from '@/contexts/copy-schedule-context';
 import { CopyScheduleDialog } from '@/components/timetable/copy-schedule-dialog';
 import { useUser } from '@/contexts/user-context';
-import { Loader2 } from 'lucide-react';
+import { FillingBottleLoader } from '@/components/ui/filling-bottle-loader';
 
 function FloatingActionButtons() {
   const { openModal } = useModal();
@@ -88,8 +88,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   
   if (loading) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="flex h-screen w-full flex-col items-center justify-center bg-background gap-4">
+        <FillingBottleLoader />
+        <p className="text-muted-foreground">Loading CollabTime...</p>
       </div>
     );
   }

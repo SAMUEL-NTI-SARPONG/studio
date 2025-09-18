@@ -91,12 +91,23 @@ export default {
         pop: {
           '0%, 100%': { transform: 'scale(1)' },
           '50%': { transform: 'scale(0.9)' },
-        }
+        },
+        fill: {
+          '0%': { transform: 'translateY(100%)' },
+          '100%': { transform: 'translateY(0%)' },
+        },
+        wave: {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(-50%)' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         pop: 'pop 0.2s ease-out',
+        fill: 'fill 2s ease-in-out infinite alternate',
+        wave: 'wave 2s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite',
+        'wave-delay': 'wave 2s cubic-bezier(0.36, 0.45, 0.63, 0.53) -0.5s infinite',
       },
     },
   },
