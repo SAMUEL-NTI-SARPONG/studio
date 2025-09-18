@@ -152,18 +152,14 @@ export function TimetableGrid() {
                   </div>
                 ))}
               </div>
-              <div className="relative flex-1 border-l pr-px">
+              <div className="relative flex-1 border-l">
 
                 {Array.from({ length: 24 }).map((_, hour) => (
                   <div
                     key={hour}
-                    className="h-24 border-t cursor-pointer hover:bg-primary/5 flex"
+                    className="h-24 border-t cursor-pointer hover:bg-primary/5"
                     onClick={() => handleSlotClick(dayIndex, hour)}
-                  >
-                     {Array.from({ length: 12 }).map((_, i) => (
-                      <div key={i} className="w-[8.3333%] h-full border-r border-border/70"></div>
-                    ))}
-                  </div>
+                  />
                 ))}
                 
                 <CurrentTimeIndicator dayIndex={dayIndex}/>
@@ -234,3 +230,5 @@ export function TimetableGrid() {
     </>
   );
 }
+
+    
