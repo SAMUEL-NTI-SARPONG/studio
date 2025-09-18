@@ -240,7 +240,7 @@ export function TimetableGrid({ activeTab }: { activeTab: string }) {
                         {entry.title}
                     </p>
                     {engagedUsers.length > 0 && (
-                        <div className="absolute bottom-1 left-1 flex items-center">
+                        <div className="absolute bottom-1 left-0 right-0 flex justify-center items-center">
                         <TooltipProvider>
                             {engagedUsers.slice(0, 3).map((u, i) => (
                             <Tooltip key={u.id}>
