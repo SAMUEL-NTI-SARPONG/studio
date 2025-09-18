@@ -61,7 +61,7 @@ const PartnerStatus = ({ entry, updateCheckIn }: { entry: TimetableEntry, update
 
 
 export function TimetableGrid() {
-  const { activeTab } = useAuthContext();
+  const { activeTab, user } = useAuthContext();
   const { entries, loading, updateCheckIn } = useTimetable();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState<TimetableEntry | null>(null);
@@ -165,7 +165,7 @@ export function TimetableGrid() {
 
                       const isPast = now > endTime;
                       const isActive = now >= startTime && now <= endTime;
-                      const isOwn = false; // Mocking since auth is removed
+                      const isOwn = user?.id === entry.user_id;
 
                       return (
                         <div
