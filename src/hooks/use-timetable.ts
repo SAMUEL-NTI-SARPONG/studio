@@ -78,7 +78,7 @@ export function useTimetable() {
     return true;
   };
 
-  const updateEntry = async (id: string, updatedFields: Partial<TimetableEntry>) => {
+  const updateEntry = async (id: string, updatedFields: Partial<Omit<TimetableEntry, 'id' | 'created_at' | 'user_id'>>) => {
     const { error } = await supabase.from('timetable_entries').update(updatedFields).eq('id', id);
      if (error) {
       console.error('Error updating entry:', error);
