@@ -245,7 +245,7 @@ export function TimetableGrid({ activeTab }: { activeTab?: string }) {
                         }}
                       >
                         <p
-                          className={cn('font-medium text-center text-white', fontSizeClass, {
+                          className={cn('font-normal text-center text-white', fontSizeClass, {
                             'text-muted-foreground': isPast,
                           })}
                         >
@@ -263,5 +263,7 @@ export function TimetableGrid({ activeTab }: { activeTab?: string }) {
     </>
   );
 }
+
+    
 
     
