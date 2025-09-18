@@ -13,18 +13,22 @@ import {
   DropdownMenuTrigger,
   DropdownMenuGroup,
 } from '../ui/dropdown-menu';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import { Button } from '../ui/button';
-import { Trash, Calendar, CalendarDays, User as UserIcon, LogOut, ArrowLeft } from 'lucide-react';
+import { Trash, Calendar, CalendarDays, User as UserIcon, LogOut } from 'lucide-react';
 import { useClearSchedule } from '@/hooks/use-clear-schedule';
 import { useProfileModal } from '@/hooks/use-profile-modal';
-import { useState } from 'react';
 
 export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
   const { user, signOut } = useUser();
   const router = useRouter();
   const { openClearScheduleDialog } = useClearSchedule();
   const { openModal } = useProfileModal();
-  const [menuView, setMenuView] = useState<'main' | 'personal' | 'general'>('main');
 
   const handleLogout = async () => {
     await signOut();
@@ -39,7 +43,6 @@ export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
     });
   };
 
-  const userAvatar = user?.avatarUrl || '';
   const userName = user?.name || 'User';
   const userEmail = user?.email || 'No email';
 
@@ -55,59 +58,43 @@ export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
 
           {user && (
             <>
-              <DropdownMenu onOpenChange={(isOpen) => !isOpen && setMenuView('main')}>
+              <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon">
                     <Trash className="h-5 w-5" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end">
-                  {menuView === 'main' && (
-                    <>
-                      <DropdownMenuLabel>Clear Schedule</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onSelect={() => setMenuView('personal')}>
-                        My Schedule
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onSelect={() => setMenuView('general')}>
-                        General Schedule
-                      </DropdownMenuItem>
-                    </>
-                  )}
-                   {menuView === 'personal' && (
-                    <>
-                      <DropdownMenuLabel className="flex items-center">
-                        <Button variant="ghost" size="icon" className="h-6 w-6 mr-2" onClick={(e) => {e.stopPropagation(); setMenuView('main');}}><ArrowLeft className="h-4 w-4" /></Button>
-                        My Schedule
-                      </DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => handleClear('personal', 'day')}>
-                        <Calendar className="mr-2 h-4 w-4" />
-                        <span>For Today</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleClear('personal', 'all')}>
-                        <CalendarDays className="mr-2 h-4 w-4" />
-                        <span>For All Days</span>
-                      </DropdownMenuItem>
-                    </>
-                  )}
-                  {menuView === 'general' && (
-                    <>
-                       <DropdownMenuLabel className="flex items-center">
-                        <Button variant="ghost" size="icon" className="h-6 w-6 mr-2" onClick={(e) => {e.stopPropagation(); setMenuView('main');}}><ArrowLeft className="h-4 w-4" /></Button>
-                        General Schedule
-                      </DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => handleClear('general', 'day')}>
-                        <Calendar className="mr-2 h-4 w-4" />
-                        <span>For Today</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleClear('general', 'all')}>
-                        <CalendarDays className="mr-2 h-4 w-4" />
-                        <span>For All Days</span>
-                      </DropdownMenuItem>
-                    </>
-                  )}
+                <DropdownMenuContent className="w-64 p-2" align="end">
+                    <DropdownMenuLabel>Clear Schedule</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <Accordion type="single" collapsible className="w-full">
+                      <AccordionItem value="item-1">
+                        <AccordionTrigger className="px-2 py-1.5 text-sm font-normal hover:no-underline">My Schedule</AccordionTrigger>
+                        <AccordionContent className="pb-1">
+                          <DropdownMenuItem onClick={() => handleClear('personal', 'day')} className="pl-6">
+                            <Calendar className="mr-2 h-4 w-4" />
+                            <span>For Today</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleClear('personal', 'all')} className="pl-6">
+                            <CalendarDays className="mr-2 h-4 w-4" />
+                            <span>For All Days</span>
+                          </DropdownMenuItem>
+                        </AccordionContent>
+                      </AccordionItem>
+                      <AccordionItem value="item-2" className="border-b-0">
+                        <AccordionTrigger className="px-2 py-1.5 text-sm font-normal hover:no-underline">General Schedule</AccordionTrigger>
+                        <AccordionContent className="pb-1">
+                          <DropdownMenuItem onClick={() => handleClear('general', 'day')} className="pl-6">
+                            <Calendar className="mr-2 h-4 w-4" />
+                            <span>For Today</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleClear('general', 'all')} className="pl-6">
+                            <CalendarDays className="mr-2 h-4 w-4" />
+                            <span>For All Days</span>
+                          </DropdownMenuItem>
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
                 </DropdownMenuContent>
               </DropdownMenu>
 
