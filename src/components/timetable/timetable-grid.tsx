@@ -182,7 +182,8 @@ export function TimetableGrid() {
                   const isPast = now > endTime;
 
                   const isPersonal = entry.user_id !== null;
-                  const isMyEvent = isPersonal && entry.user_id === user?.id;
+                  const isUser1 = entry.user_id === 'user_1';
+                  const isUser2 = entry.user_id === 'user_2';
                   
                   return (
                     <div
@@ -191,8 +192,8 @@ export function TimetableGrid() {
                         'absolute p-2 rounded-lg border text-left cursor-pointer transition-all duration-200 ease-in-out transform hover:scale-[1.02] hover:z-10 overflow-hidden',
                         {
                           'bg-primary/20 border-primary/30 text-primary-foreground': !isPersonal,
-                          'bg-green-500/20 border-green-500/30 text-green-800 dark:text-green-200': isMyEvent,
-                          'bg-orange-500/20 border-orange-500/30 text-orange-800 dark:text-orange-200': isPersonal && !isMyEvent,
+                          'bg-green-500/20 border-green-500/30 text-green-800 dark:text-green-200': isUser1,
+                          'bg-orange-500/20 border-orange-500/30 text-orange-800 dark:text-orange-200': isUser2,
                           'opacity-60': isPast,
                         }
                       )}
