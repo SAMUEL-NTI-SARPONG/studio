@@ -14,30 +14,29 @@ export function useTimetable() {
   const [entries, setEntries] = useState<TimetableEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchEntries = useCallback(async () => {
-    setLoading(true);
-
-    const { data, error } = await supabase.from('timetable_entries').select('*');
-    
-    if (error) {
-      console.error('Error fetching timetable entries:', error);
-      toast({
-        title: 'Error',
-        description: 'Could not fetch timetable data.',
-        variant: 'destructive',
-      });
-      setEntries([]);
-    } else {
-      setEntries(data || []);
-    }
-    setLoading(false);
-  }, [supabase, toast]);
-
   useEffect(() => {
+    const fetchEntries = async () => {
+      setLoading(true);
+      const { data, error } = await supabase.from('timetable_entries').select('*');
+      
+      if (error) {
+        console.error('Error fetching timetable entries:', error);
+        toast({
+          title: 'Error',
+          description: 'Could not fetch timetable data.',
+          variant: 'destructive',
+        });
+        setEntries([]);
+      } else {
+        setEntries(data || []);
+      }
+      setLoading(false);
+    };
+
     if (user) {
       fetchEntries();
     }
-  }, [fetchEntries, user]);
+  }, [user, supabase, toast]);
 
 
   useEffect(() => {
@@ -67,7 +66,7 @@ export function useTimetable() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase, setEntries, fetchEntries]);
+  }, [supabase]);
 
 
   const addEntry = async (newEntry: Omit<TimetableEntry, 'id' | 'created_at' | 'engaging_user_ids'>) => {
@@ -208,5 +207,5 @@ export function useTimetable() {
   }
 
 
-  return { entries, loading, addEntry, updateEntry, deleteEntry, fetchEntries, clearPersonalScheduleForDay, clearPersonalScheduleForAllDays, clearGeneralScheduleForDay, clearGeneralScheduleForAllDays, toggleEventEngagement, copySchedule };
+  return { entries, loading, addEntry, updateEntry, deleteEntry, clearPersonalScheduleForDay, clearPersonalScheduleForAllDays, clearGeneralScheduleForDay, clearGeneralScheduleForAllDays, toggleEventEngagement, copySchedule };
 }
