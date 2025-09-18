@@ -11,6 +11,7 @@ import { HourModal } from './hour-modal';
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 import { CheckCircle2, Circle } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 // Utility to parse "HH:mm" string to minutes from midnight
 const parseTime = (time: string): number => {
@@ -135,14 +136,15 @@ export function TimetableGrid() {
       <Card>
         <CardContent className="p-2 sm:p-4">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-3 sm:grid-cols-7 h-auto">
-              {DAYS_OF_WEEK.map((day) => (
-                <TabsTrigger key={day} value={day}>
-                  <span className="hidden sm:inline">{day}</span>
-                  <span className="sm:hidden">{day.substring(0,3)}</span>
-                </TabsTrigger>
-              ))}
-            </TabsList>
+             <ScrollArea className="w-full whitespace-nowrap rounded-lg">
+                <TabsList className="w-full justify-start">
+                  {DAYS_OF_WEEK.map((day) => (
+                    <TabsTrigger key={day} value={day}>
+                      {day}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+            </ScrollArea>
 
             {DAYS_OF_WEEK.map((day, dayIndex) => (
               <TabsContent key={day} value={day} className="mt-4">
