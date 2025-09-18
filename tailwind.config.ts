@@ -95,21 +95,33 @@ export default {
         },
         'jiggle-bounce': {
           '0%, 100%': {
-            transform: 'translateY(-100%)',
+            transform: 'translateY(0)',
             animationTimingFunction: 'cubic-bezier(0.8, 0, 1, 1)',
-            backgroundColor: 'hsl(var(--ring))',
+            backgroundColor: 'hsl(var(--primary))',
           },
           '50%': {
-            transform: 'translateY(0)',
+            transform: 'translateY(-100%)',
             animationTimingFunction: 'cubic-bezier(0, 0, 0.2, 1)',
-            backgroundColor: 'hsl(var(--primary))',
+            backgroundColor: 'hsl(var(--ring))',
           },
           '60%': {
             transform: 'translateY(0) scale(1.2, 0.8)',
+            backgroundColor: '#f97316', // Orange color on impact
           },
           '75%': {
             transform: 'translateY(-25%) scale(0.9, 1.1)',
+            backgroundColor: 'hsl(var(--primary))',
           },
+        },
+        'burst': {
+          '0%': {
+            transform: 'scale(1)',
+            opacity: '1'
+          },
+          '100%': {
+            transform: 'scale(3)',
+            opacity: '0'
+          }
         },
          'trophy-pop': {
           '0%': { transform: 'scale(0)', opacity: '0' },
@@ -130,6 +142,7 @@ export default {
         'accordion-up': 'accordion-up 0.2s ease-out',
         pop: 'pop 0.2s ease-out',
         'jiggle-bounce': 'jiggle-bounce 1.2s infinite',
+        'jiggle-and-burst': 'jiggle-bounce 1.2s 3, burst 0.3s forwards 3.6s',
         'trophy-pop': 'trophy-pop 0.5s ease-out forwards',
         sparkle: 'sparkle 0.4s ease-out forwards',
         'trophy-shine': 'trophy-shine 1s ease-in-out infinite',
