@@ -19,7 +19,8 @@ export async function login(prevState: any, formData: FormData) {
     return { message: error.message };
   }
 
-  redirect('/timetable');
+  // By removing the redirect, we let the client-side UserProvider
+  // handle the session update and routing.
 }
 
 export async function logout() {
