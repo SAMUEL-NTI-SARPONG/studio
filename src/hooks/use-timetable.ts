@@ -207,17 +207,20 @@ export function useTimetableData() {
 
     const newEntries = destinationDays.flatMap(day => 
       entriesToCopy.map(entry => {
+        // Correctly create a new entry object without id and created_at
         const { id, created_at, ...rest } = entry;
-        const newEntry = {
+        
+        const newEntry: Omit<TimetableEntry, 'id' | 'created_at'> = {
           ...rest,
           day_of_week: day,
           engaging_user_ids: [],
         };
+        
         // If the original entry was personal, assign it to the current user.
-        // If it was general (user_id is null), keep it general.
         if (newEntry.user_id) {
           newEntry.user_id = user.id;
         }
+        
         return newEntry;
       })
     );
@@ -226,7 +229,7 @@ export function useTimetableData() {
       return true; // Nothing to copy
     }
 
-    const { error } = await supabase.from('timetable_entries').insert(newEntries as any);
+    const { error } = await supabase.from('timetable_entries').insert(newEntries);
 
     if (error) {
       toast({ title: 'Error', description: 'Could not copy schedule.', variant: 'destructive' });
