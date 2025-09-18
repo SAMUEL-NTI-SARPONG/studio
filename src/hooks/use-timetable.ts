@@ -16,10 +16,10 @@ export function useTimetable() {
 
   useEffect(() => {
     if (!user) {
-        setLoading(false);
         setEntries([]);
+        setLoading(false);
         return;
-    };
+    }
 
     const fetchEntries = async () => {
       setLoading(true);
@@ -47,6 +47,7 @@ export function useTimetable() {
         'postgres_changes',
         { event: '*', schema: 'public', table: 'timetable_entries' },
         (payload) => {
+          console.log('Change received!', payload);
           if (payload.eventType === 'INSERT') {
             setEntries((prevEntries) => [...prevEntries, payload.new as TimetableEntry]);
           } else if (payload.eventType === 'UPDATE') {
