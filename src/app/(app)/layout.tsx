@@ -19,6 +19,8 @@ import { CopyScheduleProvider } from '@/contexts/copy-schedule-context';
 import { CopyScheduleDialog } from '@/components/timetable/copy-schedule-dialog';
 import { useUser } from '@/contexts/user-context';
 import { BouncingBallLoader } from '@/components/ui/bouncing-ball-loader';
+import { EventNotification } from '@/components/timetable/event-notification';
+import { TimetableProvider as TimetableDataProvider } from '@/hooks/use-timetable';
 
 function FloatingActionButtons() {
   const { openModal } = useModal();
@@ -78,6 +80,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
       <ClearScheduleDialog />
       <ProfileModal />
       <CopyScheduleDialog />
+      <EventNotification />
     </div>
   );
 }
@@ -85,15 +88,15 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useUser();
-  const [showContent, setShowContent] = useState(false);
+  const [showContent, setShowContent] = useState(loading);
 
   useEffect(() => {
     if (!loading) {
-      setShowContent(true);
+      setShowContent(false);
     }
   }, [loading]);
 
-  if (!showContent) {
+  if (showContent) {
     return (
       <div className="flex h-screen w-full flex-col items-center justify-center bg-background px-16">
         <BouncingBallLoader showContent={!loading} />
@@ -103,16 +106,18 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <ModalProvider>
-      <ClearScheduleProvider>
-        <ProfileModalProvider>
-          <CopyScheduleProvider>
-            <TimetableProvider>
-              <AppLayoutContent>{children}</AppLayoutContent>
-            </TimetableProvider>
-          </CopyScheduleProvider>
-        </ProfileModalProvider>
-      </ClearScheduleProvider>
-    </ModalProvider>
+    <TimetableDataProvider>
+      <ModalProvider>
+        <ClearScheduleProvider>
+          <ProfileModalProvider>
+            <CopyScheduleProvider>
+              <TimetableProvider>
+                <AppLayoutContent>{children}</AppLayoutContent>
+              </TimetableProvider>
+            </CopyScheduleProvider>
+          </ProfileModalProvider>
+        </ClearScheduleProvider>
+      </ModalProvider>
+    </TimetableDataProvider>
   );
 }

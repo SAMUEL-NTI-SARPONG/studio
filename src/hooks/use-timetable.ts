@@ -1,13 +1,30 @@
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, createContext, useContext, ReactNode } from 'react';
 import type { TimetableEntry } from '@/lib/types';
 import { useToast } from './use-toast';
 import { createClient } from '@/lib/supabase/client';
 import { useUser } from '@/contexts/user-context';
 
-export function useTimetable() {
+
+type TimetableContextType = {
+  entries: TimetableEntry[];
+  loading: boolean;
+  addEntry: (newEntry: Omit<TimetableEntry, 'id' | 'created_at' | 'engaging_user_ids'>) => Promise<boolean>;
+  updateEntry: (id: string, updatedFields: Partial<Omit<TimetableEntry, 'id' | 'created_at'>>) => Promise<boolean>;
+  deleteEntry: (id: string) => Promise<boolean>;
+  clearPersonalScheduleForDay: (dayOfWeek: number) => Promise<boolean>;
+  clearPersonalScheduleForAllDays: () => Promise<boolean>;
+  clearGeneralScheduleForDay: (dayOfWeek: number) => Promise<boolean>;
+  clearGeneralScheduleForAllDays: () => Promise<boolean>;
+  toggleEventEngagement: (entryId: string, userId: string) => Promise<void>;
+  copySchedule: (sourceDay: number, destinationDays: number[]) => Promise<boolean>;
+};
+
+const TimetableContext = createContext<TimetableContextType | undefined>(undefined);
+
+export function TimetableProvider({ children }: { children: ReactNode }) {
   const supabase = createClient();
   const { toast } = useToast();
   const { user } = useUser();
@@ -69,10 +86,10 @@ export function useTimetable() {
       supabase.removeChannel(channel);
     };
 
-  }, [user]);
+  }, [user, toast, supabase]);
   
 
-  const addEntry = async (newEntry: Omit<TimetableEntry, 'id' | 'created_at' | 'engaging_user_ids'>) => {
+  const addEntry = useCallback(async (newEntry: Omit<TimetableEntry, 'id' | 'created_at' | 'engaging_user_ids'>) => {
     const fullEntry = {
         ...newEntry,
         description: newEntry.description || null,
@@ -86,9 +103,9 @@ export function useTimetable() {
     }
     toast({ title: 'Event Added!', description: 'A new event is on the timetable.', variant: 'achievement' });
     return true;
-  };
+  }, [supabase, toast]);
 
-  const updateEntry = async (id: string, updatedFields: Partial<Omit<TimetableEntry, 'id' | 'created_at'>>) => {
+  const updateEntry = useCallback(async (id: string, updatedFields: Partial<Omit<TimetableEntry, 'id' | 'created_at'>>) => {
     const { error } = await supabase.from('timetable_entries').update(updatedFields).eq('id', id);
      if (error) {
       console.error('Error updating entry:', error);
@@ -97,9 +114,9 @@ export function useTimetable() {
     }
     toast({ title: 'Event Updated!', description: 'Your changes have been saved.', variant: 'achievement' });
     return true;
-  };
+  }, [supabase, toast]);
 
-  const deleteEntry = async (id: string) => {
+  const deleteEntry = useCallback(async (id: string) => {
     const { error } = await supabase.from('timetable_entries').delete().eq('id', id);
     if (error) {
       console.error('Error deleting entry:', error);
@@ -108,9 +125,9 @@ export function useTimetable() {
     }
     toast({ title: 'Event Deleted!', description: 'The event has been removed.', variant: 'achievement' });
     return true;
-  };
+  }, [supabase, toast]);
   
-  const clearPersonalScheduleForDay = async (dayOfWeek: number) => {
+  const clearPersonalScheduleForDay = useCallback(async (dayOfWeek: number) => {
     if(!user) return false;
     const { error } = await supabase.from('timetable_entries').delete().eq('user_id', user.id).eq('day_of_week', dayOfWeek);
     if (error) {
@@ -119,9 +136,9 @@ export function useTimetable() {
     }
     toast({ title: 'Schedule Cleared!', description: 'Your schedule for the selected day is empty.', variant: 'achievement' });
     return true;
-  };
+  }, [supabase, user, toast]);
   
-  const clearPersonalScheduleForAllDays = async () => {
+  const clearPersonalScheduleForAllDays = useCallback(async () => {
     if(!user) return false;
     const { error } = await supabase.from('timetable_entries').delete().eq('user_id', user.id);
      if (error) {
@@ -130,9 +147,9 @@ export function useTimetable() {
     }
     toast({ title: 'Schedule Cleared!', description: 'Your entire personal schedule is now empty.', variant: 'achievement' });
     return true;
-  };
+  }, [supabase, user, toast]);
 
-  const clearGeneralScheduleForDay = async (dayOfWeek: number) => {
+  const clearGeneralScheduleForDay = useCallback(async (dayOfWeek: number) => {
     const { error } = await supabase.from('timetable_entries').delete().is('user_id', null).eq('day_of_week', dayOfWeek);
     if (error) {
       toast({ title: 'Error', description: 'Could not clear general schedule for the day.', variant: 'destructive' });
@@ -140,9 +157,9 @@ export function useTimetable() {
     }
     toast({ title: 'Schedule Cleared!', description: 'General schedule for the day is now empty.', variant: 'achievement' });
     return true;
-  };
+  }, [supabase, toast]);
 
-  const clearGeneralScheduleForAllDays = async () => {
+  const clearGeneralScheduleForAllDays = useCallback(async () => {
     const { error } = await supabase.from('timetable_entries').delete().is('user_id', null);
     if (error) {
       toast({ title: 'Error', description: 'Could not clear the general schedule.', variant: 'destructive' });
@@ -150,9 +167,9 @@ export function useTimetable() {
     }
     toast({ title: 'Schedule Cleared!', description: 'The entire general schedule is now empty.', variant: 'achievement' });
     return true;
-  };
+  }, [supabase, toast]);
   
-  const toggleEventEngagement = async (entryId: string, userId: string) => {
+  const toggleEventEngagement = useCallback(async (entryId: string, userId: string) => {
     const entry = entries.find(e => e.id === entryId);
     if (!entry || !user) {
       return;
@@ -174,9 +191,9 @@ export function useTimetable() {
       console.error('Engagement error:', error);
       toast({ title: 'Error', description: 'Could not update engagement status.', variant: 'destructive' });
     }
-  };
+  }, [entries, supabase, user, toast]);
 
-  const copySchedule = async (sourceDay: number, destinationDays: number[]) => {
+  const copySchedule = useCallback(async (sourceDay: number, destinationDays: number[]) => {
     const entriesToCopy = entries.filter(entry => entry.day_of_week === sourceDay);
     if (entriesToCopy.length === 0) {
       toast({ title: 'No events to copy', description: 'The selected source day has no events.' });
@@ -204,8 +221,18 @@ export function useTimetable() {
 
     toast({ title: 'Schedule Copied!', description: 'Events have been copied to the selected days.', variant: 'achievement' });
     return true;
+  }, [entries, supabase, toast]);
+
+
+  const value = { entries, loading, addEntry, updateEntry, deleteEntry, clearPersonalScheduleForDay, clearPersonalScheduleForAllDays, clearGeneralScheduleForDay, clearGeneralScheduleForAllDays, toggleEventEngagement, copySchedule };
+
+  return <TimetableContext.Provider value={value}>{children}</TimetableContext.Provider>;
+}
+
+export function useTimetable() {
+  const context = useContext(TimetableContext);
+  if (context === undefined) {
+    throw new Error('useTimetable must be used within a TimetableProvider');
   }
-
-
-  return { entries, loading, addEntry, updateEntry, deleteEntry, clearPersonalScheduleForDay, clearPersonalScheduleForAllDays, clearGeneralScheduleForDay, clearGeneralScheduleForAllDays, toggleEventEngagement, copySchedule };
+  return context;
 }
