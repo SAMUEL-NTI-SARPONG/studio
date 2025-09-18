@@ -83,11 +83,12 @@ export function TimetableGrid() {
       entry: null,
       day,
       time: `${String(hour).padStart(2, '0')}:00`,
+      source: 'slot',
     });
   };
 
   const handleEntryClick = (entry: TimetableEntry) => {
-    openModal({ entry, day: entry.day_of_week });
+    openModal({ entry, day: entry.day_of_week, source: 'slot' });
   };
 
   const entriesByDay = useMemo(() => {
@@ -230,7 +231,7 @@ export function TimetableGrid() {
                     <div
                       key={entry.id}
                       className={cn(
-                        'absolute p-2 rounded-lg border text-left cursor-pointer transition-all duration-200 ease-in-out transform hover:scale-[1.02] hover:z-10 overflow-hidden',
+                        'absolute p-2 border text-left cursor-pointer transition-all duration-200 ease-in-out transform hover:scale-[1.02] hover:z-10 overflow-hidden',
                         {
                           'bg-primary border-primary/50 text-primary-foreground': !isPersonal,
                           'bg-green-500 border-green-600 text-white': isUser1,

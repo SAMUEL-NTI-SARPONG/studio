@@ -83,7 +83,7 @@ export function HourModal() {
   const { addEntry, updateEntry, deleteEntry } = useTimetable();
   const { user } = useUser();
   const [isDeleting, setIsDeleting] = useState(false);
-  const { isOpen, day, time, entry } = modalState || {};
+  const { isOpen, day, time, entry, source } = modalState || {};
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -171,7 +171,7 @@ export function HourModal() {
   const canModify =
     !entry || entry.user_id === null || entry.user_id === user?.id;
   
-  const isNewEntry = !entry;
+  const isNewEntryFromSlot = !entry && source === 'slot';
 
   return (
     <Dialog open={isOpen} onOpenChange={closeModal}>
@@ -259,7 +259,7 @@ export function HourModal() {
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                         value={field.value}
-                        disabled={isNewEntry}
+                        disabled={isNewEntryFromSlot}
                       >
                         <FormControl>
                           <SelectTrigger>

@@ -8,6 +8,7 @@ type ModalState = {
   entry: TimetableEntry | null;
   day: number;
   time?: string;
+  source?: 'slot' | 'fab';
 };
 
 type ModalContextType = {

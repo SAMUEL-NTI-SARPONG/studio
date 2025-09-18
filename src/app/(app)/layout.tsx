@@ -22,6 +22,7 @@ function FloatingActionButton() {
       entry: null,
       day: today,
       time: `${String(currentHour).padStart(2, '0')}:00`,
+      source: 'fab',
     });
   };
 
