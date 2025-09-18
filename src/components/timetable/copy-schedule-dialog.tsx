@@ -75,7 +75,7 @@ export function CopyScheduleDialog() {
     <Dialog open={state.isOpen} onOpenChange={handleOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Copy Schedule from {sourceDayName}</DialogTitle>
+          <DialogTitle className="text-base font-medium">Copy Schedule from {sourceDayName}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
