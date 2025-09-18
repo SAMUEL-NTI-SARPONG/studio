@@ -79,7 +79,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="sticky top-16 z-30 w-full border-b bg-secondary/95 backdrop-blur-sm">
             <TimetableHeader activeTab={activeTab} setActiveTab={setActiveTab} />
           </div>
-          <main className="flex-1 container mx-auto px-4 py-2">{childrenWithProps}</main>
+          <main className="flex-1 px-4 py-2">{childrenWithProps}</main>
           <HourModal />
           <FloatingActionButton />
           <ClearScheduleDialog />

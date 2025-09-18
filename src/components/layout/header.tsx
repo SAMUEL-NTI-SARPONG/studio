@@ -37,7 +37,7 @@ export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-card">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4">
+      <div className="flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-2">
           <h1 className="text-xl font-semibold text-primary">CollabTime</h1>
         </div>
@@ -75,7 +75,7 @@ export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
                         <DropdownMenuSubTrigger>
                           My Schedule
                         </DropdownMenuSubTrigger>
-                        <DropdownMenuSubContent sideOffset={8} alignOffset={-5} className="w-48">
+                        <DropdownMenuSubContent sideOffset={-5} alignOffset={-5} align="start" className="w-48">
                           <DropdownMenuItem onClick={() => handleClear('personal', 'day')}>
                             <Calendar className="mr-2 h-4 w-4" />
                             <span>For Today</span>
@@ -90,7 +90,7 @@ export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
                         <DropdownMenuSubTrigger>
                           General Schedule
                         </DropdownMenuSubTrigger>
-                        <DropdownMenuSubContent sideOffset={8} alignOffset={-5} className="w-48">
+                        <DropdownMenuSubContent sideOffset={-5} alignOffset={-5} align="start" className="w-48">
                           <DropdownMenuItem onClick={() => handleClear('general', 'day')}>
                             <Calendar className="mr-2 h-4 w-4" />
                             <span>For Today</span>

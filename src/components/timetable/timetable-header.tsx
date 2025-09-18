@@ -11,7 +11,7 @@ export function TimetableHeader({
   setActiveTab: (value: string) => void;
 }) {
   return (
-    <div className="container mx-auto flex items-center justify-between px-4">
+    <div className="flex items-center justify-between px-4">
       <Tabs
         value={activeTab}
         onValueChange={setActiveTab}
