@@ -42,22 +42,34 @@ export function useTimetable() {
 
   useEffect(() => {
     if (!user) return;
-
+  
     const channel = supabase
       .channel('timetable_entries_channel')
       .on<TimetableEntry>(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'timetable_entries' },
         (payload) => {
-          fetchEntries();
+          if (payload.eventType === 'INSERT') {
+            setEntries((prevEntries) => [...prevEntries, payload.new as TimetableEntry]);
+          } else if (payload.eventType === 'UPDATE') {
+            setEntries((prevEntries) =>
+              prevEntries.map((entry) =>
+                entry.id === payload.new.id ? (payload.new as TimetableEntry) : entry
+              )
+            );
+          } else if (payload.eventType === 'DELETE') {
+            setEntries((prevEntries) =>
+              prevEntries.filter((entry) => entry.id !== payload.old.id)
+            );
+          }
         }
       )
       .subscribe();
-
+  
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase, fetchEntries, user]);
+  }, [supabase, user]);
 
 
   const addEntry = async (newEntry: Omit<TimetableEntry, 'id' | 'created_at' >) => {
