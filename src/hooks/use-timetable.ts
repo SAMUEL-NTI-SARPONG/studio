@@ -59,10 +59,15 @@ export function useTimetable() {
     };
   }, [supabase, setEntries]);
 
-  const addEntry = async (newEntry: Omit<TimetableEntry, 'id' | 'created_at'>) => {
+  const addEntry = async (newEntry: Omit<TimetableEntry, 'id' | 'created_at' | 'user_id' | 'user_email'>) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    console.log('Current user:', user);
+
     const fullEntry = {
         ...newEntry,
         description: newEntry.description || '',
+        user_id: 'd2a13a89-72c3-424a-93e1-7db1a16b0d9e', // Anonymous user ID
+        user_email: 'anon@example.com',
     }
     const { error } = await supabase.from('timetable_entries').insert(fullEntry);
     if (error) {
@@ -74,7 +79,7 @@ export function useTimetable() {
     return true;
   };
 
-  const updateEntry = async (id: string, updatedFields: Partial<Omit<TimetableEntry, 'id' | 'created_at'>>) => {
+  const updateEntry = async (id: string, updatedFields: Partial<Omit<TimetableEntry, 'id' | 'created_at' | 'user_id'>>) => {
     const { error } = await supabase.from('timetable_entries').update(updatedFields).eq('id', id);
      if (error) {
       console.error('Error updating entry:', error);
