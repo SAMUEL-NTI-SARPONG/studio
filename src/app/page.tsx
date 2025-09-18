@@ -1,10 +1,10 @@
+
 'use client';
 
 import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -31,9 +31,6 @@ export default function LoginPage() {
       <Card className="w-[400px]">
         <CardHeader>
           <CardTitle>Login</CardTitle>
-          <CardDescription>
-            Welcome back! Please enter your details.
-          </CardDescription>
         </CardHeader>
         <CardContent>
           <form action={loginAction} className="space-y-4">
