@@ -1,15 +1,12 @@
+
 'use client';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DAYS_OF_WEEK } from '@/lib/constants';
+import { useTimetableContext } from '@/contexts/timetable-context';
 import { cn } from '@/lib/utils';
 
-export function TimetableHeader({
-  activeTab,
-  setActiveTab,
-}: {
-  activeTab: string;
-  setActiveTab: (value: string) => void;
-}) {
+export function TimetableHeader() {
+  const { activeTab, setActiveTab } = useTimetableContext();
   return (
     <div className="flex items-center justify-between px-4">
       <Tabs

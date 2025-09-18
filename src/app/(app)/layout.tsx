@@ -4,7 +4,7 @@
 import Header from '@/components/layout/header';
 import { TimetableHeader } from '@/components/timetable/timetable-header';
 import { DAYS_OF_WEEK } from '@/lib/constants';
-import { useState, useEffect, Children, cloneElement } from 'react';
+import { useState, useEffect } from 'react';
 import { useUser } from '@/contexts/user-context';
 import { useRouter } from 'next/navigation';
 import { ModalProvider } from '@/contexts/modal-context';
@@ -16,16 +16,18 @@ import { ClearScheduleProvider } from '@/contexts/clear-schedule-context';
 import { ClearScheduleDialog } from '@/components/timetable/clear-schedule-dialog';
 import { ProfileModalProvider } from '@/contexts/profile-modal-context';
 import { ProfileModal } from '@/components/profile/profile-modal';
+import { TimetableProvider, useTimetableContext } from '@/contexts/timetable-context';
 
 function FloatingActionButton() {
   const { openModal } = useModal();
-  const today = new Date().getDay();
+  const { activeTab } = useTimetableContext();
+  const dayIndex = DAYS_OF_WEEK.indexOf(activeTab);
 
   const handleFabClick = () => {
     const currentHour = new Date().getHours();
     openModal({
       entry: null,
-      day: today,
+      day: dayIndex,
       time: `${String(currentHour).padStart(2, '0')}:00`,
       source: 'fab',
     });
@@ -43,6 +45,26 @@ function FloatingActionButton() {
   );
 }
 
+function AppLayoutContent({ children }: { children: React.ReactNode }) {
+  const { activeTab } = useTimetableContext();
+  const activeDayIndex = DAYS_OF_WEEK.indexOf(activeTab);
+  
+  return (
+    <div className="flex min-h-screen flex-col bg-background">
+      <Header activeDayIndex={activeDayIndex} />
+      <div className="sticky top-16 z-30 w-full border-b bg-secondary/95 backdrop-blur-sm">
+        <TimetableHeader />
+      </div>
+      <main className="flex-1 px-4 py-2">{children}</main>
+      <HourModal />
+      <FloatingActionButton />
+      <ClearScheduleDialog />
+      <ProfileModal />
+    </div>
+  );
+}
+
+
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { user } = useUser();
   const router = useRouter();
@@ -53,16 +75,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     }
   }, [user, router]);
 
-  const today = new Date().getDay();
-  const [activeTab, setActiveTab] = useState(DAYS_OF_WEEK[today]);
-  
-  const childrenWithProps = Children.map(children, (child) => {
-    if (typeof child === 'object' && child !== null && 'props' in child) {
-        return cloneElement(child as any, { activeTab });
-    }
-    return child;
-  });
-
   if (!user) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
@@ -71,23 +83,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     );
   }
 
-  const activeDayIndex = DAYS_OF_WEEK.indexOf(activeTab);
-
   return (
     <ModalProvider>
       <ClearScheduleProvider>
         <ProfileModalProvider>
-          <div className="flex min-h-screen flex-col bg-background">
-            <Header activeDayIndex={activeDayIndex} />
-            <div className="sticky top-16 z-30 w-full border-b bg-secondary/95 backdrop-blur-sm">
-              <TimetableHeader activeTab={activeTab} setActiveTab={setActiveTab} />
-            </div>
-            <main className="flex-1 px-4 py-2">{childrenWithProps}</main>
-            <HourModal />
-            <FloatingActionButton />
-            <ClearScheduleDialog />
-            <ProfileModal />
-          </div>
+          <TimetableProvider>
+            <AppLayoutContent>{children}</AppLayoutContent>
+          </TimetableProvider>
         </ProfileModalProvider>
       </ClearScheduleProvider>
     </ModalProvider>

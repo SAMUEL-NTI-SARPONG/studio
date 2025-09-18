@@ -58,15 +58,13 @@ const CurrentTimeIndicator = ({ dayIndex }: { dayIndex: number }) => {
   );
 };
 
-export function TimetableGrid({ activeTab }: { activeTab?: string }) {
+export function TimetableGrid({ activeTab }: { activeTab: string }) {
   const { entries, loading } = useTimetable();
   const { user, colors } = useUser();
   const { openModal } = useModal();
   const [now, setNow] = useState(new Date());
   
-  const today = new Date().getDay();
-  const currentTab = activeTab || DAYS_OF_WEEK[today];
-  const dayIndex = DAYS_OF_WEEK.indexOf(currentTab);
+  const dayIndex = useMemo(() => DAYS_OF_WEEK.indexOf(activeTab), [activeTab]);
 
 
   useEffect(() => {
@@ -156,139 +154,135 @@ export function TimetableGrid({ activeTab }: { activeTab?: string }) {
 
   return (
     <>
-      <Tabs value={currentTab} asChild={false}>
-          <TabsContent value={currentTab} className="mt-0">
-            <div className="flex">
-              <div className="w-20 text-right pr-2 text-xs text-muted-foreground">
-                 {Array.from({ length: 24 }).map((_, hour) => (
-                  <div key={hour} className="h-24 flex items-start justify-end pt-0.5 relative -top-2">
-                    <span className='text-xs'>
-                      {hour === 0 ? '12 AM' : hour < 12 ? `${hour} AM` : hour === 12 ? '12 PM' : `${hour-12} PM`}
-                    </span>
-                  </div>
-                ))}
-              </div>
-              <div className="relative flex-1 border-l">
-
-                {Array.from({ length: 24 }).map((_, hour) => (
-                  <div
-                    key={hour}
-                    className="h-24 border-t"
-                    onClick={() => handleSlotClick(dayIndex, `${String(hour).padStart(2, '0')}:00`)}
-                  />
-                ))}
-                
-                <CurrentTimeIndicator dayIndex={dayIndex}/>
-
-                {loading && <div className="absolute inset-0 flex items-center justify-center bg-card/50"><Loader2 className="animate-spin text-primary" /></div>}
-
-                {entriesForCurrentDay.map((entry) => {
-                  const top = (parseTime(entry.start_time) / (24 * 60)) * 100;
-                  const duration = parseTime(entry.end_time) - parseTime(entry.start_time);
-                  const height = (duration / (24 * 60)) * 100;
-                  
-                  const columnCount = (entry as any).columnCount || 1;
-                  const column = (entry as any).column || 0;
-                  const width = `calc(${100 / columnCount}% - 2px)`;
-                  const left = `calc(${column * (100 / columnCount)}% + 1px)`;
-
-                  const endTime = getDateTime(dayIndex, entry.end_time);
-                  const isPast = now > endTime;
-
-                  const isPersonal = entry.user_id !== null;
-                  const canModify = !entry.user_id || entry.user_id === user?.id;
-                  
-                  const fontSizeClass =
-                    duration < 30
-                      ? 'text-sm'
-                      : duration < 60
-                      ? 'text-base'
-                      : 'text-lg';
-                  
-                  const personalColor = user?.id === entry.user_id ? colors.personal : '#a0aec0';
-                  const eventColor = isPersonal ? personalColor : colors.general;
-
-                  const engagedUsers = (entry.engaging_user_ids || [])
-                    .map(userId => USERS.find(u => u.id === userId))
-                    .filter(Boolean) as (typeof USERS)[0][];
-
-                  return (
-                     <EventPopover
-                      key={entry.id}
-                      entry={entry}
-                      canModify={canModify}
-                    >
-                      <div
-                        tabIndex={0}
-                        className={cn(
-                          'absolute p-2 border cursor-pointer transition-all duration-200 ease-in-out flex flex-col items-center justify-center',
-                          'focus:outline-none focus:ring-2 focus:ring-ring focus:z-10',
-                           {
-                            'opacity-60': isPast,
-                          }
-                        )}
-                        style={{
-                          top: `${top}%`,
-                          height: `${height}%`,
-                          left: left,
-                          width: width,
-                          minHeight: '1.5rem',
-                          backgroundColor: eventColor,
-                          borderColor: eventColor,
-                        }}
-                      >
-                        <p
-                          className={cn('font-normal text-center text-white', fontSizeClass, {
-                            'text-muted-foreground': isPast,
-                          })}
-                        >
-                          {entry.title}
-                        </p>
-                        {engagedUsers.length > 0 && (
-                          <div className="absolute bottom-1 right-1 flex items-center">
-                            <TooltipProvider>
-                              {engagedUsers.slice(0, 3).map((u, i) => (
-                                <Tooltip key={u.id}>
-                                  <TooltipTrigger asChild>
-                                    <Avatar
-                                      className="h-6 w-6 border-2 border-background"
-                                      style={{ zIndex: engagedUsers.length - i, marginLeft: i > 0 ? -8 : 0 }}
-                                    >
-                                      <AvatarImage src={u.avatarUrl} alt={u.name} />
-                                      <AvatarFallback>{u.name.charAt(0)}</AvatarFallback>
-                                    </Avatar>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>{u.name}</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              ))}
-                              {engagedUsers.length > 3 && (
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <div
-                                      className="h-6 w-6 rounded-full bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground border-2 border-background"
-                                      style={{ zIndex: 0, marginLeft: -8 }}
-                                    >
-                                      +{engagedUsers.length - 3}
-                                    </div>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>{engagedUsers.slice(3).map(u => u.name).join(', ')}</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              )}
-                            </TooltipProvider>
-                          </div>
-                        )}
-                      </div>
-                    </EventPopover>
-                  );
-                })}
-              </div>
+      <div className="flex">
+        <div className="w-20 text-right pr-2 text-xs text-muted-foreground">
+            {Array.from({ length: 24 }).map((_, hour) => (
+            <div key={hour} className="h-24 flex items-start justify-end pt-0.5 relative -top-2">
+                <span className='text-xs'>
+                {hour === 0 ? '12 AM' : hour < 12 ? `${hour} AM` : hour === 12 ? '12 PM' : `${hour-12} PM`}
+                </span>
             </div>
-          </TabsContent>
-      </Tabs>
+            ))}
+        </div>
+        <div className="relative flex-1 border-l">
+
+            {Array.from({ length: 24 }).map((_, hour) => (
+            <div
+                key={hour}
+                className="h-24 border-t"
+                onClick={() => handleSlotClick(dayIndex, `${String(hour).padStart(2, '0')}:00`)}
+            />
+            ))}
+            
+            <CurrentTimeIndicator dayIndex={dayIndex}/>
+
+            {loading && <div className="absolute inset-0 flex items-center justify-center bg-card/50"><Loader2 className="animate-spin text-primary" /></div>}
+
+            {entriesForCurrentDay.map((entry) => {
+                const top = (parseTime(entry.start_time) / (24 * 60)) * 100;
+                const duration = parseTime(entry.end_time) - parseTime(entry.start_time);
+                const height = (duration / (24 * 60)) * 100;
+                
+                const columnCount = (entry as any).columnCount || 1;
+                const column = (entry as any).column || 0;
+                const width = `calc(${100 / columnCount}% - 2px)`;
+                const left = `calc(${column * (100 / columnCount)}% + 1px)`;
+
+                const endTime = getDateTime(dayIndex, entry.end_time);
+                const isPast = now > endTime;
+
+                const isPersonal = entry.user_id !== null;
+                const canModify = !entry.user_id || entry.user_id === user?.id;
+                
+                const fontSizeClass =
+                duration < 30
+                    ? 'text-sm'
+                    : duration < 60
+                    ? 'text-base'
+                    : 'text-lg';
+                
+                const personalColor = user?.id === entry.user_id ? colors.personal : '#a0aec0';
+                const eventColor = isPersonal ? personalColor : colors.general;
+
+                const engagedUsers = (entry.engaging_user_ids || [])
+                .map(userId => USERS.find(u => u.id === userId))
+                .filter(Boolean) as (typeof USERS)[0][];
+
+                return (
+                    <EventPopover
+                    key={entry.id}
+                    entry={entry}
+                    canModify={canModify}
+                >
+                    <div
+                    tabIndex={0}
+                    className={cn(
+                        'absolute p-2 border cursor-pointer transition-all duration-200 ease-in-out flex flex-col items-center justify-center',
+                        'focus:outline-none focus:ring-2 focus:ring-ring focus:z-10',
+                        {
+                        'opacity-60': isPast,
+                        }
+                    )}
+                    style={{
+                        top: `${top}%`,
+                        height: `${height}%`,
+                        left: left,
+                        width: width,
+                        minHeight: '1.5rem',
+                        backgroundColor: eventColor,
+                        borderColor: eventColor,
+                    }}
+                    >
+                    <p
+                        className={cn('font-normal text-center text-white', fontSizeClass, {
+                        'text-muted-foreground': isPast,
+                        })}
+                    >
+                        {entry.title}
+                    </p>
+                    {engagedUsers.length > 0 && (
+                        <div className="absolute bottom-1 right-1 flex items-center">
+                        <TooltipProvider>
+                            {engagedUsers.slice(0, 3).map((u, i) => (
+                            <Tooltip key={u.id}>
+                                <TooltipTrigger asChild>
+                                <Avatar
+                                    className="h-6 w-6 border-2 border-background"
+                                    style={{ zIndex: engagedUsers.length - i, marginLeft: i > 0 ? -8 : 0 }}
+                                >
+                                    <AvatarImage src={u.avatarUrl} alt={u.name} />
+                                    <AvatarFallback>{u.name.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                <p>{u.name}</p>
+                                </TooltipContent>
+                            </Tooltip>
+                            ))}
+                            {engagedUsers.length > 3 && (
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                <div
+                                    className="h-6 w-6 rounded-full bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground border-2 border-background"
+                                    style={{ zIndex: 0, marginLeft: -8 }}
+                                >
+                                    +{engagedUsers.length - 3}
+                                </div>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                <p>{engagedUsers.slice(3).map(u => u.name).join(', ')}</p>
+                                </TooltipContent>
+                            </Tooltip>
+                            )}
+                        </TooltipProvider>
+                        </div>
+                    )}
+                    </div>
+                </EventPopover>
+                );
+            })}
+        </div>
+      </div>
     </>
   );
 }
