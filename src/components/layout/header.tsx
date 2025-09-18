@@ -1,3 +1,4 @@
+
 'use client';
 import { TickingClock } from '../timetable/ticking-clock';
 import { useUser } from '@/contexts/user-context';
@@ -69,7 +70,7 @@ export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
                       <Trash className="mr-2 h-4 w-4" />
                       Clear Schedule
                     </DropdownMenuSubTrigger>
-                    <DropdownMenuSubContent className="w-48">
+                    <DropdownMenuSubContent className="w-48" sideOffset={-5} align="start">
                       <DropdownMenuSub>
                         <DropdownMenuSubTrigger>
                           My Schedule
