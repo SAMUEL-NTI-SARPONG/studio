@@ -9,7 +9,6 @@ export default function LoginPage() {
           <CalendarCheck className="h-8 w-8" />
         </div>
         <h1 className="text-3xl font-bold tracking-tight text-foreground">CollabTime</h1>
-        <p className="mt-1 text-muted-foreground">Enter password to access the shared timetable</p>
       </div>
       <LoginForm />
     </div>
