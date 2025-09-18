@@ -110,7 +110,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     return (
       <div className="flex h-screen w-full flex-col items-center justify-center bg-background px-16">
         <BouncingBallLoader showContent={!loading} />
-        <p className="text-muted-foreground">Loading CollabTime...</p>
+        <p className="text-muted-foreground">Loading Legend...</p>
       </div>
     );
   }
