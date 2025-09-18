@@ -73,11 +73,21 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && !user) {
-      router.replace('/');
+    // Wait until the initial loading is complete.
+    if (!loading) {
+      if (user) {
+        // If there is a user, ensure they are on a page within the app.
+        // This handles the case where they just logged in.
+        router.replace('/timetable');
+      } else {
+        // If there is no user, redirect them to the login page.
+        router.replace('/');
+      }
     }
   }, [user, loading, router]);
 
+  // While loading, or if there's no user yet, show a loading indicator.
+  // This prevents a flash of the login page for already authenticated users.
   if (loading || !user) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
@@ -86,6 +96,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     );
   }
 
+  // Once loading is false and user is present, render the main app.
   return (
     <ModalProvider>
       <ClearScheduleProvider>

@@ -19,8 +19,10 @@ export async function login(prevState: any, formData: FormData) {
     return { message: error.message };
   }
 
-  // By removing the redirect, we let the client-side UserProvider
-  // handle the session update and routing.
+  // Intentionally not redirecting here.
+  // The client-side UserProvider and AppLayout will handle the session
+  // update and routing to the correct page.
+  // This prevents the redirect race condition.
 }
 
 export async function logout() {
