@@ -49,6 +49,12 @@ export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
   const userName = user?.name || 'User';
   const userEmail = user?.email || 'No email';
 
+  const handleFilterChange = (checked: boolean) => {
+    if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
+      window.navigator.vibrate(50);
+    }
+    setIsFiltered(checked);
+  }
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-card">
@@ -62,7 +68,7 @@ export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
           <Switch
             id="filter-switch"
             checked={isFiltered}
-            onCheckedChange={setIsFiltered}
+            onCheckedChange={handleFilterChange}
           />
 
           {user && (
