@@ -95,7 +95,7 @@ export default {
         },
         'jiggle-bounce': {
           '0%, 100%': {
-            transform: 'translateY(-60px)',
+            transform: 'translateY(-100%)',
             animationTimingFunction: 'cubic-bezier(0.8, 0, 1, 1)',
             backgroundColor: 'hsl(var(--ring))',
           },
@@ -108,7 +108,7 @@ export default {
             transform: 'translateY(0) scale(1.2, 0.8)',
           },
           '75%': {
-            transform: 'translateY(-15px) scale(0.9, 1.1)',
+            transform: 'translateY(-25%) scale(0.9, 1.1)',
           },
         },
          'trophy-pop': {
