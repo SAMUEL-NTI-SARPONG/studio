@@ -155,8 +155,12 @@ export function useTimetable() {
   };
   
   const toggleEventEngagement = async (entryId: string, userId: string) => {
+    setLoading(true);
     const entry = entries.find(e => e.id === entryId);
-    if (!entry) return;
+    if (!entry) {
+      setLoading(false);
+      return;
+    }
 
     const currentEngagedUsers = entry.engaging_user_ids || [];
     const isEngaged = currentEngagedUsers.includes(userId);
@@ -171,8 +175,10 @@ export function useTimetable() {
       .eq('id', entryId);
 
     if (error) {
+      console.error('Engagement error:', error);
       toast({ title: 'Error', description: 'Could not update engagement status.', variant: 'destructive' });
     }
+    setLoading(false);
   };
 
 
