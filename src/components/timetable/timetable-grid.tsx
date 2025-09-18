@@ -108,27 +108,73 @@ export function TimetableGrid() {
     });
 
     Object.values(grouped).forEach(dayEntries => {
-        dayEntries.sort((a, b) => parseTime(a.start_time) - parseTime(b.start_time));
+      dayEntries.sort((a, b) => parseTime(a.start_time) - parseTime(b.start_time));
+  
+      const visualInfo = dayEntries.map(entry => ({
+        ...entry,
+        start: parseTime(entry.start_time),
+        end: parseTime(entry.end_time),
+        column: -1,
+        totalColumns: 1
+      }));
+  
+      for (let i = 0; i < visualInfo.length; i++) {
+        const currentEntry = visualInfo[i];
+        let col = 0;
+        let placed = false;
         
-        const columns: TimetableEntry[][] = [];
-        dayEntries.forEach(entry => {
-            let placed = false;
-            for (const col of columns) {
-                const lastEntry = col[col.length - 1];
-                if (parseTime(entry.start_time) >= parseTime(lastEntry.end_time)) {
-                    col.push(entry);
-                    (entry as any).column = columns.indexOf(col);
-                    placed = true;
-                    break;
-                }
+        while (!placed) {
+          let hasOverlap = false;
+          for (let j = 0; j < i; j++) {
+            const otherEntry = visualInfo[j];
+            if (otherEntry.column === col && currentEntry.start < otherEntry.end) {
+              hasOverlap = true;
+              break;
             }
-            if (!placed) {
-                columns.push([entry]);
-                (entry as any).column = columns.length - 1;
-            }
-        });
-
-        (dayEntries as any).columnCount = columns.length;
+          }
+          
+          if (!hasOverlap) {
+            currentEntry.column = col;
+            placed = true;
+          } else {
+            col++;
+          }
+        }
+      }
+  
+      for (let i = 0; i < visualInfo.length; i++) {
+        const entryA = visualInfo[i];
+        let maxColumns = 1;
+        for (let j = 0; j < visualInfo.length; j++) {
+          if (i === j) continue;
+          const entryB = visualInfo[j];
+          const A_overlaps_B = entryA.start < entryB.end && entryA.end > entryB.start;
+          if (A_overlaps_B) {
+            maxColumns = Math.max(maxColumns, entryB.column + 1);
+          }
+        }
+        entryA.totalColumns = maxColumns;
+      }
+      
+      for (let i = 0; i < visualInfo.length; i++) {
+        const entryA = visualInfo[i];
+        let newTotalColumns = entryA.totalColumns;
+        for(let j=0; j < visualInfo.length; j++) {
+           const entryB = visualInfo[j];
+           if(entryA.start < entryB.end && entryA.end > entryB.start) {
+              newTotalColumns = Math.max(newTotalColumns, entryB.totalColumns);
+           }
+        }
+        entryA.totalColumns = newTotalColumns;
+      }
+  
+      visualInfo.forEach(entryInfo => {
+        const originalEntry = dayEntries.find(e => e.id === entryInfo.id);
+        if (originalEntry) {
+          (originalEntry as any).column = entryInfo.column;
+          (originalEntry as any).columnCount = entryInfo.totalColumns;
+        }
+      });
     });
 
     return grouped;
@@ -173,7 +219,7 @@ export function TimetableGrid() {
                   const duration = parseTime(entry.end_time) - parseTime(entry.start_time);
                   const height = (duration / (24 * 60)) * 100;
                   
-                  const columnCount = (entriesByDay[dayIndex] as any).columnCount || 1;
+                  const columnCount = (entry as any).columnCount || 1;
                   const column = (entry as any).column || 0;
                   const width = 100 / columnCount;
                   const left = column * width;
@@ -192,8 +238,8 @@ export function TimetableGrid() {
                         'absolute p-2 rounded-lg border text-left cursor-pointer transition-all duration-200 ease-in-out transform hover:scale-[1.02] hover:z-10 overflow-hidden',
                         {
                           'bg-primary border-primary/50 text-primary-foreground': !isPersonal,
-                          'bg-green-500 border-green-600 text-white dark:text-green-100': isUser1,
-                          'bg-orange-500 border-orange-600 text-white dark:text-orange-100': isUser2,
+                          'bg-green-500 border-green-600 text-white': isUser1,
+                          'bg-orange-500 border-orange-600 text-white': isUser2,
                           'opacity-60': isPast,
                         }
                       )}
@@ -208,19 +254,19 @@ export function TimetableGrid() {
                     >
                       <p className={cn("font-bold text-sm truncate", {
                         'text-primary-foreground': !isPersonal && !isPast,
-                        'dark:text-white text-black': isPersonal && !isPast,
+                        'text-white': isPersonal && !isPast,
                         'text-muted-foreground': isPast
                       })}>{entry.title}</p>
                       <p className={cn("text-xs truncate", {
                          'text-primary-foreground/80': !isPersonal && !isPast,
-                         'dark:text-white/80 text-black/80': isPersonal && !isPast,
+                         'text-white/80': isPersonal && !isPast,
                          'text-muted-foreground/80': isPast,
                       })}>
                         {formatTime(entry.start_time)} - {formatTime(entry.end_time)}
                       </p>
                       <p className={cn("text-xs truncate pt-1", {
                          'text-primary-foreground/70': !isPersonal && !isPast,
-                         'dark:text-white/70 text-black/70': isPersonal && !isPast,
+                         'text-white/70': isPersonal && !isPast,
                          'text-muted-foreground/70': isPast
                       })}>{entry.description}</p>
                     </div>
