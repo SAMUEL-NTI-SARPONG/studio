@@ -74,7 +74,7 @@ export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
                         <DropdownMenuSubTrigger>
                           My Schedule
                         </DropdownMenuSubTrigger>
-                        <DropdownMenuSubContent>
+                        <DropdownMenuSubContent sideOffset={8} alignOffset={-5} className="w-48">
                           <DropdownMenuItem onClick={() => handleClear('personal', 'day')}>
                             <Calendar className="mr-2 h-4 w-4" />
                             <span>For Today</span>
@@ -89,7 +89,7 @@ export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
                         <DropdownMenuSubTrigger>
                           General Schedule
                         </DropdownMenuSubTrigger>
-                        <DropdownMenuSubContent>
+                        <DropdownMenuSubContent sideOffset={8} alignOffset={-5} className="w-48">
                           <DropdownMenuItem onClick={() => handleClear('general', 'day')}>
                             <Calendar className="mr-2 h-4 w-4" />
                             <span>For Today</span>
