@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useEffect, useState } from 'react';
 import { login } from './actions';
 import { Button } from '@/components/ui/button';
 import {
@@ -18,11 +18,19 @@ import { BouncingBallLoader } from '@/components/ui/bouncing-ball-loader';
 
 export default function LoginPage() {
   const [state, formAction, isPending] = useActionState(login, undefined);
+  const [showContent, setShowContent] = useState(false);
 
-  if (isPending) {
+  useEffect(() => {
+    if (!isPending) {
+      setShowContent(true);
+    }
+  }, [isPending]);
+
+
+  if (!showContent) {
     return (
       <div className="flex h-screen w-full flex-col items-center justify-center bg-background px-16">
-        <BouncingBallLoader />
+        <BouncingBallLoader showContent={!isPending} />
         <p className="text-muted-foreground">Signing in...</p>
       </div>
     );

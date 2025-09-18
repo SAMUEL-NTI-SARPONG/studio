@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Header from '@/components/layout/header';
 import { TimetableHeader } from '@/components/timetable/timetable-header';
 import { DAYS_OF_WEEK } from '@/lib/constants';
@@ -85,11 +85,18 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useUser();
-  
-  if (loading) {
+  const [showContent, setShowContent] = useState(false);
+
+  useEffect(() => {
+    if (!loading) {
+      setShowContent(true);
+    }
+  }, [loading]);
+
+  if (!showContent) {
     return (
       <div className="flex h-screen w-full flex-col items-center justify-center bg-background px-16">
-        <BouncingBallLoader />
+        <BouncingBallLoader showContent={!loading} />
         <p className="text-muted-foreground">Loading CollabTime...</p>
       </div>
     );
