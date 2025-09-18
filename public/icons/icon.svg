@@ -1,1 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-thumbs-up"><path d="M7 10v12"/><path d="M18.5 10V6.5A2.5 2.5 0 0 0 16 4H12.5a2.5 2.5 0 0 0-2.5 2.5V10"/><path d="M14.5 10V4.5a2.5 2.5 0 0 0-2.5-2.5v0"/><path d="M10.5 10.5c.5-.5.5-1 0-1.5-2-2-2.5-5-2.5-5a7.5 7.5 0 0 0-7.5 7.5c0 1.5 0 3 2 3h5.5"/></svg>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+<defs>
+    <radialGradient id="grad" cx="50%" cy="40%" r="60%" fx="50%" fy="40%">
+        <stop offset="0%" style="stop-color:rgb(255,220,0);stop-opacity:1" />
+        <stop offset="100%" style="stop-color:rgb(255,140,0);stop-opacity:1" />
+    </radialGradient>
+</defs>
+<circle cx="256" cy="256" r="256" fill="url(#grad)" />
+</svg>
