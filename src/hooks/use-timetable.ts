@@ -60,17 +60,11 @@ export function useTimetable() {
   }, [supabase, setEntries]);
 
   const addEntry = async (newEntry: Omit<TimetableEntry, 'id' | 'created_at' | 'user_id' | 'user_email'>) => {
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-        toast({ title: 'Authentication Error', description: 'You must be logged in to add an event.', variant: 'destructive' });
-        return false;
-    }
-
     const fullEntry = {
         ...newEntry,
-        user_id: user.id,
-        user_email: user.email!,
+        user_id: '00000000-0000-0000-0000-000000000000', // Anonymous user
+        user_email: 'anonymous@example.com',
+        description: '',
     }
     const { error } = await supabase.from('timetable_entries').insert(fullEntry);
     if (error) {
