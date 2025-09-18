@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import type { TimetableEntry } from '@/lib/types';
-import { Pencil, UserCheck, Users } from 'lucide-react';
+import { Trash, UserCheck, Users } from 'lucide-react';
 import { useModal } from '@/hooks/use-modal';
 import { USERS } from '@/lib/users';
 import { Badge } from '../ui/badge';
@@ -18,6 +18,17 @@ import { useTimetable } from '@/hooks/use-timetable';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { cn } from '@/lib/utils';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 const formatTime = (time: string): string => {
   const [hours, minutes] = time.split(':').map(Number);
@@ -35,27 +46,21 @@ export function EventPopover({
   canModify: boolean;
   children: React.ReactNode;
 }) {
-  const { openModal } = useModal();
   const { user } = useUser();
-  const { toggleEventEngagement, loading } = useTimetable();
+  const { toggleEventEngagement, loading, deleteEntry } = useTimetable();
   const [popoverOpen, setPopoverOpen] = useState(false);
-
-  const handleEditClick = () => {
-    setPopoverOpen(false);
-    setTimeout(() => {
-      openModal({ entry, day: entry.day_of_week, source: 'slot' });
-    }, 150);
-  };
 
   const handleEngagementClick = async () => {
     if (user) {
       await toggleEventEngagement(entry.id, user.id);
     }
   };
+
+  const handleDelete = async () => {
+    await deleteEntry(entry.id);
+    setPopoverOpen(false);
+  };
   
-  // This part needs a way to resolve user info from IDs.
-  // For now, we'll keep it simple.
-  const popoverUser = entry.user_id ? { name: 'A User' } : null;
   const isEngaged = user && entry.engaging_user_ids?.includes(user.id);
 
   const engagedUsers = (entry.engaging_user_ids || [])
@@ -95,10 +100,26 @@ export function EventPopover({
                   </Button>
                 )}
                 {canModify && (
-                <Button variant="ghost" size="sm" onClick={handleEditClick} className="h-8 px-3">
-                    <Pencil className="mr-1 h-3 w-3" />
-                    Edit
-                </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="ghost" size="sm" className="h-8 px-3 text-destructive hover:text-destructive">
+                        <Trash className="mr-1 h-3 w-3" />
+                        Delete
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This action cannot be undone. This will permanently delete the event.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 )}
             </div>
           </div>
