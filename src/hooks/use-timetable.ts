@@ -14,61 +14,33 @@ export function useTimetable() {
   const [entries, setEntries] = useState<TimetableEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchEntries = useCallback(async () => {
     if (!user) {
         setEntries([]);
         setLoading(false);
         return;
     }
 
-    const fetchEntries = async () => {
-      setLoading(true);
-      const { data, error } = await supabase.from('timetable_entries').select('*');
-      
-      if (error) {
-        console.error('Error fetching timetable entries:', error);
-        toast({
-          title: 'Error',
-          description: 'Could not fetch timetable data.',
-          variant: 'destructive',
-        });
-        setEntries([]);
-      } else {
-        setEntries(data || []);
-      }
-      setLoading(false);
-    };
-
-    fetchEntries();
-
-    const channel = supabase
-      .channel('public:timetable_entries')
-      .on<TimetableEntry>(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'timetable_entries' },
-        (payload) => {
-          console.log('Change received!', payload);
-          if (payload.eventType === 'INSERT') {
-            setEntries((prevEntries) => [...prevEntries, payload.new as TimetableEntry]);
-          } else if (payload.eventType === 'UPDATE') {
-            setEntries((prevEntries) =>
-              prevEntries.map((entry) =>
-                entry.id === payload.new.id ? (payload.new as TimetableEntry) : entry
-              )
-            );
-          } else if (payload.eventType === 'DELETE') {
-            setEntries((prevEntries) =>
-              prevEntries.filter((entry) => entry.id !== (payload.old as {id: string}).id)
-            );
-          }
-        }
-      )
-      .subscribe();
-  
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    setLoading(true);
+    const { data, error } = await supabase.from('timetable_entries').select('*');
+    
+    if (error) {
+      console.error('Error fetching timetable entries:', error);
+      toast({
+        title: 'Error',
+        description: 'Could not fetch timetable data.',
+        variant: 'destructive',
+      });
+      setEntries([]);
+    } else {
+      setEntries(data || []);
+    }
+    setLoading(false);
   }, [user, supabase, toast]);
+
+  useEffect(() => {
+    fetchEntries();
+  }, [fetchEntries]);
 
 
   const addEntry = async (newEntry: Omit<TimetableEntry, 'id' | 'created_at' | 'engaging_user_ids'>) => {
@@ -84,6 +56,7 @@ export function useTimetable() {
       return false;
     }
     toast({ title: 'Success', description: 'Event added to timetable.' });
+    await fetchEntries();
     return true;
   };
 
@@ -95,6 +68,7 @@ export function useTimetable() {
       return false;
     }
     toast({ title: 'Success', description: 'Event updated.' });
+    await fetchEntries();
     return true;
   };
 
@@ -106,6 +80,7 @@ export function useTimetable() {
       return false;
     }
     toast({ title: 'Success', description: 'Event deleted.' });
+    await fetchEntries();
     return true;
   };
   
@@ -117,6 +92,7 @@ export function useTimetable() {
       return false;
     }
     toast({ title: 'Success', description: 'Your schedule for the selected day has been cleared.' });
+    await fetchEntries();
     return true;
   };
   
@@ -128,6 +104,7 @@ export function useTimetable() {
       return false;
     }
     toast({ title: 'Success', description: 'Your entire personal schedule has been cleared.' });
+    await fetchEntries();
     return true;
   };
 
@@ -138,6 +115,7 @@ export function useTimetable() {
       return false;
     }
     toast({ title: 'Success', description: 'General schedule for the selected day has been cleared.' });
+    await fetchEntries();
     return true;
   };
 
@@ -148,6 +126,7 @@ export function useTimetable() {
       return false;
     }
     toast({ title: 'Success', description: 'The entire general schedule has been cleared.' });
+    await fetchEntries();
     return true;
   };
   
@@ -175,6 +154,7 @@ export function useTimetable() {
       console.error('Engagement error:', error);
       toast({ title: 'Error', description: 'Could not update engagement status.', variant: 'destructive' });
     }
+    await fetchEntries();
     setLoading(false);
   };
 
@@ -205,6 +185,7 @@ export function useTimetable() {
     }
 
     toast({ title: 'Success', description: 'Schedule copied successfully.' });
+    await fetchEntries();
     return true;
   }
 
