@@ -29,7 +29,7 @@ const getDateTime = (day: number, time: string): Date => {
   return date;
 };
 
-const CurrentTimeIndicator = ({ dayIndex }: { dayIndex: number }) => {
+const CurrentTimeIndicator = ({ dayIndex, gridHours }: { dayIndex: number, gridHours: number[] }) => {
   const [now, setNow] = useState(new Date());
 
   useEffect(() => {
@@ -43,9 +43,16 @@ const CurrentTimeIndicator = ({ dayIndex }: { dayIndex: number }) => {
   if (dayIndex !== today) {
     return null;
   }
+  
+  const currentHour = now.getHours();
+  if(!gridHours.includes(currentHour)) {
+    return null;
+  }
+  
+  const hourIndex = gridHours.indexOf(currentHour);
 
-  const minutes = now.getHours() * 60 + now.getMinutes();
-  const top = (minutes / (24 * 60)) * 100;
+  const minutesIntoHour = now.getMinutes();
+  const top = ((hourIndex * 60 + minutesIntoHour) / (gridHours.length * 60)) * 100;
 
   return (
     <div
@@ -62,6 +69,7 @@ export function TimetableGrid({ activeTab }: { activeTab: string }) {
   const { entries, loading } = useTimetable();
   const { user, colors } = useUser();
   const { openModal } = useModal();
+  const { isFiltered } = useTimetableContext();
   const [now, setNow] = useState(new Date());
   
   const dayIndex = useMemo(() => DAYS_OF_WEEK.indexOf(activeTab), [activeTab]);
@@ -151,12 +159,30 @@ export function TimetableGrid({ activeTab }: { activeTab: string }) {
   const handleSlotClick = (day: number, time: string) => {
     // openModal({ entry: null, day, time, source: 'slot' });
   };
+  
+  const gridHours = useMemo(() => {
+    if (!isFiltered) {
+      return Array.from({ length: 24 }, (_, i) => i);
+    }
+    const eventHours = new Set<number>();
+    entriesForCurrentDay.forEach(entry => {
+      const startHour = Math.floor(parseTime(entry.start_time) / 60);
+      const endHour = Math.ceil(parseTime(entry.end_time) / 60);
+      for (let h = startHour; h < endHour; h++) {
+        eventHours.add(h);
+      }
+    });
+    const hours = Array.from(eventHours).sort((a,b) => a - b);
+    return hours.length > 0 ? hours : Array.from({ length: 24 }, (_, i) => i);
+  }, [isFiltered, entriesForCurrentDay]);
+
+  const totalMinutesInView = gridHours.length * 60;
 
   return (
     <TabsContent value={activeTab} forceMount>
       <div className="flex">
         <div className="w-20 text-right pr-2 text-xs text-primary">
-            {Array.from({ length: 24 }).map((_, hour) => (
+            {gridHours.map((hour) => (
             <div key={hour} className="h-24 flex items-start justify-end pt-0.5 relative -top-2">
                 <span className='text-xs font-medium'>
                 {hour === 0 ? '12 AM' : hour < 12 ? `${hour} AM` : hour === 12 ? '12 PM' : `${hour-12} PM`}
@@ -166,7 +192,7 @@ export function TimetableGrid({ activeTab }: { activeTab: string }) {
         </div>
         <div className="relative flex-1 border-l">
 
-            {Array.from({ length: 24 }).map((_, hour) => (
+            {gridHours.map((hour) => (
             <div
                 key={hour}
                 className="h-24 border-t"
@@ -174,14 +200,24 @@ export function TimetableGrid({ activeTab }: { activeTab: string }) {
             />
             ))}
             
-            <CurrentTimeIndicator dayIndex={dayIndex}/>
+            <CurrentTimeIndicator dayIndex={dayIndex} gridHours={gridHours} />
 
             {loading && <div className="absolute inset-0 flex items-center justify-center bg-card/50"><Loader2 className="animate-spin text-primary" /></div>}
 
             {entriesForCurrentDay.map((entry) => {
-                const top = (parseTime(entry.start_time) / (24 * 60)) * 100;
+                const startHour = Math.floor(parseTime(entry.start_time) / 60);
+                const firstHourInView = gridHours[0];
+                const minutesOffset = gridHours.indexOf(startHour) * 60 - (isFiltered ? 0 : firstHourInView * 60);
+                
+                const startMinutes = parseTime(entry.start_time);
+                const startTimeInView = isFiltered
+                  ? (gridHours.indexOf(Math.floor(startMinutes/60)) * 60) + (startMinutes % 60)
+                  : startMinutes;
+
+                const top = (startTimeInView / totalMinutesInView) * 100;
+
                 const duration = parseTime(entry.end_time) - parseTime(entry.start_time);
-                const height = (duration / (24 * 60)) * 100;
+                const height = (duration / totalMinutesInView) * 100;
                 
                 const columnCount = (entry as any).columnCount || 1;
                 const column = (entry as any).column || 0;
@@ -206,6 +242,10 @@ export function TimetableGrid({ activeTab }: { activeTab: string }) {
 
                 const engagedUsers = (entry.engaging_user_ids || [])
                 .map(userId => ({ id: userId, name: 'User', avatarUrl: `https://picsum.photos/seed/${userId}/200/200`}));
+                
+                if (isFiltered && !gridHours.includes(Math.floor(parseTime(entry.start_time)/60))) {
+                   return null;
+                }
 
                 return (
                     <EventPopover

@@ -23,12 +23,16 @@ import { Button } from '../ui/button';
 import { Calendar, CalendarDays, User as UserIcon, LogOut, Trash2 } from 'lucide-react';
 import { useClearSchedule } from '@/hooks/use-clear-schedule';
 import { useProfileModal } from '@/hooks/use-profile-modal';
+import { useTimetableContext } from '@/contexts/timetable-context';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 
 export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
   const { user, signOut } = useUser();
   const router = useRouter();
   const { openClearScheduleDialog } = useClearSchedule();
   const { openModal } = useProfileModal();
+  const { isFiltered, setIsFiltered } = useTimetableContext();
 
   const handleLogout = async () => {
     await signOut();
@@ -53,8 +57,17 @@ export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
         <div className="flex items-center gap-2">
           <h1 className="text-xl font-semibold text-primary">CollabTime</h1>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-4">
           <TickingClock />
+
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="filter-switch"
+              checked={isFiltered}
+              onCheckedChange={setIsFiltered}
+            />
+            <Label htmlFor="filter-switch">Filter</Label>
+          </div>
 
           {user && (
             <>
