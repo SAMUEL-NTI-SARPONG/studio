@@ -139,20 +139,24 @@ export function TimetableGrid() {
         {DAYS_OF_WEEK.map((day, dayIndex) => (
           <TabsContent key={day} value={day} className="mt-0">
             <div className="flex">
-              <div className="w-20 text-right pr-2 text-xs text-muted-foreground space-y-2">
-                {Array.from({ length: 24 }).map((_, hour) => (
-                  <div key={hour} className="h-12 flex items-start justify-end pt-0.5 relative -top-2">
-                    {hour === 0 ? '12 AM' : hour < 12 ? `${hour} AM` : hour === 12 ? '12 PM' : `${hour-12} PM`}
+              <div className="w-20 text-right pr-2 text-xs text-muted-foreground">
+                 {Array.from({ length: 24 }).map((_, hour) => (
+                  <div key={hour} className="h-14 flex items-start justify-end pt-0.5 relative -top-2">
+                    <span className='text-xs'>
+                      {hour === 0 ? '12 AM' : hour < 12 ? `${hour} AM` : hour === 12 ? '12 PM' : `${hour-12} PM`}
+                    </span>
                   </div>
                 ))}
               </div>
-              <div className="relative flex-1 border-l border-t rounded-lg">
+              <div className="relative flex-1 border-l">
                 {Array.from({ length: 24 }).map((_, hour) => (
                   <div
                     key={hour}
-                    className="h-14 border-b cursor-pointer hover:bg-primary/5"
+                    className="h-14 border-t cursor-pointer hover:bg-primary/5 relative"
                     onClick={() => handleSlotClick(dayIndex, hour)}
-                  ></div>
+                  >
+                    <div className="absolute top-1/2 w-full border-b border-dashed border-border"></div>
+                  </div>
                 ))}
                 
                 <CurrentTimeIndicator dayIndex={dayIndex}/>
@@ -179,7 +183,7 @@ export function TimetableGrid() {
                     <div
                       key={entry.id}
                       className={cn(
-                        'absolute p-2 rounded-lg border text-left cursor-pointer transition-all duration-200 ease-in-out transform hover:scale-[1.02] hover:z-10',
+                        'absolute p-2 rounded-lg border text-left cursor-pointer transition-all duration-200 ease-in-out transform hover:scale-[1.02] hover:z-10 bg-primary/20 text-primary-foreground',
                          {
                           'bg-primary/10 border-primary/20': !isPast,
                           'bg-muted/50 border-muted-foreground/20 opacity-70': isPast,
@@ -190,7 +194,7 @@ export function TimetableGrid() {
                         height: `${height}%`,
                         left: `${left}%`,
                         width: `${width}%`,
-                        minHeight: '2rem'
+                        minHeight: '1rem'
                       }}
                       onClick={() => handleEntryClick(entry)}
                     >
@@ -220,4 +224,3 @@ export function TimetableGrid() {
     </>
   );
 }
-
