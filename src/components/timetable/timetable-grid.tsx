@@ -153,21 +153,6 @@ export function TimetableGrid() {
                 ))}
               </div>
               <div className="relative flex-1 border-l">
-                {/* Grid lines */}
-                {Array.from({ length: 24 * 12 }).map((_, i) => {
-                    const isHour = i % 12 === 0;
-                    const isQuarter = i % 3 === 0;
-                    return (
-                        <div key={i} className={cn(
-                            "absolute w-full border-b",
-                            {
-                                "border-border": isHour,
-                                "border-border/50": !isHour && isQuarter,
-                                "border-border/20 border-dashed": !isHour && !isQuarter,
-                            }
-                        )} style={{ top: `${(i / (24 * 12)) * 100}%`}}></div>
-                    );
-                })}
 
                 {Array.from({ length: 24 }).map((_, hour) => (
                   <div
