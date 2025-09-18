@@ -11,7 +11,7 @@ export default function Home() {
 
   return (
     <div className="flex h-screen w-full items-center justify-center bg-background">
-        <p className="text-muted-foreground">Loading CollabTime...</p>
+        <p className="text-muted-foreground">Loading LEGEND...</p>
     </div>
   );
 }
