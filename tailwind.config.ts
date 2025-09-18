@@ -92,24 +92,43 @@ export default {
           '0%, 100%': { transform: 'scale(1)' },
           '50%': { transform: 'scale(0.9)' },
         },
-        fill: {
+        'fill-bucket': {
           '0%': { transform: 'translateY(100%)' },
-          '100%': { transform: 'translateY(0%)' },
+          '100%': { transform: 'translateY(15%)' },
         },
         wave: {
           '0%': { transform: 'translateX(0)' },
           '100%': { transform: 'translateX(-50%)' },
         },
+        drip: {
+          '0%': { transform: 'translateY(0)', opacity: '1' },
+          '50%': { transform: 'translateY(48px)', opacity: '1' },
+          '100%': { transform: 'translateY(48px)', opacity: '0' },
+        }
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         pop: 'pop 0.2s ease-out',
-        fill: 'fill 2s ease-in-out infinite alternate',
+        'fill-bucket': 'fill-bucket 3s ease-in-out infinite alternate',
         wave: 'wave 2s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite',
         'wave-delay': 'wave 2s cubic-bezier(0.36, 0.45, 0.63, 0.53) -0.5s infinite',
+        drip: 'drip 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite',
       },
     },
   },
-  plugins: [require('tailwindcss-animate')],
+  plugins: [
+    require('tailwindcss-animate'),
+    function ({ addUtilities }: { addUtilities: any }) {
+      const newUtilities = {
+        '.clip-trapezoid': {
+          'clip-path': 'polygon(10% 0, 90% 0, 100% 100%, 0% 100%)',
+        },
+        '.clip-trapezoid-inner': {
+            'clip-path': 'polygon(10% 0, 90% 0, 98% 98%, 2% 98%)',
+          },
+      }
+      addUtilities(newUtilities, ['responsive', 'hover'])
+    }
+  ],
 } satisfies Config;

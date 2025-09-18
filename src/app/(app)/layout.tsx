@@ -18,7 +18,7 @@ import { TimetableProvider, useTimetableContext } from '@/contexts/timetable-con
 import { CopyScheduleProvider } from '@/contexts/copy-schedule-context';
 import { CopyScheduleDialog } from '@/components/timetable/copy-schedule-dialog';
 import { useUser } from '@/contexts/user-context';
-import { FillingBottleLoader } from '@/components/ui/filling-bottle-loader';
+import { DrippingTapLoader } from '@/components/ui/dripping-tap-loader';
 
 function FloatingActionButtons() {
   const { openModal } = useModal();
@@ -89,7 +89,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   if (loading) {
     return (
       <div className="flex h-screen w-full flex-col items-center justify-center bg-background gap-4">
-        <FillingBottleLoader />
+        <DrippingTapLoader />
         <p className="text-muted-foreground">Loading CollabTime...</p>
       </div>
     );
