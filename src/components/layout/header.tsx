@@ -59,7 +59,7 @@ export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                   <Avatar className="h-10 w-10">
-                    <AvatarImage src={userAvatar} alt={userName} />
+                    <AvatarImage src={user.avatarUrl} alt={userName} />
                     <AvatarFallback>{userName.charAt(0).toUpperCase()}</AvatarFallback>
                   </Avatar>
                 </Button>
