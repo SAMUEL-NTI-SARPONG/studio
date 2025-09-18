@@ -15,6 +15,12 @@ export function useTimetable() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!user) {
+        setLoading(false);
+        setEntries([]);
+        return;
+    };
+
     const fetchEntries = async () => {
       setLoading(true);
       const { data, error } = await supabase.from('timetable_entries').select('*');
@@ -33,15 +39,10 @@ export function useTimetable() {
       setLoading(false);
     };
 
-    if (user) {
-      fetchEntries();
-    }
-  }, [user, supabase, toast]);
+    fetchEntries();
 
-
-  useEffect(() => {
     const channel = supabase
-      .channel('timetable_entries_channel')
+      .channel('public:timetable_entries')
       .on<TimetableEntry>(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'timetable_entries' },
@@ -66,7 +67,7 @@ export function useTimetable() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase]);
+  }, [user, supabase, toast]);
 
 
   const addEntry = async (newEntry: Omit<TimetableEntry, 'id' | 'created_at' | 'engaging_user_ids'>) => {
