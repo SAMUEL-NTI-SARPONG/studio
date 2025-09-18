@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 import { useUser } from '@/contexts/user-context';
 import { EventPopover } from './event-popover';
+import { useModal } from '@/hooks/use-modal';
 
 const parseTime = (time: string): number => {
   const [hours, minutes] = time.split(':').map(Number);
@@ -54,13 +55,14 @@ const CurrentTimeIndicator = ({ dayIndex }: { dayIndex: number }) => {
   );
 };
 
-export function TimetableGrid() {
+export function TimetableGrid({ activeTab }: { activeTab?: string }) {
   const { entries, loading } = useTimetable();
   const { user } = useUser();
+  const { openModal } = useModal();
   const [now, setNow] = useState(new Date());
   
   const today = new Date().getDay();
-  const [activeTab, setActiveTab] = useState(DAYS_OF_WEEK[today]);
+  const currentTab = activeTab || DAYS_OF_WEEK[today];
 
 
   useEffect(() => {
@@ -156,11 +158,13 @@ export function TimetableGrid() {
     return grouped;
   }, [entries]);
   
-  const activeDayIndex = useMemo(() => DAYS_OF_WEEK.indexOf(activeTab), [activeTab]);
+  const handleSlotClick = (day: number, time: string) => {
+    openModal({ entry: null, day, time, source: 'slot' });
+  };
 
   return (
     <>
-      <Tabs value={activeTab} onValueChange={setActiveTab} asChild={false}>
+      <Tabs value={currentTab} asChild={false}>
         {DAYS_OF_WEEK.map((day, dayIndex) => (
           <TabsContent key={day} value={day} className="mt-0">
             <div className="flex">
@@ -179,6 +183,7 @@ export function TimetableGrid() {
                   <div
                     key={hour}
                     className="h-24 border-t"
+                    onClick={() => handleSlotClick(dayIndex, `${String(hour).padStart(2, '0')}:00`)}
                   />
                 ))}
                 
@@ -217,9 +222,9 @@ export function TimetableGrid() {
                           'absolute p-2 border text-left cursor-pointer transition-all duration-200 ease-in-out',
                           'focus:outline-none focus:ring-2 focus:ring-ring focus:z-10',
                            {
-                            'bg-primary border-primary-foreground/50': !isPersonal,
-                            'bg-green-500 border-green-600': isUser1,
-                            'bg-orange-500 border-orange-600': isUser2,
+                            'bg-primary/80 border-primary-foreground/50': !isPersonal,
+                            'bg-green-500/80 border-green-600': isUser1,
+                            'bg-orange-500/80 border-orange-600': isUser2,
                             'opacity-60': isPast,
                           }
                         )}
