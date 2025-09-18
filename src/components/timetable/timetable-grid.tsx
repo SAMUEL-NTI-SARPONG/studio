@@ -216,7 +216,7 @@ export function TimetableGrid({ activeTab }: { activeTab: string }) {
                     <div
                     tabIndex={0}
                     className={cn(
-                        'absolute p-2 border cursor-pointer transition-all duration-200 ease-in-out flex flex-col items-center justify-center',
+                        'absolute p-2 border cursor-pointer transition-all duration-200 ease-in-out flex flex-col items-center justify-center rounded-md',
                         'focus:outline-none focus:ring-2 focus:ring-ring focus:z-10',
                         {
                         'opacity-60': isPast,
@@ -233,20 +233,20 @@ export function TimetableGrid({ activeTab }: { activeTab: string }) {
                     }}
                     >
                     <p
-                        className={cn('font-normal text-center text-white', fontSizeClass, {
+                        className={cn('font-semibold text-center text-white', fontSizeClass, {
                         'text-muted-foreground': isPast,
                         })}
                     >
                         {entry.title}
                     </p>
                     {engagedUsers.length > 0 && (
-                        <div className="absolute bottom-1 right-1 flex items-center">
+                        <div className="absolute bottom-1 left-1 flex items-center">
                         <TooltipProvider>
                             {engagedUsers.slice(0, 3).map((u, i) => (
                             <Tooltip key={u.id}>
                                 <TooltipTrigger asChild>
                                 <Avatar
-                                    className="h-6 w-6 border-2 border-background"
+                                    className="h-6 w-6 border-2 border-white dark:border-background"
                                     style={{ zIndex: engagedUsers.length - i, marginLeft: i > 0 ? -8 : 0 }}
                                 >
                                     <AvatarImage src={u.avatarUrl} alt={u.name} />
@@ -262,7 +262,7 @@ export function TimetableGrid({ activeTab }: { activeTab: string }) {
                             <Tooltip>
                                 <TooltipTrigger asChild>
                                 <div
-                                    className="h-6 w-6 rounded-full bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground border-2 border-background"
+                                    className="h-6 w-6 rounded-full bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground border-2 border-white dark:border-background"
                                     style={{ zIndex: 0, marginLeft: -8 }}
                                 >
                                     +{engagedUsers.length - 3}
