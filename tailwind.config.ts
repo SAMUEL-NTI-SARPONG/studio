@@ -92,28 +92,45 @@ export default {
           '0%, 100%': { transform: 'scale(1)' },
           '50%': { transform: 'scale(0.9)' },
         },
-        'fill-bucket': {
-          '0%': { transform: 'translateY(100%)' },
-          '100%': { transform: 'translateY(15%)' },
+        bounce: {
+          '0%, 100%': { transform: 'translateY(-120px)', animationTimingFunction: 'cubic-bezier(0.8, 0, 1, 1)' },
+          '50%': { transform: 'translateY(0)', animationTimingFunction: 'cubic-bezier(0, 0, 0.2, 1)' },
+          '99%': { opacity: '1' },
+          '100%': { opacity: '0' },
         },
-        wave: {
-          '0%': { transform: 'translateX(0)' },
-          '100%': { transform: 'translateX(-50%)' },
+        crack: {
+          '0%': { transform: 'scale(0)', opacity: '0' },
+          '50%': { transform: 'scale(1)', opacity: '1' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
         },
-        drip: {
-          '0%': { transform: 'translateY(0)', opacity: '1' },
-          '50%': { transform: 'translateY(48px)', opacity: '1' },
-          '100%': { transform: 'translateY(48px)', opacity: '0' },
-        }
+        'ground-solid': {
+          '0%, 80%': { opacity: '1' },
+          '81%, 100%': { opacity: '0' },
+        },
+        'ground-break-left': {
+          '0%, 80%': { transform: 'translateX(0) translateY(0) rotate(0)', opacity: '0' },
+          '100%': { transform: 'translateX(-20px) translateY(40px) rotate(-15deg)', opacity: '1' },
+        },
+        'ground-break-right': {
+          '0%, 80%': { transform: 'translateX(0) translateY(0) rotate(0)', opacity: '0' },
+          '100%': { transform: 'translateX(20px) translateY(40px) rotate(15deg)', opacity: '1' },
+        },
+        'ball-fall-through': {
+          '0%, 80%': { opacity: '0' },
+          '81%': { transform: 'translateY(0)', opacity: '1' },
+          '100%': { transform: 'translateY(80px)', opacity: '1' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         pop: 'pop 0.2s ease-out',
-        'fill-bucket': 'fill-bucket 3s ease-in-out infinite alternate',
-        wave: 'wave 2s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite',
-        'wave-delay': 'wave 2s cubic-bezier(0.36, 0.45, 0.63, 0.53) -0.5s infinite',
-        drip: 'drip 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite',
+        bounce: 'bounce 1s infinite',
+        crack: 'crack 1s forwards',
+        'ground-solid': 'ground-solid 4s forwards',
+        'ground-break-left': 'ground-break-left 4s forwards',
+        'ground-break-right': 'ground-break-right 4s forwards',
+        'ball-fall-through': 'ball-fall-through 4s forwards',
       },
     },
   },
