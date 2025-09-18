@@ -2,8 +2,6 @@
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DAYS_OF_WEEK } from '@/lib/constants';
 import { cn } from '@/lib/utils';
-import { TickingClock } from './ticking-clock';
-import { ConnectionStatus } from './connection-status';
 
 export function TimetableHeader({
   activeTab,
@@ -34,10 +32,6 @@ export function TimetableHeader({
           ))}
         </TabsList>
       </Tabs>
-      <div className="flex items-center space-x-4 ml-4">
-        <TickingClock />
-        <ConnectionStatus />
-      </div>
     </div>
   );
 }
