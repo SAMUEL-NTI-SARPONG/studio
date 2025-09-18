@@ -1,3 +1,4 @@
+
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
@@ -54,7 +55,8 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
+  // This is important! The `getUser()` method refreshes the session.
   await supabase.auth.getUser();
 
-  return response;
+  return { response, supabase };
 }
