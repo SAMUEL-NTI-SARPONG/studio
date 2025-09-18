@@ -10,8 +10,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
-  DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import {
@@ -28,12 +26,7 @@ import type { TimetableEntry } from '@/lib/types';
 import {
   Loader2,
   Trash2,
-  CalendarDays,
-  Clock,
-  Pencil,
-  FileText,
 } from 'lucide-react';
-import { Separator } from '../ui/separator';
 import {
   Select,
   SelectContent,
@@ -41,7 +34,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../ui/select';
-import { Textarea } from '../ui/textarea';
 
 type HourModalProps = {
   isOpen: boolean;
@@ -70,13 +62,22 @@ const formSchema = z
     }
   );
 
+const formatTime12h = (h: number, m: number) => {
+    const period = h >= 12 ? 'PM' : 'AM';
+    const hour12 = h % 12 === 0 ? 12 : h % 12;
+    return `${String(hour12).padStart(2, '0')}:${String(m).padStart(2, '0')} ${period}`;
+}
+
 const generateTimeSlots = () => {
-  const slots = [];
+  const slots: { value: string; label: string }[] = [];
   for (let h = 0; h < 24; h++) {
     for (let m = 0; m < 60; m += 15) {
       const hour = String(h).padStart(2, '0');
       const minute = String(m).padStart(2, '0');
-      slots.push(`${hour}:${minute}`);
+      slots.push({
+        value: `${hour}:${minute}`,
+        label: formatTime12h(h, m),
+      });
     }
   }
   return slots;
@@ -205,8 +206,8 @@ export function HourModal({
                         </FormControl>
                         <SelectContent>
                           {timeSlots.map((slot) => (
-                            <SelectItem key={`start-${slot}`} value={slot}>
-                              {slot}
+                            <SelectItem key={`start-${slot.value}`} value={slot.value}>
+                              {slot.label}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -235,8 +236,8 @@ export function HourModal({
                         </FormControl>
                         <SelectContent>
                           {timeSlots.map((slot) => (
-                            <SelectItem key={`end-${slot}`} value={slot}>
-                              {slot}
+                            <SelectItem key={`end-${slot.value}`} value={slot.value}>
+                              {slot.label}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -247,30 +248,32 @@ export function HourModal({
                 />
               </div>
             </div>
-            <DialogFooter className="pt-4 sm:justify-between flex-row-reverse w-full">
+            <div className="pt-4 flex justify-between items-center w-full">
+               <div>
+                {entry && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="text-destructive hover:text-destructive"
+                    onClick={handleDelete}
+                    disabled={isDeleting || form.formState.isSubmitting}
+                  >
+                    {isDeleting ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="mr-2 h-4 w-4" />
+                    )}
+                    Delete
+                  </Button>
+                )}
+              </div>
               <Button type="submit" disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
                 {entry ? 'Save Changes' : 'Save'}
               </Button>
-              {entry && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  className="text-destructive hover:text-destructive"
-                  onClick={handleDelete}
-                  disabled={isDeleting || form.formState.isSubmitting}
-                >
-                  {isDeleting ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Trash2 className="mr-2 h-4 w-4" />
-                  )}
-                  Delete
-                </Button>
-              )}
-            </DialogFooter>
+            </div>
           </form>
         </Form>
       </DialogContent>
