@@ -19,15 +19,12 @@ import { Button } from '../ui/button';
 import { LogOut, Trash, Calendar, CalendarDays, User as UserIcon } from 'lucide-react';
 import { useClearSchedule } from '@/hooks/use-clear-schedule';
 import { useProfileModal } from '@/hooks/use-profile-modal';
+import { logout } from '@/app/auth/actions';
 
 export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
-  const { user, setUser } = useUser();
+  const { user } = useUser();
   const { openClearScheduleDialog } = useClearSchedule();
   const { openModal } = useProfileModal();
-
-  const handleLogout = () => {
-    setUser(null);
-  };
 
   const handleClear = (scope: 'personal' | 'general', time: 'day' | 'all') => {
     openClearScheduleDialog({
@@ -36,6 +33,11 @@ export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
       day: activeDayIndex,
     });
   };
+
+  const userAvatar = user?.user_metadata?.avatar_url || '';
+  const userName = user?.user_metadata?.name || user?.email || 'User';
+  const userEmail = user?.email || 'No email';
+
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-card">
@@ -51,17 +53,17 @@ export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                   <Avatar className="h-10 w-10">
-                    <AvatarImage src={user.avatarUrl} alt={user.name} />
-                    <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                    <AvatarImage src={userAvatar} alt={userName} />
+                    <AvatarFallback>{userName.charAt(0).toUpperCase()}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{user.name}</p>
+                    <p className="text-sm font-medium leading-none">{userName}</p>
                     <p className="text-xs leading-none text-muted-foreground">
-                      {user.id}
+                      {userEmail}
                     </p>
                   </div>
                 </DropdownMenuLabel>
@@ -111,10 +113,14 @@ export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
                   </DropdownMenuSub>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout}>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Log out</span>
-                </DropdownMenuItem>
+                <form action={logout}>
+                  <DropdownMenuItem asChild>
+                     <button type="submit" className="w-full">
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Log out</span>
+                    </button>
+                  </DropdownMenuItem>
+                </form>
               </DropdownMenuContent>
             </DropdownMenu>
           )}

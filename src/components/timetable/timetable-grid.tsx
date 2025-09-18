@@ -11,7 +11,6 @@ import { Loader2 } from 'lucide-react';
 import { useUser } from '@/contexts/user-context';
 import { EventPopover } from './event-popover';
 import { useModal } from '@/hooks/use-modal';
-import { USERS } from '@/lib/users';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { useTimetableContext } from '@/contexts/timetable-context';
@@ -206,8 +205,7 @@ export function TimetableGrid({ activeTab }: { activeTab: string }) {
                 const eventColor = isPersonal ? personalColor : colors.general;
 
                 const engagedUsers = (entry.engaging_user_ids || [])
-                .map(userId => USERS.find(u => u.id === userId))
-                .filter(Boolean) as (typeof USERS)[0][];
+                .map(userId => ({ id: userId, name: 'User', avatarUrl: `https://picsum.photos/seed/${userId}/200/200`}));
 
                 return (
                     <EventPopover

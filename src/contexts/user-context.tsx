@@ -1,10 +1,10 @@
 
 'use client';
 
-import { createContext, useContext, useState, ReactNode, Dispatch, SetStateAction, useEffect } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
+import type { User } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase/client';
 import { USERS } from '@/lib/users';
-
-type User = (typeof USERS)[0];
 
 export type UserColors = {
   personal: string;
@@ -13,80 +13,101 @@ export type UserColors = {
 
 type UserContextType = {
   user: User | null;
-  setUser: Dispatch<SetStateAction<User | null>>;
+  loading: boolean;
   colors: UserColors;
-  setColors: Dispatch<SetStateAction<UserColors>>;
+  setColors: (colors: UserColors) => void;
   updateUserName: (newName: string) => void;
 };
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
-const defaultColors: UserColors = {
-  personal: '#4299e1', // blue-500
-  general: '#4a5568', // gray-600
-};
-
 export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [colors, setColors] = useState<UserColors>(defaultColors);
+  const [loading, setLoading] = useState(true);
+  const [colors, setColorsState] = useState<UserColors>({ personal: '#4299e1', general: '#4a5568' });
 
+  const fetchUserProfile = useCallback(async (user: User) => {
+    // For now, we are not using a separate profiles table.
+    // We can extend this later.
+    // The user object from auth has email, id, etc.
+    // We can simulate name/avatar from the old USERS object for now if needed.
+    const staticUser = USERS.find(u => u.id.includes(user.email?.charAt(0) || ''));
+    if (user.user_metadata.name) {
+       return { ...user, name: user.user_metadata.name, avatarUrl: staticUser?.avatarUrl || '' };
+    }
+    return { ...user, name: user.email, avatarUrl: staticUser?.avatarUrl || '' };
+  }, []);
+
+
+  useEffect(() => {
+    const getSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        const profile = await fetchUserProfile(session.user);
+        // This is a bit of a hack to merge profile data
+        // In a real app, you might want to manage this better
+        setUser(prevUser => ({...prevUser, ...profile} as User));
+      }
+      setLoading(false);
+    };
+    getSession();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      setUser(session?.user ?? null);
+       if (session?.user) {
+        const profile = await fetchUserProfile(session.user);
+        setUser(prevUser => ({...prevUser, ...profile} as User));
+      }
+      setLoading(false);
+    });
+
+    return () => {
+      authListener?.subscription.unsubscribe();
+    };
+  }, [fetchUserProfile]);
+  
   useEffect(() => {
     if (user) {
       const storedColors = localStorage.getItem(`user-colors-${user.id}`);
       if (storedColors) {
-        setColors(JSON.parse(storedColors));
+        setColorsState(JSON.parse(storedColors));
       } else {
-        const userDefaults = USERS.find(u => u.id === user.id);
-        if (userDefaults) {
-           const initialColors = {
-             personal: user.id === 'user_1' ? '#38a169' : '#dd6b20', // green-600 or orange-600
-             general: '#718096', // gray-500
-           };
-           setColors(initialColors);
-           localStorage.setItem(`user-colors-${user.id}`, JSON.stringify(initialColors));
-        }
-      }
-
-      const storedName = localStorage.getItem(`user-name-${user.id}`);
-      if (storedName) {
-        setUser(prevUser => prevUser ? { ...prevUser, name: storedName } : null);
+        const initialColors = {
+          personal: '#38a169',
+          general: '#718096',
+        };
+        setColorsState(initialColors);
+        localStorage.setItem(`user-colors-${user.id}`, JSON.stringify(initialColors));
       }
     }
   }, [user?.id]);
 
 
-  const handleSetUser = (newUser: SetStateAction<User | null>) => {
-    if (newUser === null) {
-      localStorage.removeItem('selectedUserId');
-    } else if (typeof newUser === 'function') {
-        const result = newUser(user);
-        if(result) localStorage.setItem('selectedUserId', result.id);
-    } else {
-        localStorage.setItem('selectedUserId', newUser.id);
-    }
-    setUser(newUser);
-  };
-  
-  const handleSetColors = (newColors: SetStateAction<UserColors>) => {
-      setColors(prev => {
-          const updatedColors = typeof newColors === 'function' ? newColors(prev) : newColors;
-          if (user) {
-            localStorage.setItem(`user-colors-${user.id}`, JSON.stringify(updatedColors));
-          }
-          return updatedColors;
-      })
-  }
-  
-  const updateUserName = (newName: string) => {
+  const setColors = (newColors: UserColors) => {
     if (user) {
-      setUser({ ...user, name: newName });
-      localStorage.setItem(`user-name-${user.id}`, newName);
+      localStorage.setItem(`user-colors-${user.id}`, JSON.stringify(newColors));
+      setColorsState(newColors);
+    }
+  };
+
+  const updateUserName = async (newName: string) => {
+    if (user) {
+      const { data, error } = await supabase.auth.updateUser({
+        data: { name: newName },
+      });
+      if (data.user) {
+        setUser({ ...user, user_metadata: data.user.user_metadata });
+      }
+      if (error) {
+        console.error('Error updating user name:', error);
+      }
     }
   };
 
 
   return (
-    <UserContext.Provider value={{ user, setUser: handleSetUser, colors, setColors: handleSetColors, updateUserName }}>
+    <UserContext.Provider value={{ user, loading, colors, setColors, updateUserName }}>
       {children}
     </UserContext.Provider>
   );

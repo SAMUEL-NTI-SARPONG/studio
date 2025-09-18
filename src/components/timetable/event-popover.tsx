@@ -52,13 +52,15 @@ export function EventPopover({
       await toggleEventEngagement(entry.id, user.id);
     }
   };
-
-  const popoverUser = entry.user_id ? USERS.find(u => u.id === entry.user_id) : null;
+  
+  // This part needs a way to resolve user info from IDs.
+  // For now, we'll keep it simple.
+  const popoverUser = entry.user_id ? { name: 'A User' } : null;
   const isEngaged = user && entry.engaging_user_ids?.includes(user.id);
 
   const engagedUsers = (entry.engaging_user_ids || [])
-    .map(userId => USERS.find(u => u.id === userId))
-    .filter(Boolean) as (typeof USERS)[0][];
+    .map(userId => ({ id: userId, name: 'User', avatarUrl: `https://picsum.photos/seed/${userId}/200/200`}))
+    
 
   return (
     <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
@@ -77,7 +79,7 @@ export function EventPopover({
           
           <div className="flex items-center justify-between">
             <Badge variant={entry.user_id ? 'secondary' : 'default'} className="text-xs">
-                {entry.user_id ? `Personal (${popoverUser?.name})` : 'General'}
+                {entry.user_id ? 'Personal' : 'General'}
             </Badge>
             <div className="flex items-center gap-2">
                 {user && (
