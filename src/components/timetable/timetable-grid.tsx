@@ -9,6 +9,7 @@ import type { TimetableEntry } from '@/lib/types';
 import { HourModal } from './hour-modal';
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
+import { useUser } from '@/contexts/user-context';
 
 const parseTime = (time: string): number => {
   const [hours, minutes] = time.split(':').map(Number);
@@ -62,6 +63,7 @@ const CurrentTimeIndicator = ({ dayIndex }: { dayIndex: number }) => {
 
 export function TimetableGrid() {
   const { entries, loading } = useTimetable();
+  const { user } = useUser();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState<TimetableEntry | null>(null);
   const [selectedDay, setSelectedDay] = useState<number>(new Date().getDay());
@@ -178,16 +180,21 @@ export function TimetableGrid() {
 
                   const endTime = getDateTime(dayIndex, entry.end_time);
                   const isPast = now > endTime;
+
+                  const isPersonal = entry.user_id !== null;
+                  const isMyEvent = isPersonal && entry.user_id === user?.id;
                   
                   return (
                     <div
                       key={entry.id}
                       className={cn(
-                        'absolute p-2 rounded-lg border text-left cursor-pointer transition-all duration-200 ease-in-out transform hover:scale-[1.02] hover:z-10 bg-primary/20 text-primary-foreground overflow-hidden',
-                         {
-                          'bg-primary/10 border-primary/20': !isPast,
-                          'bg-muted/50 border-muted-foreground/20 opacity-70': isPast,
-                         }
+                        'absolute p-2 rounded-lg border text-left cursor-pointer transition-all duration-200 ease-in-out transform hover:scale-[1.02] hover:z-10 overflow-hidden',
+                        {
+                          'bg-primary/20 border-primary/30 text-primary-foreground': !isPersonal,
+                          'bg-green-500/20 border-green-500/30 text-green-800 dark:text-green-200': isMyEvent,
+                          'bg-orange-500/20 border-orange-500/30 text-orange-800 dark:text-orange-200': isPersonal && !isMyEvent,
+                          'opacity-60': isPast,
+                        }
                       )}
                       style={{
                         top: `${top}%`,
@@ -199,18 +206,21 @@ export function TimetableGrid() {
                       onClick={() => handleEntryClick(entry)}
                     >
                       <p className={cn("font-bold text-sm truncate", {
-                        'text-primary-foreground': !isPast,
+                        'text-primary-foreground': !isPersonal && !isPast,
+                        'dark:text-white text-black': isPersonal && !isPast,
                         'text-muted-foreground': isPast
                       })}>{entry.title}</p>
                       <p className={cn("text-xs truncate", {
-                          'text-primary-foreground/80': !isPast,
-                          'text-muted-foreground/80': isPast
+                         'text-primary-foreground/80': !isPersonal && !isPast,
+                         'dark:text-white/80 text-black/80': isPersonal && !isPast,
+                         'text-muted-foreground/80': isPast,
                       })}>
                         {formatTime(entry.start_time)} - {formatTime(entry.end_time)}
                       </p>
                       <p className={cn("text-xs truncate pt-1", {
-                          'text-primary-foreground/70': !isPast,
-                          'text-muted-foreground/70': isPast
+                         'text-primary-foreground/70': !isPersonal && !isPast,
+                         'dark:text-white/70 text-black/70': isPersonal && !isPast,
+                         'text-muted-foreground/70': isPast
                       })}>{entry.description}</p>
                     </div>
                   );
@@ -230,5 +240,3 @@ export function TimetableGrid() {
     </>
   );
 }
-
-    

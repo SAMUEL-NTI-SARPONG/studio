@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -23,10 +22,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { useTimetable } from '@/hooks/use-timetable';
 import type { TimetableEntry } from '@/lib/types';
-import {
-  Loader2,
-  Trash2,
-} from 'lucide-react';
+import { Loader2, Trash2 } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -35,6 +31,9 @@ import {
   SelectValue,
 } from '../ui/select';
 import { Textarea } from '../ui/textarea';
+import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
+import { useUser } from '@/contexts/user-context';
+import { cn } from '@/lib/utils';
 
 type HourModalProps = {
   isOpen: boolean;
@@ -50,6 +49,7 @@ const formSchema = z
     description: z.string().optional(),
     start_time: z.string().nonempty('Start time is required'),
     end_time: z.string().nonempty('End time is required'),
+    type: z.enum(['general', 'personal']).default('general'),
   })
   .refine(
     (data) => {
@@ -65,10 +65,10 @@ const formSchema = z
   );
 
 const formatTime12h = (h: number, m: number) => {
-    const period = h >= 12 ? 'PM' : 'AM';
-    const hour12 = h % 12 === 0 ? 12 : h % 12;
-    return `${String(hour12)}:${String(m).padStart(2, '0')} ${period}`;
-}
+  const period = h >= 12 ? 'PM' : 'AM';
+  const hour12 = h % 12 === 0 ? 12 : h % 12;
+  return `${String(hour12)}:${String(m).padStart(2, '0')} ${period}`;
+};
 
 const generateTimeSlots = () => {
   const slots: { value: string; label: string }[] = [];
@@ -95,6 +95,7 @@ export function HourModal({
   time,
 }: HourModalProps) {
   const { addEntry, updateEntry, deleteEntry } = useTimetable();
+  const { user } = useUser();
   const [isDeleting, setIsDeleting] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -104,6 +105,7 @@ export function HourModal({
       description: '',
       start_time: '',
       end_time: '',
+      type: 'general',
     },
   });
 
@@ -115,20 +117,20 @@ export function HourModal({
           description: entry.description || '',
           start_time: entry.start_time,
           end_time: entry.end_time,
+          type: entry.user_id ? 'personal' : 'general',
         });
       } else {
         const startHour = parseInt(time.split(':')[0], 10);
         const startMinute = 0;
-        
-        // Default to a 1-hour slot
+
         let endHour = startHour + 1;
         let endMinute = 0;
 
         if (endHour > 23) {
-            endHour = 23;
-            endMinute = 55;
+          endHour = 23;
+          endMinute = 55;
         }
-        
+
         form.reset({
           title: '',
           description: '',
@@ -138,23 +140,27 @@ export function HourModal({
           end_time: `${String(endHour).padStart(2, '0')}:${String(
             endMinute
           ).padStart(2, '0')}`,
+          type: 'general',
         });
       }
     }
   }, [entry, time, form, isOpen]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    const entryData = {
+      title: values.title,
+      description: values.description,
+      start_time: values.start_time,
+      end_time: values.end_time,
+      day_of_week: day,
+      user_id: values.type === 'personal' ? user?.id : null,
+    };
+
     let success = false;
     if (entry) {
-      success = await updateEntry(entry.id, {
-        ...values,
-        day_of_week: day,
-      });
+      success = await updateEntry(entry.id, entryData);
     } else {
-      success = await addEntry({
-        ...values,
-        day_of_week: day,
-      });
+      success = await addEntry(entryData);
     }
     if (success) {
       setIsOpen(false);
@@ -170,6 +176,9 @@ export function HourModal({
     }
     setIsDeleting(false);
   };
+  
+  const canModify =
+    !entry || entry.user_id === null || entry.user_id === user?.id;
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -181,7 +190,42 @@ export function HourModal({
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="space-y-4">
+            <fieldset disabled={!canModify} className="space-y-4 group">
+              <FormField
+                control={form.control}
+                name="type"
+                render={({ field }) => (
+                  <FormItem className="space-y-3">
+                    <FormLabel>Type</FormLabel>
+                    <FormControl>
+                      <RadioGroup
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        className="flex items-center space-x-4"
+                      >
+                        <FormItem className="flex items-center space-x-2 space-y-0">
+                          <FormControl>
+                            <RadioGroupItem value="general" id="r1" />
+                          </FormControl>
+                          <FormLabel htmlFor="r1" className="font-normal">
+                            General
+                          </FormLabel>
+                        </FormItem>
+                        <FormItem className="flex items-center space-x-2 space-y-0">
+                          <FormControl>
+                            <RadioGroupItem value="personal" id="r2" />
+                          </FormControl>
+                          <FormLabel htmlFor="r2" className="font-normal">
+                            Personal
+                          </FormLabel>
+                        </FormItem>
+                      </RadioGroup>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <FormField
                 control={form.control}
                 name="title"
@@ -230,7 +274,10 @@ export function HourModal({
                         </FormControl>
                         <SelectContent>
                           {timeSlots.map((slot) => (
-                            <SelectItem key={`start-${slot.value}`} value={slot.value}>
+                            <SelectItem
+                              key={`start-${slot.value}`}
+                              value={slot.value}
+                            >
                               {slot.label}
                             </SelectItem>
                           ))}
@@ -271,10 +318,10 @@ export function HourModal({
                   )}
                 />
               </div>
-            </div>
+            </fieldset>
             <div className="pt-4 flex justify-between items-center w-full">
-               <div>
-                {entry && (
+              <div>
+                {entry && canModify && (
                   <Button
                     type="button"
                     variant="ghost"
@@ -291,12 +338,17 @@ export function HourModal({
                   </Button>
                 )}
               </div>
-              <Button type="submit" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
-                {entry ? 'Save Changes' : 'Save'}
-              </Button>
+               {canModify ? (
+
+                <Button type="submit" disabled={form.formState.isSubmitting}>
+                  {form.formState.isSubmitting && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  {entry ? 'Save Changes' : 'Save'}
+                </Button>
+               ) : (
+                <Button type="button" onClick={() => setIsOpen(false)}>Close</Button>
+               )}
             </div>
           </form>
         </Form>
