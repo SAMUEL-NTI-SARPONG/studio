@@ -3,7 +3,6 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 export type TimetableEntry = {
   id: string;
   user_id: string;
-  user_email: string;
   day_of_week: number;
   start_time: string;
   end_time: string;

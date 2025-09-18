@@ -18,7 +18,7 @@ export function useTimetable() {
       console.error('Error fetching timetable entries:', error);
       toast({
         title: 'Error',
-        description: 'Could not fetch timetable data.',
+        description: 'Could not fetch timetable data. Please check your Supabase credentials and network connection.',
         variant: 'destructive',
       });
       setEntries([]);
@@ -59,17 +59,15 @@ export function useTimetable() {
     };
   }, [supabase, setEntries]);
 
-  const addEntry = async (newEntry: Omit<TimetableEntry, 'id' | 'created_at' | 'user_id' | 'user_email'>) => {
+  const addEntry = async (newEntry: Omit<TimetableEntry, 'id' | 'created_at' | 'user_id' >) => {
     const fullEntry = {
         ...newEntry,
         description: newEntry.description || '',
-        user_id: 'd2a13a89-72c3-424a-93e1-7db1a16b0d9e', // Anonymous user ID
-        user_email: 'anon@example.com',
     }
-    const { error } = await supabase.from('timetable_entries').insert(fullEntry);
+    const { error } = await supabase.from('timetable_entries').insert(fullEntry as any);
     if (error) {
       console.error('Error adding entry:', error);
-      toast({ title: 'Error: Permission Denied', description: "Please run the following SQL in your Supabase project to allow anonymous inserts: CREATE POLICY \"Allow anon insert\" ON public.timetable_entries FOR INSERT TO anon WITH CHECK (true);", variant: 'destructive', duration: 20000 });
+       toast({ title: 'Error: Permission Denied', description: 'Please ensure RLS is disabled or that anon users have INSERT permissions.', variant: 'destructive', duration: 20000 });
       return false;
     }
     toast({ title: 'Success', description: 'Event added to timetable.' });
