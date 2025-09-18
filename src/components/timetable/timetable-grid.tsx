@@ -288,15 +288,13 @@ export function TimetableGrid({ activeTab }: { activeTab: string }) {
                     >
                         {entry.title}
                     </p>
-                    {duration >= 45 && (
-                      <p
+                    <p
                         className={cn('text-white/90', fontSizeClass, {
-                          'text-gray-200/90': isPast,
+                            'text-gray-200/90': isPast,
                         })}
-                      >
+                        >
                         {formatTime(entry.start_time)} - {formatTime(entry.end_time)}
-                      </p>
-                    )}
+                    </p>
                     {engagedUsers.length > 0 && (
                         <div className="absolute bottom-1 right-1 flex items-center space-x-1">
                         <TooltipProvider>
