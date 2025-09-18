@@ -93,16 +93,22 @@ export default {
           '0%, 100%': { transform: 'scale(1)' },
           '50%': { transform: 'scale(0.9)' },
         },
-        'bounce-vertical-perspective': {
+        'jiggle-bounce': {
           '0%, 100%': {
-            transform: 'translateY(100px) scale(1, 1)',
-            backgroundColor: 'hsl(var(--primary))',
+            transform: 'translateY(-60px)',
             animationTimingFunction: 'cubic-bezier(0.8, 0, 1, 1)',
+            backgroundColor: 'hsl(var(--ring))',
           },
           '50%': {
-            transform: 'translateY(-40px) scale(0.5, 0.5)',
-            backgroundColor: 'hsl(var(--ring))',
+            transform: 'translateY(0)',
             animationTimingFunction: 'cubic-bezier(0, 0, 0.2, 1)',
+            backgroundColor: 'hsl(var(--primary))',
+          },
+          '60%': {
+            transform: 'translateY(0) scale(1.2, 0.8)',
+          },
+          '75%': {
+            transform: 'translateY(-15px) scale(0.9, 1.1)',
           },
         },
          'trophy-pop': {
@@ -123,7 +129,7 @@ export default {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         pop: 'pop 0.2s ease-out',
-        'bounce-vertical-perspective': 'bounce-vertical-perspective 1.5s infinite',
+        'jiggle-bounce': 'jiggle-bounce 1.2s infinite',
         'trophy-pop': 'trophy-pop 0.5s ease-out forwards',
         sparkle: 'sparkle 0.4s ease-out forwards',
         'trophy-shine': 'trophy-shine 1s ease-in-out infinite',
