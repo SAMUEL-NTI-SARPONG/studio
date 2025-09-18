@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -12,7 +11,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { login } from '@/app/auth/actions';
-import { useFormState, useFormStatus } from 'react-dom';
+import { useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
 
 function SubmitButton({ text }: { text: string }) {
   const { pending } = useFormStatus();
@@ -24,7 +24,7 @@ function SubmitButton({ text }: { text: string }) {
 }
 
 export default function LoginPage() {
-  const [loginState, loginAction] = useFormState(login, undefined);
+  const [loginState, loginAction] = useActionState(login, undefined);
 
   return (
     <div className="flex h-screen w-full items-center justify-center bg-background p-4">
