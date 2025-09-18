@@ -24,7 +24,7 @@ export function BouncingBallLoader() {
   return (
     <div className="relative w-full h-48 flex items-center justify-center overflow-hidden">
         <div className="absolute w-20 h-20 bg-primary rounded-full animate-jiggle-bounce" />
-        <div className="absolute bottom-[4.5rem] w-24 h-1 bg-gray-300 rounded-full" />
+        <div className="absolute bottom-[4.5rem] w-32 h-2 bg-gray-300 rounded-full" />
     </div>
   );
 }
