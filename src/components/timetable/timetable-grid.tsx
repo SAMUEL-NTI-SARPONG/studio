@@ -210,10 +210,10 @@ export function TimetableGrid({ activeTab }: { activeTab?: string }) {
                   
                   const fontSizeClass =
                     duration < 30
-                      ? 'text-xs'
-                      : duration < 60
                       ? 'text-sm'
-                      : 'text-base';
+                      : duration < 60
+                      ? 'text-base'
+                      : 'text-lg';
                   
                   const personalColor = user?.id === entry.user_id ? colors.personal : '#a0aec0';
                   const eventColor = isPersonal ? personalColor : colors.general;
@@ -245,7 +245,7 @@ export function TimetableGrid({ activeTab }: { activeTab?: string }) {
                         }}
                       >
                         <p
-                          className={cn('font-bold text-center text-white', fontSizeClass, {
+                          className={cn('font-medium text-center text-white', fontSizeClass, {
                             'text-muted-foreground': isPast,
                           })}
                         >
@@ -263,3 +263,5 @@ export function TimetableGrid({ activeTab }: { activeTab?: string }) {
     </>
   );
 }
+
+    
