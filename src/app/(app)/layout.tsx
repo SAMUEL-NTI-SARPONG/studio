@@ -1,7 +1,6 @@
 
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import Header from '@/components/layout/header';
 import { TimetableHeader } from '@/components/timetable/timetable-header';
@@ -25,7 +24,6 @@ function FloatingActionButtons() {
   const { openModal } = useModal();
   const { activeTab } = useTimetableContext();
   const dayIndex = DAYS_OF_WEEK.indexOf(activeTab);
-  const router = useRouter();
 
   const handleAddClick = () => {
     const currentHour = new Date().getHours();
@@ -38,7 +36,7 @@ function FloatingActionButtons() {
   };
 
   const handleReloadClick = () => {
-    router.refresh();
+    window.location.reload();
   };
 
   return (
