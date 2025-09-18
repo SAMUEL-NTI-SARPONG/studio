@@ -159,7 +159,7 @@ export function TimetableGrid({ activeTab }: { activeTab?: string }) {
   }, [entries]);
   
   const handleSlotClick = (day: number, time: string) => {
-    openModal({ entry: null, day, time, source: 'slot' });
+    // openModal({ entry: null, day, time, source: 'slot' });
   };
 
   return (
@@ -219,7 +219,7 @@ export function TimetableGrid({ activeTab }: { activeTab?: string }) {
                       <div
                         tabIndex={0}
                         className={cn(
-                          'absolute p-2 border text-left cursor-pointer transition-all duration-200 ease-in-out',
+                          'absolute p-2 border cursor-pointer transition-all duration-200 ease-in-out flex items-center justify-center',
                           'focus:outline-none focus:ring-2 focus:ring-ring focus:z-10',
                            {
                             'bg-primary/80 border-primary-foreground/50': !isPersonal,
@@ -237,7 +237,7 @@ export function TimetableGrid({ activeTab }: { activeTab?: string }) {
                         }}
                       >
                         <p
-                          className={cn('font-bold text-sm truncate', {
+                          className={cn('font-bold text-sm text-center', {
                             'text-primary-foreground': !isPersonal,
                              'text-white': isPersonal,
                             'text-muted-foreground': isPast,
