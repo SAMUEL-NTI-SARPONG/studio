@@ -26,6 +26,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useTimetable } from '@/hooks/use-timetable';
 import type { TimetableEntry } from '@/lib/types';
 import { Loader2, Trash2, Clock, CalendarDays } from 'lucide-react';
+import { Separator } from '../ui/separator';
 
 type HourModalProps = {
   isOpen: boolean;
@@ -113,7 +114,7 @@ export function HourModal({ isOpen, setIsOpen, entry, day, time }: HourModalProp
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="sm:max-w-lg bg-background/95 backdrop-blur-sm">
+      <DialogContent className="sm:max-w-md bg-card/95 backdrop-blur-sm">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold tracking-tight">
             {entry ? 'Edit Event' : 'Create New Event'}
@@ -142,14 +143,16 @@ export function HourModal({ isOpen, setIsOpen, entry, day, time }: HourModalProp
                     <FormItem>
                       <FormLabel>Description (Optional)</FormLabel>
                       <FormControl>
-                        <Textarea placeholder="e.g., Discuss Q3 goals" {...field} />
+                        <Textarea {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
-                <div className="space-y-4 pt-2">
+                <Separator />
+                
+                <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                         <FormField
                         control={form.control}
@@ -186,8 +189,11 @@ export function HourModal({ isOpen, setIsOpen, entry, day, time }: HourModalProp
                     </div>
                 </div>
               </div>
-              <DialogFooter className="pt-4 flex-col sm:flex-row sm:justify-between w-full">
-                <div>
+              <DialogFooter className="pt-4 sm:justify-between flex-row-reverse w-full">
+                 <Button type="submit" disabled={form.formState.isSubmitting}>
+                   {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
+                   {entry ? 'Save Changes' : 'Create Event'}
+                 </Button>
                 {entry && (
                   <Button
                     type="button"
@@ -200,11 +206,6 @@ export function HourModal({ isOpen, setIsOpen, entry, day, time }: HourModalProp
                     Delete
                   </Button>
                 )}
-                </div>
-                 <Button type="submit" disabled={form.formState.isSubmitting}>
-                   {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
-                   {entry ? 'Save Changes' : 'Create Event'}
-                 </Button>
               </DialogFooter>
             </form>
           </Form>
