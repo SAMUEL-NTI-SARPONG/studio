@@ -10,13 +10,18 @@ import { HourModal } from './hour-modal';
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 
-// Utility to parse "HH:mm" string to minutes from midnight
 const parseTime = (time: string): number => {
   const [hours, minutes] = time.split(':').map(Number);
   return hours * 60 + minutes;
 };
 
-// Utility to create a Date object from a day index and time string
+const formatTime = (time: string): string => {
+    const [hours, minutes] = time.split(':').map(Number);
+    const period = hours >= 12 ? 'PM' : 'AM';
+    const hour12 = hours % 12 === 0 ? 12 : hours % 12;
+    return `${hour12}:${String(minutes).padStart(2, '0')} ${period}`;
+};
+
 const getDateTime = (day: number, time: string): Date => {
   const [hours, minutes] = time.split(':').map(Number);
   const date = new Date();
@@ -32,7 +37,7 @@ const CurrentTimeIndicator = ({ dayIndex }: { dayIndex: number }) => {
   useEffect(() => {
     const timer = setInterval(() => {
       setNow(new Date());
-    }, 60 * 1000); // Update every minute
+    }, 60 * 1000);
     return () => clearInterval(timer);
   }, []);
 
@@ -46,10 +51,10 @@ const CurrentTimeIndicator = ({ dayIndex }: { dayIndex: number }) => {
 
   return (
     <div
-      className="absolute w-full flex items-center"
+      className="absolute w-full flex items-center z-20"
       style={{ top: `${top}%` }}
     >
-      <div className="w-2 h-2 bg-red-500 rounded-full -ml-1 z-10"></div>
+      <div className="w-2 h-2 bg-red-500 rounded-full -ml-1"></div>
       <div className="w-full h-0.5 bg-red-500"></div>
     </div>
   );
@@ -68,7 +73,6 @@ export function TimetableGrid() {
 
 
   useEffect(() => {
-    // Update the current time every minute
     const timer = setInterval(() => {
       setNow(new Date());
     }, 60 * 1000);
@@ -84,6 +88,7 @@ export function TimetableGrid() {
 
   const handleEntryClick = (entry: TimetableEntry) => {
     setSelectedEntry(entry);
+    setSelectedDay(entry.day_of_week);
     setIsModalOpen(true);
   };
 
@@ -100,7 +105,6 @@ export function TimetableGrid() {
       }
     });
 
-    // Add conflict detection
     Object.values(grouped).forEach(dayEntries => {
         dayEntries.sort((a, b) => parseTime(a.start_time) - parseTime(b.start_time));
         
@@ -141,7 +145,7 @@ export function TimetableGrid() {
             <div className="flex">
               <div className="w-20 text-right pr-2 text-xs text-muted-foreground">
                  {Array.from({ length: 24 }).map((_, hour) => (
-                  <div key={hour} className="h-14 flex items-start justify-end pt-0.5 relative -top-2">
+                  <div key={hour} className="h-24 flex items-start justify-end pt-0.5 relative -top-2">
                     <span className='text-xs'>
                       {hour === 0 ? '12 AM' : hour < 12 ? `${hour} AM` : hour === 12 ? '12 PM' : `${hour-12} PM`}
                     </span>
@@ -149,13 +153,28 @@ export function TimetableGrid() {
                 ))}
               </div>
               <div className="relative flex-1 border-l">
+                {/* Grid lines */}
+                {Array.from({ length: 24 * 12 }).map((_, i) => {
+                    const isHour = i % 12 === 0;
+                    const isQuarter = i % 3 === 0;
+                    return (
+                        <div key={i} className={cn(
+                            "absolute w-full border-b",
+                            {
+                                "border-border": isHour,
+                                "border-border/50": !isHour && isQuarter,
+                                "border-border/20 border-dashed": !isHour && !isQuarter,
+                            }
+                        )} style={{ top: `${(i / (24 * 12)) * 100}%`}}></div>
+                    );
+                })}
+
                 {Array.from({ length: 24 }).map((_, hour) => (
                   <div
                     key={hour}
-                    className="h-14 border-t cursor-pointer hover:bg-primary/5 relative"
+                    className="h-24 border-t cursor-pointer hover:bg-primary/5"
                     onClick={() => handleSlotClick(dayIndex, hour)}
                   >
-                    <div className="absolute top-1/2 w-full border-b border-dashed border-border"></div>
                   </div>
                 ))}
                 
@@ -173,17 +192,14 @@ export function TimetableGrid() {
                   const width = 100 / columnCount;
                   const left = column * width;
 
-
-                  const startTime = getDateTime(dayIndex, entry.start_time);
                   const endTime = getDateTime(dayIndex, entry.end_time);
-
                   const isPast = now > endTime;
                   
                   return (
                     <div
                       key={entry.id}
                       className={cn(
-                        'absolute p-2 rounded-lg border text-left cursor-pointer transition-all duration-200 ease-in-out transform hover:scale-[1.02] hover:z-10 bg-primary/20 text-primary-foreground',
+                        'absolute p-2 rounded-lg border text-left cursor-pointer transition-all duration-200 ease-in-out transform hover:scale-[1.02] hover:z-10 bg-primary/20 text-primary-foreground overflow-hidden',
                          {
                           'bg-primary/10 border-primary/20': !isPast,
                           'bg-muted/50 border-muted-foreground/20 opacity-70': isPast,
@@ -194,7 +210,7 @@ export function TimetableGrid() {
                         height: `${height}%`,
                         left: `${left}%`,
                         width: `${width}%`,
-                        minHeight: '1rem'
+                        minHeight: '1.5rem'
                       }}
                       onClick={() => handleEntryClick(entry)}
                     >
@@ -205,6 +221,12 @@ export function TimetableGrid() {
                       <p className={cn("text-xs truncate", {
                           'text-primary-foreground/80': !isPast,
                           'text-muted-foreground/80': isPast
+                      })}>
+                        {formatTime(entry.start_time)} - {formatTime(entry.end_time)}
+                      </p>
+                      <p className={cn("text-xs truncate pt-1", {
+                          'text-primary-foreground/70': !isPast,
+                          'text-muted-foreground/70': isPast
                       })}>{entry.description}</p>
                     </div>
                   );

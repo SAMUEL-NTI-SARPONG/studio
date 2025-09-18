@@ -34,6 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../ui/select';
+import { Textarea } from '../ui/textarea';
 
 type HourModalProps = {
   isOpen: boolean;
@@ -46,6 +47,7 @@ type HourModalProps = {
 const formSchema = z
   .object({
     title: z.string().min(1, 'Title is required'),
+    description: z.string().optional(),
     start_time: z.string().nonempty('Start time is required'),
     end_time: z.string().nonempty('End time is required'),
   })
@@ -65,13 +67,13 @@ const formSchema = z
 const formatTime12h = (h: number, m: number) => {
     const period = h >= 12 ? 'PM' : 'AM';
     const hour12 = h % 12 === 0 ? 12 : h % 12;
-    return `${String(hour12).padStart(2, '0')}:${String(m).padStart(2, '0')} ${period}`;
+    return `${String(hour12)}:${String(m).padStart(2, '0')} ${period}`;
 }
 
 const generateTimeSlots = () => {
   const slots: { value: string; label: string }[] = [];
   for (let h = 0; h < 24; h++) {
-    for (let m = 0; m < 60; m += 15) {
+    for (let m = 0; m < 60; m += 5) {
       const hour = String(h).padStart(2, '0');
       const minute = String(m).padStart(2, '0');
       slots.push({
@@ -99,6 +101,7 @@ export function HourModal({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: '',
+      description: '',
       start_time: '',
       end_time: '',
     },
@@ -109,17 +112,26 @@ export function HourModal({
       if (entry) {
         form.reset({
           title: entry.title,
+          description: entry.description || '',
           start_time: entry.start_time,
           end_time: entry.end_time,
         });
       } else {
         const startHour = parseInt(time.split(':')[0], 10);
         const startMinute = 0;
-        const endHour = startHour;
-        const endMinute = 30;
+        
+        // Default to a 1-hour slot
+        let endHour = startHour + 1;
+        let endMinute = 0;
 
+        if (endHour > 23) {
+            endHour = 23;
+            endMinute = 55;
+        }
+        
         form.reset({
           title: '',
+          description: '',
           start_time: `${String(startHour).padStart(2, '0')}:${String(
             startMinute
           ).padStart(2, '0')}`,
@@ -178,6 +190,19 @@ export function HourModal({
                     <FormLabel>Title</FormLabel>
                     <FormControl>
                       <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description (Optional)</FormLabel>
+                    <FormControl>
+                      <Textarea {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
