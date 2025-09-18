@@ -71,10 +71,10 @@ export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
             <Tooltip>
               <TooltipTrigger>
                 <div className={cn(
-                  "flex items-center rounded-md p-1 text-xs font-medium",
+                  "flex items-center rounded-md p-1",
                   isOffline ? "text-destructive" : "text-green-700"
                 )}>
-                  {isOffline ? <WifiOff className="h-5 w-5" /> : <Wifi className="h-5 w-5" />}
+                  {isOffline ? <WifiOff className="h-4 w-4" /> : <Wifi className="h-4 w-4" />}
                 </div>
               </TooltipTrigger>
               <TooltipContent>
