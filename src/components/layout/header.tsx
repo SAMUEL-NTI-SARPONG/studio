@@ -20,14 +20,11 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Button } from '../ui/button';
-import { Calendar, CalendarDays, User as UserIcon, LogOut, Trash2, Wifi, WifiOff } from 'lucide-react';
+import { Calendar, CalendarDays, User as UserIcon, LogOut, Trash2 } from 'lucide-react';
 import { useClearSchedule } from '@/hooks/use-clear-schedule';
 import { useProfileModal } from '@/hooks/use-profile-modal';
 import { useTimetableContext } from '@/contexts/timetable-context';
 import { Switch } from '@/components/ui/switch';
-import { useTimetable } from '@/hooks/use-timetable';
-import { cn } from '@/lib/utils';
-import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '../ui/tooltip';
 
 export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
   const { user, signOut } = useUser();
@@ -35,7 +32,6 @@ export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
   const { openClearScheduleDialog } = useClearSchedule();
   const { openModal } = useProfileModal();
   const { isFiltered, setIsFiltered } = useTimetableContext();
-  const { isOffline } = useTimetable();
 
   const handleLogout = async () => {
     await signOut();
@@ -67,22 +63,6 @@ export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
           <h1 className="text-xl font-semibold text-primary">Legend</h1>
         </div>
         <div className="flex items-center space-x-4">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <div className={cn(
-                  "flex items-center rounded-md p-1",
-                  isOffline ? "text-destructive" : "text-green-700"
-                )}>
-                  {isOffline ? <WifiOff className="h-4 w-4" /> : <Wifi className="h-4 w-4" />}
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{isOffline ? 'You are offline' : 'You are online'}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-
           <TickingClock />
 
           <Switch

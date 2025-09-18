@@ -40,7 +40,7 @@ function FloatingActionButtons() {
   };
 
   const handleReloadClick = () => {
-    if (!isOffline) {
+    if (typeof window !== 'undefined' && !isOffline) {
       window.location.reload();
     }
   };
@@ -92,6 +92,11 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
 
 function TimetableDataProvider({ children }: { children: ReactNode }) {
   const timetableData = useTimetableData();
+  const { isOffline } = timetableData;
+
+  // We no longer need to show a different UI for offline mode here.
+  // The schedule is now always visible.
+
   return (
     <TimetableContext.Provider value={timetableData}>
       {children}
@@ -101,15 +106,8 @@ function TimetableDataProvider({ children }: { children: ReactNode }) {
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useUser();
-  const [showContent, setShowContent] = useState(loading);
 
-  useEffect(() => {
-    if (!loading) {
-      setShowContent(false);
-    }
-  }, [loading]);
-
-  if (showContent) {
+  if (loading) {
     return (
       <div className="flex h-screen w-full flex-col items-center justify-center bg-background px-16">
         <BouncingBallLoader showContent={!loading} />
