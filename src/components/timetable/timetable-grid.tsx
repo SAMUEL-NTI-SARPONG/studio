@@ -232,10 +232,10 @@ export function TimetableGrid({ activeTab }: { activeTab: string }) {
                 
                 const fontSizeClass =
                 duration < 30
-                    ? 'text-sm'
+                    ? 'text-[10px]'
                     : duration < 60
-                    ? 'text-base'
-                    : 'text-lg';
+                    ? 'text-xs'
+                    : 'text-sm';
                 
                 const personalColor = user?.id === entry.user_id ? colors.personal : '#a0aec0';
                 const eventColor = isPersonal ? personalColor : colors.general;
@@ -256,7 +256,7 @@ export function TimetableGrid({ activeTab }: { activeTab: string }) {
                     <div
                     tabIndex={0}
                     className={cn(
-                        'absolute p-2 border cursor-pointer transition-all duration-200 ease-in-out flex flex-col items-center justify-center rounded-md',
+                        'absolute p-2 cursor-pointer transition-all duration-200 ease-in-out flex flex-col items-start justify-start rounded-lg shadow-inner',
                         'focus:outline-none focus:ring-2 focus:ring-ring focus:z-10',
                         {
                         'opacity-60': isPast,
@@ -267,30 +267,30 @@ export function TimetableGrid({ activeTab }: { activeTab: string }) {
                         height: `${height}%`,
                         left: left,
                         width: width,
-                        minHeight: '1.5rem',
-                        backgroundColor: eventColor,
-                        borderColor: eventColor,
+                        minHeight: '2rem',
+                        background: `linear-gradient(to bottom right, ${eventColor}99, ${eventColor}FF)`,
+                        boxShadow: `inset 0 1px 1px ${eventColor}33, inset 0 -1px 1px #00000022`,
+
                     }}
                     >
                     <p
-                        className={cn('font-semibold text-center text-white', fontSizeClass, {
-                        'text-muted-foreground': isPast,
+                        className={cn('font-bold text-white tracking-tight', fontSizeClass, {
+                        'text-gray-200': isPast,
                         })}
                     >
                         {entry.title}
                     </p>
                     {engagedUsers.length > 0 && (
-                        <div className="absolute top-0 bottom-0 right-1 flex flex-col justify-center items-center space-y-1">
+                        <div className="absolute bottom-1 right-1 flex items-center space-x-1">
                         <TooltipProvider>
-                            {engagedUsers.slice(0, 3).map((u, i) => (
+                            {engagedUsers.slice(0, 2).map((u, i) => (
                             <Tooltip key={u.id}>
                                 <TooltipTrigger asChild>
                                 <Avatar
-                                    className="h-6 w-6 border-2 border-white dark:border-background"
-                                    style={{ zIndex: engagedUsers.length - i }}
+                                    className="h-5 w-5 border-2 border-white/50"
                                 >
                                     <AvatarImage src={u.avatarUrl} alt={u.name} />
-                                    <AvatarFallback>{u.name.charAt(0)}</AvatarFallback>
+                                    <AvatarFallback className="text-xs">{u.name.charAt(0)}</AvatarFallback>
                                 </Avatar>
                                 </TooltipTrigger>
                                 <TooltipContent>
@@ -298,18 +298,17 @@ export function TimetableGrid({ activeTab }: { activeTab: string }) {
                                 </TooltipContent>
                             </Tooltip>
                             ))}
-                            {engagedUsers.length > 3 && (
+                            {engagedUsers.length > 2 && (
                             <Tooltip>
                                 <TooltipTrigger asChild>
                                 <div
-                                    className="h-6 w-6 rounded-full bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground border-2 border-white dark:border-background"
-                                    style={{ zIndex: 0 }}
+                                    className="h-5 w-5 rounded-full bg-black/20 flex items-center justify-center text-[10px] font-bold text-white border-2 border-white/50"
                                 >
-                                    +{engagedUsers.length - 3}
+                                    +{engagedUsers.length - 2}
                                 </div>
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                <p>{engagedUsers.slice(3).map(u => u.name).join(', ')}</p>
+                                <p>{engagedUsers.slice(2).map(u => u.name).join(', ')}</p>
                                 </TooltipContent>
                             </Tooltip>
                             )}
