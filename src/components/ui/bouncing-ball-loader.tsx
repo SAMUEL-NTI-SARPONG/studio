@@ -1,6 +1,27 @@
+'use client';
+
 import { cn } from "@/lib/utils";
+import { useEffect } from "react";
 
 export function BouncingBallLoader() {
+  useEffect(() => {
+    // The bounce animation is 1s long, and the ball hits the ground at the 50% mark.
+    // We start a timer to vibrate at the first impact (500ms) and then repeat every second.
+    const vibrateOnImpact = () => {
+      if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
+        window.navigator.vibrate(50);
+      }
+    };
+
+    const initialTimeout = setTimeout(() => {
+      vibrateOnImpact();
+      const interval = setInterval(vibrateOnImpact, 1000);
+      return () => clearInterval(interval);
+    }, 500);
+
+    return () => clearTimeout(initialTimeout);
+  }, []);
+
   return (
     <div className="relative w-48 h-48 flex items-center justify-center">
       {/* Ground and cracks */}
