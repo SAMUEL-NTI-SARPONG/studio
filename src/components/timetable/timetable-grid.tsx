@@ -3,7 +3,6 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
-import { Card, CardContent } from '@/components/ui/card';
 import { useTimetable } from '@/hooks/use-timetable';
 import { DAYS_OF_WEEK } from '@/lib/constants';
 import type { TimetableEntry } from '@/lib/types';
@@ -101,76 +100,72 @@ export function TimetableGrid() {
 
   return (
     <>
-      <Card>
-        <CardContent className="p-4 sm:p-6">
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            {DAYS_OF_WEEK.map((day, dayIndex) => (
-              <TabsContent key={day} value={day} className="mt-0">
-                <div className="flex">
-                  <div className="w-16 text-right pr-2 text-xs text-muted-foreground">
-                    {Array.from({ length: 24 }).map((_, hour) => (
-                      <div key={hour} className="h-12 flex items-start justify-end pt-0.5">
-                        {hour === 0 ? '12 AM' : hour < 12 ? `${hour} AM` : hour === 12 ? '12 PM' : `${hour-12} PM`}
-                      </div>
-                    ))}
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        {DAYS_OF_WEEK.map((day, dayIndex) => (
+          <TabsContent key={day} value={day} className="mt-0">
+            <div className="flex">
+              <div className="w-16 text-right pr-2 text-xs text-muted-foreground">
+                {Array.from({ length: 24 }).map((_, hour) => (
+                  <div key={hour} className="h-12 flex items-start justify-end pt-0.5">
+                    {hour === 0 ? '12 AM' : hour < 12 ? `${hour} AM` : hour === 12 ? '12 PM' : `${hour-12} PM`}
                   </div>
-                  <div className="relative flex-1 bg-card border-l">
-                    {Array.from({ length: 24 }).map((_, hour) => (
-                      <div
-                        key={hour}
-                        className="h-12 border-t cursor-pointer hover:bg-primary/5"
-                        onClick={() => handleSlotClick(dayIndex, hour)}
-                      ></div>
-                    ))}
-                    
-                    {loading && <div className="absolute inset-0 flex items-center justify-center bg-card/50"><Loader2 className="animate-spin text-primary" /></div>}
+                ))}
+              </div>
+              <div className="relative flex-1 bg-card border-l rounded-lg border">
+                {Array.from({ length: 24 }).map((_, hour) => (
+                  <div
+                    key={hour}
+                    className="h-12 border-t cursor-pointer hover:bg-primary/5"
+                    onClick={() => handleSlotClick(dayIndex, hour)}
+                  ></div>
+                ))}
+                
+                {loading && <div className="absolute inset-0 flex items-center justify-center bg-card/50"><Loader2 className="animate-spin text-primary" /></div>}
 
-                    {(entriesByDay[dayIndex] || []).map((entry) => {
-                      const top = (parseTime(entry.start_time) / (24 * 60)) * 100;
-                      const duration = parseTime(entry.end_time) - parseTime(entry.start_time);
-                      const height = (duration / (24 * 60)) * 100;
+                {(entriesByDay[dayIndex] || []).map((entry) => {
+                  const top = (parseTime(entry.start_time) / (24 * 60)) * 100;
+                  const duration = parseTime(entry.end_time) - parseTime(entry.start_time);
+                  const height = (duration / (24 * 60)) * 100;
 
-                      const startTime = getDateTime(dayIndex, entry.start_time);
-                      const endTime = getDateTime(dayIndex, entry.end_time);
+                  const startTime = getDateTime(dayIndex, entry.start_time);
+                  const endTime = getDateTime(dayIndex, entry.end_time);
 
-                      const isPast = now > endTime;
-                      
-                      return (
-                        <div
-                          key={entry.id}
-                          className={cn(
-                            'absolute w-full p-2 rounded-lg border text-left cursor-pointer transition-all duration-200 ease-in-out transform hover:scale-[1.02] hover:z-10',
-                             {
-                              'bg-red-100 border-red-200 text-red-700 opacity-70': isPast,
-                              'bg-accent/50 border-accent/80': !isPast,
-                              'ring-2 ring-destructive ring-offset-2': (entry as any).conflicts,
-                            }
-                          )}
-                          style={{
-                            top: `${top}%`,
-                            height: `${height}%`,
-                            minHeight: '2rem'
-                          }}
-                          onClick={() => handleEntryClick(entry)}
-                        >
-                          <p className={cn("font-bold text-sm truncate", {
-                            'text-accent-foreground': !isPast,
-                            'text-red-900': isPast
-                          })}>{entry.title}</p>
-                          <p className={cn("text-xs truncate", {
-                              'text-accent-foreground/80': !isPast,
-                              'text-red-900/80': isPast
-                          })}>{entry.description}</p>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </TabsContent>
-            ))}
-          </Tabs>
-        </CardContent>
-      </Card>
+                  const isPast = now > endTime;
+                  
+                  return (
+                    <div
+                      key={entry.id}
+                      className={cn(
+                        'absolute w-full p-2 rounded-lg border text-left cursor-pointer transition-all duration-200 ease-in-out transform hover:scale-[1.02] hover:z-10',
+                         {
+                          'bg-red-100 border-red-200 text-red-700 opacity-70': isPast,
+                          'bg-accent/50 border-accent/80': !isPast,
+                          'ring-2 ring-destructive ring-offset-2': (entry as any).conflicts,
+                        }
+                      )}
+                      style={{
+                        top: `${top}%`,
+                        height: `${height}%`,
+                        minHeight: '2rem'
+                      }}
+                      onClick={() => handleEntryClick(entry)}
+                    >
+                      <p className={cn("font-bold text-sm truncate", {
+                        'text-accent-foreground': !isPast,
+                        'text-red-900': isPast
+                      })}>{entry.title}</p>
+                      <p className={cn("text-xs truncate", {
+                          'text-accent-foreground/80': !isPast,
+                          'text-red-900/80': isPast
+                      })}>{entry.description}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </TabsContent>
+        ))}
+      </Tabs>
       <HourModal
         isOpen={isModalOpen}
         setIsOpen={setIsModalOpen}
