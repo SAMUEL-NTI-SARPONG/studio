@@ -266,6 +266,7 @@ export function HourModal({
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                         value={field.value}
+                        disabled={!entry} // Disable when creating a new entry
                       >
                         <FormControl>
                           <SelectTrigger>
