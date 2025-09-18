@@ -55,7 +55,8 @@ export function LoginForm() {
       });
     } else {
       toast({ title: 'Signed in successfully!' });
-      router.push('/timetable');
+      router.replace('/timetable');
+      router.refresh();
     }
     setLoading(false);
   }
