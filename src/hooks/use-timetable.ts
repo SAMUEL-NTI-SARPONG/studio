@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -69,7 +68,7 @@ export function useTimetable() {
       supabase.removeChannel(channel);
     };
 
-  }, [user, supabase, toast]);
+  }, [user]);
   
 
   const addEntry = async (newEntry: Omit<TimetableEntry, 'id' | 'created_at' | 'engaging_user_ids'>) => {
