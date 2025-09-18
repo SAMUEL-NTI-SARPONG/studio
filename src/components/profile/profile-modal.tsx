@@ -74,8 +74,9 @@ export function ProfileModal() {
         general: data.generalColor,
     });
     toast({
-        title: 'Profile Updated',
-        description: 'Your changes have been saved successfully.',
+        title: 'Profile Updated!',
+        description: 'Your changes have been saved.',
+        variant: 'achievement',
     });
     closeModal();
   };

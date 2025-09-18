@@ -1,3 +1,4 @@
+
 import type {Config} from 'tailwindcss';
 
 export default {
@@ -120,6 +121,19 @@ export default {
           '81%': { transform: 'translateY(0)', opacity: '1' },
           '100%': { transform: 'translateY(80px)', opacity: '1' },
         },
+         'trophy-pop': {
+          '0%': { transform: 'scale(0)', opacity: '0' },
+          '50%': { transform: 'scale(1.2)', opacity: '1' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+        sparkle: {
+          '0%, 100%': { transform: 'scale(0)', opacity: '0' },
+          '50%': { transform: 'scale(1)', opacity: '1' },
+        },
+        'trophy-shine': {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(100%)' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
@@ -131,6 +145,9 @@ export default {
         'ground-break-left': 'ground-break-left 4s forwards',
         'ground-break-right': 'ground-break-right 4s forwards',
         'ball-fall-through': 'ball-fall-through 4s forwards',
+        'trophy-pop': 'trophy-pop 0.5s ease-out forwards',
+        sparkle: 'sparkle 0.4s ease-out forwards',
+        'trophy-shine': 'trophy-shine 1s ease-in-out infinite',
       },
     },
   },

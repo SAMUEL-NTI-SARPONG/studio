@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -83,7 +84,7 @@ export function useTimetable() {
        toast({ title: 'Error: Could not add event', description: 'Please check console for details.', variant: 'destructive'});
       return false;
     }
-    toast({ title: 'Success', description: 'Event added to timetable.' });
+    toast({ title: 'Event Added!', description: 'A new event is on the timetable.', variant: 'achievement' });
     return true;
   };
 
@@ -94,7 +95,7 @@ export function useTimetable() {
       toast({ title: 'Error updating event', description: error.message, variant: 'destructive' });
       return false;
     }
-    toast({ title: 'Success', description: 'Event updated.' });
+    toast({ title: 'Event Updated!', description: 'Your changes have been saved.', variant: 'achievement' });
     return true;
   };
 
@@ -105,7 +106,7 @@ export function useTimetable() {
       toast({ title: 'Error deleting event', description: error.message, variant: 'destructive' });
       return false;
     }
-    toast({ title: 'Success', description: 'Event deleted.' });
+    toast({ title: 'Event Deleted!', description: 'The event has been removed.', variant: 'achievement' });
     return true;
   };
   
@@ -116,7 +117,7 @@ export function useTimetable() {
       toast({ title: 'Error', description: 'Could not clear personal schedule for the day.', variant: 'destructive' });
       return false;
     }
-    toast({ title: 'Success', description: 'Your schedule for the selected day has been cleared.' });
+    toast({ title: 'Schedule Cleared!', description: 'Your schedule for the selected day is empty.', variant: 'achievement' });
     return true;
   };
   
@@ -127,7 +128,7 @@ export function useTimetable() {
       toast({ title: 'Error', description: 'Could not clear your personal schedule.', variant: 'destructive' });
       return false;
     }
-    toast({ title: 'Success', description: 'Your entire personal schedule has been cleared.' });
+    toast({ title: 'Schedule Cleared!', description: 'Your entire personal schedule is now empty.', variant: 'achievement' });
     return true;
   };
 
@@ -137,7 +138,7 @@ export function useTimetable() {
       toast({ title: 'Error', description: 'Could not clear general schedule for the day.', variant: 'destructive' });
       return false;
     }
-    toast({ title: 'Success', description: 'General schedule for the selected day has been cleared.' });
+    toast({ title: 'Schedule Cleared!', description: 'General schedule for the day is now empty.', variant: 'achievement' });
     return true;
   };
 
@@ -147,7 +148,7 @@ export function useTimetable() {
       toast({ title: 'Error', description: 'Could not clear the general schedule.', variant: 'destructive' });
       return false;
     }
-    toast({ title: 'Success', description: 'The entire general schedule has been cleared.' });
+    toast({ title: 'Schedule Cleared!', description: 'The entire general schedule is now empty.', variant: 'achievement' });
     return true;
   };
   
@@ -201,7 +202,7 @@ export function useTimetable() {
       return false;
     }
 
-    toast({ title: 'Success', description: 'Schedule copied successfully.' });
+    toast({ title: 'Schedule Copied!', description: 'Events have been copied to the selected days.', variant: 'achievement' });
     return true;
   }
 
