@@ -14,9 +14,19 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
+import { BouncingBallLoader } from '@/components/ui/bouncing-ball-loader';
 
 export default function LoginPage() {
-  const [state, formAction] = useActionState(login, undefined);
+  const [state, formAction, isPending] = useActionState(login, undefined);
+
+  if (isPending) {
+    return (
+      <div className="flex h-screen w-full flex-col items-center justify-center bg-background gap-4">
+        <BouncingBallLoader />
+        <p className="text-muted-foreground">Signing in...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen w-full items-center justify-center bg-background p-4">
