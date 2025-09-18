@@ -78,15 +78,6 @@ export function TimetableGrid() {
     return () => clearInterval(timer);
   }, []);
 
-  const handleSlotClick = (day: number, hour: number) => {
-    openModal({
-      entry: null,
-      day,
-      time: `${String(hour).padStart(2, '0')}:00`,
-      source: 'slot',
-    });
-  };
-
   const handleEntryClick = (entry: TimetableEntry) => {
     openModal({ entry, day: entry.day_of_week, source: 'slot' });
   };
@@ -200,8 +191,7 @@ export function TimetableGrid() {
                 {Array.from({ length: 24 }).map((_, hour) => (
                   <div
                     key={hour}
-                    className="h-24 border-t cursor-pointer hover:bg-primary/5"
-                    onClick={() => handleSlotClick(dayIndex, hour)}
+                    className="h-24 border-t"
                   />
                 ))}
                 
