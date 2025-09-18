@@ -30,9 +30,7 @@ export function useTimetable() {
 
   useEffect(() => {
     fetchEntries();
-  }, [fetchEntries]);
 
-  useEffect(() => {
     const channel = supabase
       .channel('timetable_entries_channel')
       .on<TimetableEntry>(
@@ -49,6 +47,7 @@ export function useTimetable() {
       supabase.removeChannel(channel);
     };
   }, [supabase, fetchEntries]);
+
 
   const addEntry = async (newEntry: Omit<TimetableEntry, 'id' | 'created_at' | 'user_id' >) => {
     const fullEntry = {
