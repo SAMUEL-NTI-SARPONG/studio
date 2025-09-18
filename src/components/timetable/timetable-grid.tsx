@@ -264,7 +264,7 @@ export function TimetableGrid({ activeTab }: { activeTab: string }) {
                     <div
                     tabIndex={0}
                     className={cn(
-                        'absolute p-2 cursor-pointer transition-all duration-200 ease-in-out flex flex-col items-start justify-start rounded-lg shadow-inner overflow-hidden',
+                        'absolute p-2 cursor-pointer transition-all duration-200 ease-in-out flex flex-col items-start justify-center rounded-lg shadow-inner overflow-hidden',
                         'focus:outline-none focus:ring-2 focus:ring-ring focus:z-10',
                         {
                         'opacity-60': isPast,
