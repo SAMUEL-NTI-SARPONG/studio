@@ -240,7 +240,7 @@ export function TimetableGrid({ activeTab }: { activeTab?: string }) {
                           left: left,
                           width: width,
                           minHeight: '1.5rem',
-                          backgroundColor: `${eventColor}80`, // 80 for opacity
+                          backgroundColor: eventColor,
                           borderColor: eventColor,
                         }}
                       >
