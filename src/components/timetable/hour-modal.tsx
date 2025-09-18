@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import {
@@ -24,7 +25,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { useTimetable } from '@/hooks/use-timetable';
 import type { TimetableEntry } from '@/lib/types';
-import { Loader2, Trash2, Clock } from 'lucide-react';
+import { Loader2, Trash2, Clock, CalendarDays, Pencil } from 'lucide-react';
 import { Separator } from '../ui/separator';
 
 type HourModalProps = {
@@ -56,8 +57,8 @@ export function HourModal({ isOpen, setIsOpen, entry, day, time }: HourModalProp
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: '',
-      start_time: '09:00',
-      end_time: '10:00',
+      start_time: '',
+      end_time: '',
     },
   });
 
@@ -112,7 +113,8 @@ export function HourModal({ isOpen, setIsOpen, entry, day, time }: HourModalProp
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="sm:max-w-md bg-card/95 backdrop-blur-sm">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold tracking-tight">
+          <DialogTitle className="text-2xl font-bold tracking-tight flex items-center gap-2">
+            <Pencil className="w-6 h-6" />
             {entry ? 'Edit Event' : 'Create New Event'}
           </DialogTitle>
         </DialogHeader>
