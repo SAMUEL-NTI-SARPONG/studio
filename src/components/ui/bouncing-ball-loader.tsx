@@ -11,9 +11,8 @@ export function BouncingBallLoader() {
       }
     };
 
-    // The animation is 2s long, with impacts at 0s, 1s, and 2s.
-    vibrateOnImpact(); // Initial impact
-    const intervalId = setInterval(vibrateOnImpact, 1000); 
+    // The animation is 1.5s long, with impact at the start/end of the cycle.
+    const intervalId = setInterval(vibrateOnImpact, 1500); 
 
     return () => {
       clearInterval(intervalId);
@@ -21,8 +20,8 @@ export function BouncingBallLoader() {
   }, []);
 
   return (
-    <div className="relative w-full h-48 flex items-center justify-start overflow-visible">
-      <div className="w-8 h-8 bg-primary rounded-full animate-bounce-horizontal" />
+    <div className="relative w-full h-48 flex items-center justify-center overflow-hidden">
+      <div className="w-12 h-12 bg-primary rounded-full animate-bounce-vertical-perspective" />
     </div>
   );
 }

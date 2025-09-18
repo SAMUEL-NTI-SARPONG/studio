@@ -93,13 +93,15 @@ export default {
           '0%, 100%': { transform: 'scale(1)' },
           '50%': { transform: 'scale(0.9)' },
         },
-        'bounce-horizontal': {
+        'bounce-vertical-perspective': {
           '0%, 100%': {
-            transform: 'translateX(0)',
+            transform: 'translateY(40px) scale(1, 1)',
+            backgroundColor: 'hsl(var(--primary))',
             animationTimingFunction: 'cubic-bezier(0.8, 0, 1, 1)',
           },
           '50%': {
-            transform: 'translateX(calc(100vw - 4rem))',
+            transform: 'translateY(-100px) scale(0.5, 0.5)',
+            backgroundColor: 'hsl(var(--ring))',
             animationTimingFunction: 'cubic-bezier(0, 0, 0.2, 1)',
           },
         },
@@ -121,7 +123,7 @@ export default {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         pop: 'pop 0.2s ease-out',
-        'bounce-horizontal': 'bounce-horizontal 2s infinite',
+        'bounce-vertical-perspective': 'bounce-vertical-perspective 1.5s infinite',
         'trophy-pop': 'trophy-pop 0.5s ease-out forwards',
         sparkle: 'sparkle 0.4s ease-out forwards',
         'trophy-shine': 'trophy-shine 1s ease-in-out infinite',
