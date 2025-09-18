@@ -240,14 +240,14 @@ export function TimetableGrid({ activeTab }: { activeTab: string }) {
                         {entry.title}
                     </p>
                     {engagedUsers.length > 0 && (
-                        <div className="absolute bottom-1 left-0 right-0 flex justify-center items-center">
+                        <div className="absolute top-0 bottom-0 right-1 flex flex-col justify-center items-center space-y-1">
                         <TooltipProvider>
                             {engagedUsers.slice(0, 3).map((u, i) => (
                             <Tooltip key={u.id}>
                                 <TooltipTrigger asChild>
                                 <Avatar
                                     className="h-6 w-6 border-2 border-white dark:border-background"
-                                    style={{ zIndex: engagedUsers.length - i, marginLeft: i > 0 ? -8 : 0 }}
+                                    style={{ zIndex: engagedUsers.length - i }}
                                 >
                                     <AvatarImage src={u.avatarUrl} alt={u.name} />
                                     <AvatarFallback>{u.name.charAt(0)}</AvatarFallback>
@@ -263,7 +263,7 @@ export function TimetableGrid({ activeTab }: { activeTab: string }) {
                                 <TooltipTrigger asChild>
                                 <div
                                     className="h-6 w-6 rounded-full bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground border-2 border-white dark:border-background"
-                                    style={{ zIndex: 0, marginLeft: -8 }}
+                                    style={{ zIndex: 0 }}
                                 >
                                     +{engagedUsers.length - 3}
                                 </div>
