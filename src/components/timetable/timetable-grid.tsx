@@ -136,26 +136,14 @@ export function TimetableGrid() {
       <Card>
         <CardContent className="p-2 sm:p-4">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-             <div className="w-full sm:hidden">
-                <ScrollArea className="w-full whitespace-nowrap rounded-lg">
-                    <TabsList className="w-max justify-start">
-                      {DAYS_OF_WEEK.map((day) => (
-                        <TabsTrigger key={day} value={day}>
-                          {day.substring(0, 3)}
-                        </TabsTrigger>
-                      ))}
-                    </TabsList>
-                </ScrollArea>
-              </div>
-              <div className="hidden sm:block">
-                 <TabsList className="grid w-full grid-cols-7">
-                  {DAYS_OF_WEEK.map((day) => (
-                    <TabsTrigger key={day} value={day}>
-                      {day}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-              </div>
+             <TabsList className="grid w-full grid-cols-7">
+              {DAYS_OF_WEEK.map((day) => (
+                <TabsTrigger key={day} value={day}>
+                  <span className="hidden sm:inline">{day}</span>
+                  <span className="sm:hidden">{day.substring(0, 3)}</span>
+                </TabsTrigger>
+              ))}
+            </TabsList>
 
             {DAYS_OF_WEEK.map((day, dayIndex) => (
               <TabsContent key={day} value={day} className="mt-4">
