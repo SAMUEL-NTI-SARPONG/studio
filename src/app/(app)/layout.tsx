@@ -9,7 +9,7 @@ import { DAYS_OF_WEEK } from '@/lib/constants';
 import { ModalProvider } from '@/contexts/modal-context';
 import { HourModal } from '@/components/timetable/hour-modal';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, RefreshCw } from 'lucide-react';
 import { useModal } from '@/hooks/use-modal';
 import { ClearScheduleProvider } from '@/contexts/clear-schedule-context';
 import { ClearScheduleDialog } from '@/components/timetable/clear-schedule-dialog';
@@ -21,12 +21,13 @@ import { CopyScheduleDialog } from '@/components/timetable/copy-schedule-dialog'
 import { useUser } from '@/contexts/user-context';
 import { Loader2 } from 'lucide-react';
 
-function FloatingActionButton() {
+function FloatingActionButtons() {
   const { openModal } = useModal();
   const { activeTab } = useTimetableContext();
   const dayIndex = DAYS_OF_WEEK.indexOf(activeTab);
+  const router = useRouter();
 
-  const handleFabClick = () => {
+  const handleAddClick = () => {
     const currentHour = new Date().getHours();
     openModal({
       entry: null,
@@ -36,15 +37,30 @@ function FloatingActionButton() {
     });
   };
 
+  const handleReloadClick = () => {
+    router.refresh();
+  };
+
   return (
-    <Button
-      className="fixed bottom-8 right-8 h-16 w-16 rounded-full shadow-lg"
-      size="icon"
-      onClick={handleFabClick}
-    >
-      <Plus className="h-8 w-8" />
-      <span className="sr-only">Add new event</span>
-    </Button>
+    <div className="fixed bottom-8 right-8 flex flex-col items-center gap-4">
+       <Button
+        className="h-14 w-14 rounded-2xl shadow-lg"
+        size="icon"
+        variant="secondary"
+        onClick={handleReloadClick}
+      >
+        <RefreshCw className="h-7 w-7" />
+        <span className="sr-only">Reload page</span>
+      </Button>
+      <Button
+        className="h-16 w-16 rounded-2xl shadow-lg"
+        size="icon"
+        onClick={handleAddClick}
+      >
+        <Plus className="h-8 w-8" />
+        <span className="sr-only">Add new event</span>
+      </Button>
+    </div>
   );
 }
 
@@ -60,7 +76,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
       </div>
       <main className="flex-1 px-4 py-2">{children}</main>
       <HourModal />
-      <FloatingActionButton />
+      <FloatingActionButtons />
       <ClearScheduleDialog />
       <ProfileModal />
       <CopyScheduleDialog />
