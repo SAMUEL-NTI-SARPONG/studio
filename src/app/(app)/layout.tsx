@@ -14,13 +14,14 @@ import { ClearScheduleProvider } from '@/contexts/clear-schedule-context';
 import { ClearScheduleDialog } from '@/components/timetable/clear-schedule-dialog';
 import { ProfileModalProvider } from '@/contexts/profile-modal-context';
 import { ProfileModal } from '@/components/profile/profile-modal';
-import { TimetableProvider, useTimetableContext } from '@/contexts/timetable-context';
+import { TimetableProvider as TimetableContextProvider, useTimetableContext } from '@/contexts/timetable-context';
 import { CopyScheduleProvider } from '@/contexts/copy-schedule-context';
 import { CopyScheduleDialog } from '@/components/timetable/copy-schedule-dialog';
 import { useUser } from '@/contexts/user-context';
 import { BouncingBallLoader } from '@/components/ui/bouncing-ball-loader';
 import { EventNotification } from '@/components/timetable/event-notification';
-import { TimetableProvider as TimetableDataProvider } from '@/hooks/use-timetable';
+import { TimetableContext, useTimetableData } from '@/hooks/use-timetable';
+import { ReactNode } from 'react';
 
 function FloatingActionButtons() {
   const { openModal } = useModal();
@@ -86,6 +87,15 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
 }
 
 
+function TimetableDataProvider({ children }: { children: ReactNode }) {
+  const timetableData = useTimetableData();
+  return (
+    <TimetableContext.Provider value={timetableData}>
+      {children}
+    </TimetableContext.Provider>
+  );
+}
+
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useUser();
   const [showContent, setShowContent] = useState(loading);
@@ -111,9 +121,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <ClearScheduleProvider>
           <ProfileModalProvider>
             <CopyScheduleProvider>
-              <TimetableProvider>
+              <TimetableContextProvider>
                 <AppLayoutContent>{children}</AppLayoutContent>
-              </TimetableProvider>
+              </TimetableContextProvider>
             </CopyScheduleProvider>
           </ProfileModalProvider>
         </ClearScheduleProvider>

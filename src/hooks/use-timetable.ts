@@ -22,9 +22,9 @@ type TimetableContextType = {
   copySchedule: (sourceDay: number, destinationDays: number[]) => Promise<boolean>;
 };
 
-const TimetableContext = createContext<TimetableContextType | undefined>(undefined);
+export const TimetableContext = createContext<TimetableContextType | undefined>(undefined);
 
-export function TimetableProvider({ children }: { children: ReactNode }) {
+export function useTimetableData() {
   const supabase = createClient();
   const { toast } = useToast();
   const { user } = useUser();
@@ -224,9 +224,7 @@ export function TimetableProvider({ children }: { children: ReactNode }) {
   }, [entries, supabase, toast]);
 
 
-  const value = { entries, loading, addEntry, updateEntry, deleteEntry, clearPersonalScheduleForDay, clearPersonalScheduleForAllDays, clearGeneralScheduleForDay, clearGeneralScheduleForAllDays, toggleEventEngagement, copySchedule };
-
-  return <TimetableContext.Provider value={value}>{children}</TimetableContext.Provider>;
+  return { entries, loading, addEntry, updateEntry, deleteEntry, clearPersonalScheduleForDay, clearPersonalScheduleForAllDays, clearGeneralScheduleForDay, clearGeneralScheduleForAllDays, toggleEventEngagement, copySchedule };
 }
 
 export function useTimetable() {
