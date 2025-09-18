@@ -61,7 +61,7 @@ export function useTimetable() {
             );
           } else if (payload.eventType === 'DELETE') {
             setEntries((prevEntries) =>
-              prevEntries.filter((entry) => entry.id !== payload.old.id)
+              prevEntries.filter((entry) => entry.id !== (payload.old as TimetableEntry).id)
             );
           }
         }
