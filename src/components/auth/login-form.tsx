@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -32,6 +33,7 @@ export function LoginForm() {
   const router = useRouter();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [loginSuccess, setLoginSuccess] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -55,10 +57,20 @@ export function LoginForm() {
       });
     } else {
       toast({ title: 'Signed in successfully!' });
-      // Force a full page reload to ensure correct redirection.
-      window.location.href = '/timetable';
+      setLoginSuccess(true);
     }
     setLoading(false);
+  }
+
+  if (loginSuccess) {
+    return (
+        <div className="space-y-4 pt-4 text-center">
+            <p className="text-foreground">Authentication successful!</p>
+            <Button className="w-full" onClick={() => router.push('/timetable')}>
+                Go to Timetable
+            </Button>
+        </div>
+    );
   }
 
   return (
