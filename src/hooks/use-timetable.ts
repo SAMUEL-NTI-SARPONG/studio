@@ -194,6 +194,11 @@ export function useTimetableData() {
   }, [entries, supabase, user, toast]);
 
   const copySchedule = useCallback(async (sourceDay: number, destinationDays: number[]) => {
+    if (!user) {
+        toast({ title: 'Error', description: 'You must be logged in to copy a schedule.', variant: 'destructive' });
+        return false;
+    }
+
     const entriesToCopy = entries.filter(entry => entry.day_of_week === sourceDay);
     if (entriesToCopy.length === 0) {
       toast({ title: 'No events to copy', description: 'The selected source day has no events.' });
@@ -203,13 +208,23 @@ export function useTimetableData() {
     const newEntries = destinationDays.flatMap(day => 
       entriesToCopy.map(entry => {
         const { id, created_at, ...rest } = entry;
-        return {
+        const newEntry = {
           ...rest,
           day_of_week: day,
           engaging_user_ids: [],
         };
+        // If the original entry was personal, assign it to the current user.
+        // If it was general (user_id is null), keep it general.
+        if (newEntry.user_id) {
+          newEntry.user_id = user.id;
+        }
+        return newEntry;
       })
     );
+
+    if (newEntries.length === 0) {
+      return true; // Nothing to copy
+    }
 
     const { error } = await supabase.from('timetable_entries').insert(newEntries as any);
 
@@ -221,10 +236,12 @@ export function useTimetableData() {
 
     toast({ title: 'Schedule Copied!', description: 'Events have been copied to the selected days.', variant: 'achievement' });
     return true;
-  }, [entries, supabase, toast]);
+  }, [entries, supabase, toast, user]);
 
 
-  return { entries, loading, addEntry, updateEntry, deleteEntry, clearPersonalScheduleForDay, clearPersonalScheduleForAllDays, clearGeneralScheduleForDay, clearGeneralScheduleForAllDays, toggleEventEngagement, copySchedule };
+  const value = { entries, loading, addEntry, updateEntry, deleteEntry, clearPersonalScheduleForDay, clearPersonalScheduleForAllDays, clearGeneralScheduleForDay, clearGeneralScheduleForAllDays, toggleEventEngagement, copySchedule };
+  
+  return value;
 }
 
 export function useTimetable() {
