@@ -74,8 +74,8 @@ export function HourModal({ isOpen, setIsOpen, entry, day, time }: HourModalProp
       const endHour = startHour + 1;
       form.reset({
         title: '',
-        start_time: time,
-        end_time: `${String(endHour).padStart(2, '0')}:00`,
+        start_time: '',
+        end_time: ``,
       });
     }
   }, [entry, day, time, form, isOpen]);
@@ -113,7 +113,7 @@ export function HourModal({ isOpen, setIsOpen, entry, day, time }: HourModalProp
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="sm:max-w-md bg-card/95 backdrop-blur-sm">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold tracking-tight">
+          <DialogTitle className="text-lg font-medium tracking-tight">
             {entry ? 'Edit Event' : 'Create New Event'}
           </DialogTitle>
         </DialogHeader>
