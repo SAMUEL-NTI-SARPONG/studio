@@ -20,7 +20,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Button } from '../ui/button';
-import { Trash, Calendar, CalendarDays, User as UserIcon, LogOut } from 'lucide-react';
+import { Calendar, CalendarDays, User as UserIcon, LogOut } from 'lucide-react';
 import { useClearSchedule } from '@/hooks/use-clear-schedule';
 import { useProfileModal } from '@/hooks/use-profile-modal';
 
@@ -60,13 +60,24 @@ export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
             <>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <Trash className="h-5 w-5" />
+                  <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={user.avatarUrl} alt={userName} />
+                      <AvatarFallback>{userName.charAt(0).toUpperCase()}</AvatarFallback>
+                    </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-64 p-2" align="end">
-                    <DropdownMenuLabel>Clear Schedule</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
+                <DropdownMenuContent className="w-64 p-2" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">{userName}</p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        {userEmail}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                   <DropdownMenuLabel>Clear Schedule</DropdownMenuLabel>
                     <Accordion type="single" collapsible className="w-full">
                       <AccordionItem value="item-1">
                         <AccordionTrigger className="px-2 py-1.5 text-sm font-normal hover:no-underline">My Schedule</AccordionTrigger>
@@ -95,27 +106,6 @@ export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
                         </AccordionContent>
                       </AccordionItem>
                     </Accordion>
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={user.avatarUrl} alt={userName} />
-                      <AvatarFallback>{userName.charAt(0).toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end" forceMount>
-                  <DropdownMenuLabel className="font-normal">
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">{userName}</p>
-                      <p className="text-xs leading-none text-muted-foreground">
-                        {userEmail}
-                      </p>
-                    </div>
-                  </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuGroup>
                     <DropdownMenuItem onClick={openModal}>
