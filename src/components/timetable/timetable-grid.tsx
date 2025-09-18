@@ -191,9 +191,9 @@ export function TimetableGrid() {
                       className={cn(
                         'absolute p-2 rounded-lg border text-left cursor-pointer transition-all duration-200 ease-in-out transform hover:scale-[1.02] hover:z-10 overflow-hidden',
                         {
-                          'bg-primary/20 border-primary/30 text-primary-foreground': !isPersonal,
-                          'bg-green-500/20 border-green-500/30 text-green-800 dark:text-green-200': isUser1,
-                          'bg-orange-500/20 border-orange-500/30 text-orange-800 dark:text-orange-200': isUser2,
+                          'bg-primary border-primary/50 text-primary-foreground': !isPersonal,
+                          'bg-green-500 border-green-600 text-white dark:text-green-100': isUser1,
+                          'bg-orange-500 border-orange-600 text-white dark:text-orange-100': isUser2,
                           'opacity-60': isPast,
                         }
                       )}
