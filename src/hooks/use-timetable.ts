@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -14,7 +15,10 @@ export function useTimetable() {
   const [loading, setLoading] = useState(true);
 
   const fetchEntries = useCallback(async () => {
-    if (!user) return;
+    if (!user) {
+        setLoading(false);
+        return;
+    };
     setLoading(true);
 
     const { data, error } = await supabase.from('timetable_entries').select('*');
@@ -34,10 +38,8 @@ export function useTimetable() {
   }, [supabase, toast, user]);
 
   useEffect(() => {
-    if (user) {
-      fetchEntries();
-    }
-  }, [user, fetchEntries]);
+    fetchEntries();
+  }, [fetchEntries]);
 
 
   useEffect(() => {
@@ -69,7 +71,7 @@ export function useTimetable() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase, user]);
+  }, [supabase, user, setEntries]);
 
 
   const addEntry = async (newEntry: Omit<TimetableEntry, 'id' | 'created_at' >) => {
