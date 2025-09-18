@@ -22,10 +22,9 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { useTimetable } from '@/hooks/use-timetable';
 import type { TimetableEntry } from '@/lib/types';
-import { Loader2, Trash2, Clock, CalendarDays } from 'lucide-react';
+import { Loader2, Trash2, Clock } from 'lucide-react';
 import { Separator } from '../ui/separator';
 
 type HourModalProps = {
@@ -38,7 +37,6 @@ type HourModalProps = {
 
 const formSchema = z.object({
   title: z.string().min(1, 'Title is required'),
-  description: z.string().optional(),
   start_time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid time format (HH:mm)'),
   end_time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid time format (HH:mm)'),
 }).refine(data => {
@@ -58,7 +56,6 @@ export function HourModal({ isOpen, setIsOpen, entry, day, time }: HourModalProp
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: '',
-      description: '',
       start_time: '09:00',
       end_time: '10:00',
     },
@@ -68,7 +65,6 @@ export function HourModal({ isOpen, setIsOpen, entry, day, time }: HourModalProp
     if (entry) {
       form.reset({
         title: entry.title,
-        description: entry.description || '',
         start_time: entry.start_time,
         end_time: entry.end_time,
       });
@@ -77,7 +73,6 @@ export function HourModal({ isOpen, setIsOpen, entry, day, time }: HourModalProp
       const endHour = startHour + 1;
       form.reset({
         title: '',
-        description: '',
         start_time: time,
         end_time: `${String(endHour).padStart(2, '0')}:00`,
       });
@@ -86,14 +81,15 @@ export function HourModal({ isOpen, setIsOpen, entry, day, time }: HourModalProp
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     let success = false;
+    const data = { ...values, description: null };
     if (entry) {
       success = await updateEntry(entry.id, {
-        ...values,
+        ...data,
         day_of_week: day,
       });
     } else {
       success = await addEntry({
-        ...values,
+        ...data,
         day_of_week: day,
       });
     }
@@ -136,20 +132,7 @@ export function HourModal({ isOpen, setIsOpen, entry, day, time }: HourModalProp
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Description (Optional)</FormLabel>
-                      <FormControl>
-                        <Textarea {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
+                
                 <Separator />
                 
                 <div className="space-y-4">
