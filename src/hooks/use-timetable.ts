@@ -61,7 +61,7 @@ export function useTimetable() {
             );
           } else if (payload.eventType === 'DELETE') {
             setEntries((prevEntries) =>
-              prevEntries.filter((entry) => entry.id !== (payload.old as TimetableEntry).id)
+              prevEntries.filter((entry) => entry.id !== (payload.old as {id: string}).id)
             );
           }
         }
@@ -74,10 +74,11 @@ export function useTimetable() {
   }, [supabase, user, setEntries]);
 
 
-  const addEntry = async (newEntry: Omit<TimetableEntry, 'id' | 'created_at' >) => {
+  const addEntry = async (newEntry: Omit<TimetableEntry, 'id' | 'created_at' | 'engaging_user_ids'>) => {
     const fullEntry = {
         ...newEntry,
         description: newEntry.description || null,
+        engaging_user_ids: [],
     }
     const { error } = await supabase.from('timetable_entries').insert(fullEntry as any);
     if (error) {
@@ -152,6 +153,28 @@ export function useTimetable() {
     toast({ title: 'Success', description: 'The entire general schedule has been cleared.' });
     return true;
   };
+  
+  const toggleEventEngagement = async (entryId: string, userId: string) => {
+    const entry = entries.find(e => e.id === entryId);
+    if (!entry) return;
 
-  return { entries, loading, addEntry, updateEntry, deleteEntry, fetchEntries, clearPersonalScheduleForDay, clearPersonalScheduleForAllDays, clearGeneralScheduleForDay, clearGeneralScheduleForAllDays };
+    const currentEngagedUsers = entry.engaging_user_ids || [];
+    const isEngaged = currentEngagedUsers.includes(userId);
+
+    const newEngagedUsers = isEngaged
+      ? currentEngagedUsers.filter(id => id !== userId)
+      : [...currentEngagedUsers, userId];
+
+    const { error } = await supabase
+      .from('timetable_entries')
+      .update({ engaging_user_ids: newEngagedUsers })
+      .eq('id', entryId);
+
+    if (error) {
+      toast({ title: 'Error', description: 'Could not update engagement status.', variant: 'destructive' });
+    }
+  };
+
+
+  return { entries, loading, addEntry, updateEntry, deleteEntry, fetchEntries, clearPersonalScheduleForDay, clearPersonalScheduleForAllDays, clearGeneralScheduleForDay, clearGeneralScheduleForAllDays, toggleEventEngagement };
 }

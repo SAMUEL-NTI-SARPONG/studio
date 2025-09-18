@@ -1,3 +1,4 @@
+
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 export type TimetableEntry = {
@@ -9,6 +10,7 @@ export type TimetableEntry = {
   title: string;
   description: string | null;
   created_at: string;
+  engaging_user_ids: string[] | null;
 };
 
 export type Database = {
@@ -24,6 +26,7 @@ export type Database = {
           title: string;
           description: string | null;
           user_id: string | null;
+          engaging_user_ids: string[] | null;
         };
         Insert: {
           id?: string;
@@ -34,6 +37,7 @@ export type Database = {
           title: string;
           description?: string | null;
           user_id?: string | null;
+          engaging_user_ids?: string[] | null;
         };
         Update: {
           id?: string;
@@ -44,6 +48,7 @@ export type Database = {
           title?: string;
           description?: string | null;
           user_id?: string | null;
+          engaging_user_ids?: string[] | null;
         };
       };
     };

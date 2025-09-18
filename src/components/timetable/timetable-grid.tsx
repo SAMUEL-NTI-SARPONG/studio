@@ -11,6 +11,9 @@ import { Loader2 } from 'lucide-react';
 import { useUser } from '@/contexts/user-context';
 import { EventPopover } from './event-popover';
 import { useModal } from '@/hooks/use-modal';
+import { USERS } from '@/lib/users';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 
 const parseTime = (time: string): number => {
   const [hours, minutes] = time.split(':').map(Number);
@@ -218,6 +221,9 @@ export function TimetableGrid({ activeTab }: { activeTab?: string }) {
                   const personalColor = user?.id === entry.user_id ? colors.personal : '#a0aec0';
                   const eventColor = isPersonal ? personalColor : colors.general;
 
+                  const engagedUsers = (entry.engaging_user_ids || [])
+                    .map(userId => USERS.find(u => u.id === userId))
+                    .filter(Boolean) as (typeof USERS)[0][];
 
                   return (
                      <EventPopover
@@ -228,7 +234,7 @@ export function TimetableGrid({ activeTab }: { activeTab?: string }) {
                       <div
                         tabIndex={0}
                         className={cn(
-                          'absolute p-2 border cursor-pointer transition-all duration-200 ease-in-out flex items-center justify-center',
+                          'absolute p-2 border cursor-pointer transition-all duration-200 ease-in-out flex flex-col items-center justify-center',
                           'focus:outline-none focus:ring-2 focus:ring-ring focus:z-10',
                            {
                             'opacity-60': isPast,
@@ -251,6 +257,43 @@ export function TimetableGrid({ activeTab }: { activeTab?: string }) {
                         >
                           {entry.title}
                         </p>
+                        {engagedUsers.length > 0 && (
+                          <div className="absolute bottom-1 right-1 flex items-center">
+                            <TooltipProvider>
+                              {engagedUsers.slice(0, 3).map((u, i) => (
+                                <Tooltip key={u.id}>
+                                  <TooltipTrigger asChild>
+                                    <Avatar
+                                      className="h-6 w-6 border-2 border-background"
+                                      style={{ zIndex: engagedUsers.length - i, marginLeft: i > 0 ? -8 : 0 }}
+                                    >
+                                      <AvatarImage src={u.avatarUrl} alt={u.name} />
+                                      <AvatarFallback>{u.name.charAt(0)}</AvatarFallback>
+                                    </Avatar>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>{u.name}</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              ))}
+                              {engagedUsers.length > 3 && (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <div
+                                      className="h-6 w-6 rounded-full bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground border-2 border-background"
+                                      style={{ zIndex: 0, marginLeft: -8 }}
+                                    >
+                                      +{engagedUsers.length - 3}
+                                    </div>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>{engagedUsers.slice(3).map(u => u.name).join(', ')}</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              )}
+                            </TooltipProvider>
+                          </div>
+                        )}
                       </div>
                     </EventPopover>
                   );
@@ -263,7 +306,3 @@ export function TimetableGrid({ activeTab }: { activeTab?: string }) {
     </>
   );
 }
-
-    
-
-    
