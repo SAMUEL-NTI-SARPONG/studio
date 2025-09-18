@@ -76,91 +76,79 @@ export function TimetableGrid({ activeTab }: { activeTab?: string }) {
     return () => clearInterval(timer);
   }, []);
 
-  const entriesByDay = useMemo(() => {
-    const grouped: { [key: number]: TimetableEntry[] } = {};
-    for (let i = 0; i < 7; i++) {
-      grouped[i] = [];
-    }
-    entries.forEach((entry) => {
-      if (grouped[entry.day_of_week]) {
-        grouped[entry.day_of_week].push(entry);
-      } else {
-        grouped[entry.day_of_week] = [entry];
-      }
-    });
+  const entriesForCurrentDay = useMemo(() => {
+    const dayEntries = entries.filter(entry => entry.day_of_week === dayIndex);
+    
+    dayEntries.sort((a, b) => parseTime(a.start_time) - parseTime(b.start_time));
+    
+    const visualInfo = dayEntries.map(entry => ({
+      ...entry,
+      start: parseTime(entry.start_time),
+      end: parseTime(entry.end_time),
+      column: -1,
+      totalColumns: 1
+    }));
 
-    Object.values(grouped).forEach(dayEntries => {
-      dayEntries.sort((a, b) => parseTime(a.start_time) - parseTime(b.start_time));
-  
-      const visualInfo = dayEntries.map(entry => ({
-        ...entry,
-        start: parseTime(entry.start_time),
-        end: parseTime(entry.end_time),
-        column: -1,
-        totalColumns: 1
-      }));
-  
-      for (let i = 0; i < visualInfo.length; i++) {
-        const currentEntry = visualInfo[i];
-        let col = 0;
-        let placed = false;
-        
-        while (!placed) {
-          let hasOverlap = false;
-          for (let j = 0; j < i; j++) {
-            const otherEntry = visualInfo[j];
-            if (otherEntry.column === col && currentEntry.start < otherEntry.end && currentEntry.end > otherEntry.start) {
-              hasOverlap = true;
-              break;
-            }
-          }
-          
-          if (!hasOverlap) {
-            currentEntry.column = col;
-            placed = true;
-          } else {
-            col++;
-          }
-        }
-      }
-  
-      for (let i = 0; i < visualInfo.length; i++) {
-        const entryA = visualInfo[i];
-        let maxColumns = 1;
-        for (let j = 0; j < visualInfo.length; j++) {
-          if (i === j) continue;
-          const entryB = visualInfo[j];
-          const A_overlaps_B = entryA.start < entryB.end && entryA.end > entryB.start;
-          if (A_overlaps_B) {
-            maxColumns = Math.max(maxColumns, entryB.column + 1);
-          }
-        }
-        entryA.totalColumns = maxColumns;
-      }
+    for (let i = 0; i < visualInfo.length; i++) {
+      const currentEntry = visualInfo[i];
+      let col = 0;
+      let placed = false;
       
-      for (let i = 0; i < visualInfo.length; i++) {
-        const entryA = visualInfo[i];
-        let newTotalColumns = entryA.totalColumns;
-        for(let j=0; j < visualInfo.length; j++) {
-           const entryB = visualInfo[j];
-           if(entryA.start < entryB.end && entryA.end > entryB.start) {
-              newTotalColumns = Math.max(newTotalColumns, entryB.totalColumns);
-           }
+      while (!placed) {
+        let hasOverlap = false;
+        for (let j = 0; j < i; j++) {
+          const otherEntry = visualInfo[j];
+          if (otherEntry.column === col && currentEntry.start < otherEntry.end && currentEntry.end > otherEntry.start) {
+            hasOverlap = true;
+            break;
+          }
         }
-        entryA.totalColumns = newTotalColumns;
+        
+        if (!hasOverlap) {
+          currentEntry.column = col;
+          placed = true;
+        } else {
+          col++;
+        }
       }
-  
-      visualInfo.forEach(entryInfo => {
-        const originalEntry = dayEntries.find(e => e.id === entryInfo.id);
-        if (originalEntry) {
-          (originalEntry as any).column = entryInfo.column;
-          (originalEntry as any).columnCount = entryInfo.totalColumns;
-        }
-      });
-    });
+    }
 
-    return grouped;
-  }, [entries]);
+    for (let i = 0; i < visualInfo.length; i++) {
+      const entryA = visualInfo[i];
+      let maxColumns = 1;
+      for (let j = 0; j < visualInfo.length; j++) {
+        if (i === j) continue;
+        const entryB = visualInfo[j];
+        const A_overlaps_B = entryA.start < entryB.end && entryA.end > entryB.start;
+        if (A_overlaps_B) {
+          maxColumns = Math.max(maxColumns, entryB.column + 1);
+        }
+      }
+      entryA.totalColumns = maxColumns;
+    }
+    
+    for (let i = 0; i < visualInfo.length; i++) {
+      const entryA = visualInfo[i];
+      let newTotalColumns = entryA.totalColumns;
+      for(let j=0; j < visualInfo.length; j++) {
+         const entryB = visualInfo[j];
+         if(entryA.start < entryB.end && entryA.end > entryB.start) {
+            newTotalColumns = Math.max(newTotalColumns, entryB.totalColumns);
+         }
+      }
+      entryA.totalColumns = newTotalColumns;
+    }
+
+    return visualInfo.map(entryInfo => {
+      const originalEntry = dayEntries.find(e => e.id === entryInfo.id);
+      if (originalEntry) {
+        (originalEntry as any).column = entryInfo.column;
+        (originalEntry as any).columnCount = entryInfo.totalColumns;
+      }
+      return originalEntry as TimetableEntry & { column: number, columnCount: number };
+    }).filter(Boolean);
+
+  }, [entries, dayIndex]);
   
   const handleSlotClick = (day: number, time: string) => {
     // openModal({ entry: null, day, time, source: 'slot' });
@@ -169,8 +157,7 @@ export function TimetableGrid({ activeTab }: { activeTab?: string }) {
   return (
     <>
       <Tabs value={currentTab} asChild={false}>
-        {DAYS_OF_WEEK.map((day, dayIndex) => (
-          <TabsContent key={day} value={day} className="mt-0">
+          <TabsContent value={currentTab} className="mt-0">
             <div className="flex">
               <div className="w-20 text-right pr-2 text-xs text-muted-foreground">
                  {Array.from({ length: 24 }).map((_, hour) => (
@@ -195,7 +182,7 @@ export function TimetableGrid({ activeTab }: { activeTab?: string }) {
 
                 {loading && <div className="absolute inset-0 flex items-center justify-center bg-card/50"><Loader2 className="animate-spin text-primary" /></div>}
 
-                {(entriesByDay[dayIndex] || []).map((entry) => {
+                {entriesForCurrentDay.map((entry) => {
                   const top = (parseTime(entry.start_time) / (24 * 60)) * 100;
                   const duration = parseTime(entry.end_time) - parseTime(entry.start_time);
                   const height = (duration / (24 * 60)) * 100;
@@ -301,7 +288,6 @@ export function TimetableGrid({ activeTab }: { activeTab?: string }) {
               </div>
             </div>
           </TabsContent>
-        ))}
       </Tabs>
     </>
   );
