@@ -17,16 +17,15 @@ export function TickingClock() {
 
   if (!time) {
     return (
-        <div className="flex items-center justify-center text-sm font-medium text-muted-foreground bg-secondary px-3 py-1 rounded-md h-[30px] w-[215px]">
+        <div className="flex items-center justify-center text-sm font-medium text-muted-foreground bg-secondary px-3 py-1 rounded-md h-[40px] w-[120px]">
       </div>
     );
   }
 
   return (
-    <div className="flex items-center justify-center text-sm font-medium text-muted-foreground bg-secondary px-3 py-1 rounded-md">
+    <div className="flex flex-col items-center justify-center text-xs font-medium text-muted-foreground bg-secondary px-3 py-1 rounded-md">
       <span>{format(time, 'EEE, MMM d')}</span>
-      <span className="mx-2">|</span>
-      <span>{format(time, 'h:mm:ss a')}</span>
+      <span className="font-mono">{format(time, 'h:mm:ss a')}</span>
     </div>
   );
 }
