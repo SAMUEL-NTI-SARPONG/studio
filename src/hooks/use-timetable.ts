@@ -96,6 +96,48 @@ export function useTimetable() {
     toast({ title: 'Success', description: 'Event deleted.' });
     return true;
   };
+  
+  const clearPersonalScheduleForDay = async (dayOfWeek: number) => {
+    if(!user) return false;
+    const { error } = await supabase.from('timetable_entries').delete().eq('user_id', user.id).eq('day_of_week', dayOfWeek);
+    if (error) {
+      toast({ title: 'Error', description: 'Could not clear personal schedule for the day.', variant: 'destructive' });
+      return false;
+    }
+    toast({ title: 'Success', description: 'Your schedule for the selected day has been cleared.' });
+    return true;
+  };
+  
+  const clearPersonalScheduleForAllDays = async () => {
+    if(!user) return false;
+    const { error } = await supabase.from('timetable_entries').delete().eq('user_id', user.id);
+     if (error) {
+      toast({ title: 'Error', description: 'Could not clear your personal schedule.', variant: 'destructive' });
+      return false;
+    }
+    toast({ title: 'Success', description: 'Your entire personal schedule has been cleared.' });
+    return true;
+  };
 
-  return { entries, loading, addEntry, updateEntry, deleteEntry, fetchEntries };
+  const clearGeneralScheduleForDay = async (dayOfWeek: number) => {
+    const { error } = await supabase.from('timetable_entries').delete().is('user_id', null).eq('day_of_week', dayOfWeek);
+    if (error) {
+      toast({ title: 'Error', description: 'Could not clear general schedule for the day.', variant: 'destructive' });
+      return false;
+    }
+    toast({ title: 'Success', description: 'General schedule for the selected day has been cleared.' });
+    return true;
+  };
+
+  const clearGeneralScheduleForAllDays = async () => {
+    const { error } = await supabase.from('timetable_entries').delete().is('user_id', null);
+    if (error) {
+      toast({ title: 'Error', description: 'Could not clear the general schedule.', variant: 'destructive' });
+      return false;
+    }
+    toast({ title: 'Success', description: 'The entire general schedule has been cleared.' });
+    return true;
+  };
+
+  return { entries, loading, addEntry, updateEntry, deleteEntry, fetchEntries, clearPersonalScheduleForDay, clearPersonalScheduleForAllDays, clearGeneralScheduleForDay, clearGeneralScheduleForAllDays };
 }

@@ -11,6 +11,8 @@ import { HourModal } from '@/components/timetable/hour-modal';
 import { useModal } from '@/hooks/use-modal';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
+import { ClearScheduleProvider } from '@/contexts/clear-schedule-context';
+import { ClearScheduleDialog } from '@/components/timetable/clear-schedule-dialog';
 
 function FloatingActionButton() {
   const { openModal } = useModal();
@@ -59,17 +61,22 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     );
   }
 
+  const activeDayIndex = DAYS_OF_WEEK.indexOf(activeTab);
+
   return (
     <ModalProvider>
-      <div className="flex min-h-screen flex-col bg-background">
-        <Header />
-        <div className="sticky top-16 z-30 w-full border-b bg-secondary/95 backdrop-blur-sm">
-          <TimetableHeader activeTab={activeTab} setActiveTab={setActiveTab} />
+      <ClearScheduleProvider>
+        <div className="flex min-h-screen flex-col bg-background">
+          <Header activeDayIndex={activeDayIndex} />
+          <div className="sticky top-16 z-30 w-full border-b bg-secondary/95 backdrop-blur-sm">
+            <TimetableHeader activeTab={activeTab} setActiveTab={setActiveTab} />
+          </div>
+          <main className="flex-1 container mx-auto px-4 py-2">{children}</main>
+          <HourModal />
+          <FloatingActionButton />
+          <ClearScheduleDialog />
         </div>
-        <main className="flex-1 container mx-auto px-4 py-2">{children}</main>
-        <HourModal />
-        <FloatingActionButton />
-      </div>
+      </ClearScheduleProvider>
     </ModalProvider>
   );
 }
