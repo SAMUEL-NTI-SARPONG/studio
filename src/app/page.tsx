@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useRouter } from 'next/navigation';
@@ -5,10 +6,20 @@ import { useUser } from '@/contexts/user-context';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { USERS } from '@/lib/users';
+import { useEffect, useState } from 'react';
 
 export default function LoginPage() {
   const { setUser } = useUser();
   const router = useRouter();
+  const [users, setUsers] = useState(USERS);
+
+  useEffect(() => {
+    const updatedUsers = USERS.map(user => {
+      const storedName = localStorage.getItem(`user-name-${user.id}`);
+      return storedName ? { ...user, name: storedName } : user;
+    });
+    setUsers(updatedUsers);
+  }, []);
 
   const handleUserSelect = (user: (typeof USERS)[0]) => {
     setUser(user);
@@ -22,7 +33,7 @@ export default function LoginPage() {
           <CardTitle className="text-2xl">Who are you?</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-6">
-          {USERS.map((user) => (
+          {users.map((user) => (
             <div
               key={user.id}
               onClick={() => handleUserSelect(user)}

@@ -14,6 +14,8 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { ClearScheduleProvider } from '@/contexts/clear-schedule-context';
 import { ClearScheduleDialog } from '@/components/timetable/clear-schedule-dialog';
+import { ProfileModalProvider } from '@/contexts/profile-modal-context';
+import { ProfileModal } from '@/components/profile/profile-modal';
 
 function FloatingActionButton() {
   const { openModal } = useModal();
@@ -74,16 +76,19 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <ModalProvider>
       <ClearScheduleProvider>
-        <div className="flex min-h-screen flex-col bg-background">
-          <Header activeDayIndex={activeDayIndex} />
-          <div className="sticky top-16 z-30 w-full border-b bg-secondary/95 backdrop-blur-sm">
-            <TimetableHeader activeTab={activeTab} setActiveTab={setActiveTab} />
+        <ProfileModalProvider>
+          <div className="flex min-h-screen flex-col bg-background">
+            <Header activeDayIndex={activeDayIndex} />
+            <div className="sticky top-16 z-30 w-full border-b bg-secondary/95 backdrop-blur-sm">
+              <TimetableHeader activeTab={activeTab} setActiveTab={setActiveTab} />
+            </div>
+            <main className="flex-1 px-4 py-2">{childrenWithProps}</main>
+            <HourModal />
+            <FloatingActionButton />
+            <ClearScheduleDialog />
+            <ProfileModal />
           </div>
-          <main className="flex-1 px-4 py-2">{childrenWithProps}</main>
-          <HourModal />
-          <FloatingActionButton />
-          <ClearScheduleDialog />
-        </div>
+        </ProfileModalProvider>
       </ClearScheduleProvider>
     </ModalProvider>
   );

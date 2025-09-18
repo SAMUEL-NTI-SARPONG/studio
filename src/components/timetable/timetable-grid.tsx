@@ -57,7 +57,7 @@ const CurrentTimeIndicator = ({ dayIndex }: { dayIndex: number }) => {
 
 export function TimetableGrid({ activeTab }: { activeTab?: string }) {
   const { entries, loading } = useTimetable();
-  const { user } = useUser();
+  const { user, colors } = useUser();
   const { openModal } = useModal();
   const [now, setNow] = useState(new Date());
   
@@ -206,9 +206,6 @@ export function TimetableGrid({ activeTab }: { activeTab?: string }) {
                   const isPast = now > endTime;
 
                   const isPersonal = entry.user_id !== null;
-                  const isUser1 = entry.user_id === 'user_1';
-                  const isUser2 = entry.user_id === 'user_2';
-                  
                   const canModify = !entry.user_id || entry.user_id === user?.id;
                   
                   const fontSizeClass =
@@ -217,6 +214,9 @@ export function TimetableGrid({ activeTab }: { activeTab?: string }) {
                       : duration < 60
                       ? 'text-sm'
                       : 'text-base';
+                  
+                  const personalColor = user?.id === entry.user_id ? colors.personal : '#a0aec0';
+                  const eventColor = isPersonal ? personalColor : colors.general;
 
 
                   return (
@@ -231,9 +231,6 @@ export function TimetableGrid({ activeTab }: { activeTab?: string }) {
                           'absolute p-2 border cursor-pointer transition-all duration-200 ease-in-out flex items-center justify-center',
                           'focus:outline-none focus:ring-2 focus:ring-ring focus:z-10',
                            {
-                            'bg-primary/80 border-primary-foreground/50': !isPersonal,
-                            'bg-green-500/80 border-green-600': isUser1,
-                            'bg-orange-500/80 border-orange-600': isUser2,
                             'opacity-60': isPast,
                           }
                         )}
@@ -243,12 +240,12 @@ export function TimetableGrid({ activeTab }: { activeTab?: string }) {
                           left: left,
                           width: width,
                           minHeight: '1.5rem',
+                          backgroundColor: `${eventColor}80`, // 80 for opacity
+                          borderColor: eventColor,
                         }}
                       >
                         <p
-                          className={cn('font-bold text-center', fontSizeClass, {
-                            'text-primary-foreground': !isPersonal,
-                             'text-white': isPersonal,
+                          className={cn('font-bold text-center text-white', fontSizeClass, {
                             'text-muted-foreground': isPast,
                           })}
                         >

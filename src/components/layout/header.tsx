@@ -16,12 +16,14 @@ import {
   DropdownMenuGroup,
 } from '../ui/dropdown-menu';
 import { Button } from '../ui/button';
-import { LogOut, Trash, Calendar, CalendarDays } from 'lucide-react';
+import { LogOut, Trash, Calendar, CalendarDays, User as UserIcon } from 'lucide-react';
 import { useClearSchedule } from '@/hooks/use-clear-schedule';
+import { useProfileModal } from '@/hooks/use-profile-modal';
 
 export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
   const { user, setUser } = useUser();
   const { openClearScheduleDialog } = useClearSchedule();
+  const { openModal } = useProfileModal();
 
   const handleLogout = () => {
     setUser(null);
@@ -65,6 +67,10 @@ export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
+                  <DropdownMenuItem onClick={openModal}>
+                    <UserIcon className="mr-2 h-4 w-4" />
+                    <span>Profile</span>
+                  </DropdownMenuItem>
                   <DropdownMenuSub>
                     <DropdownMenuSubTrigger>
                       <Trash className="mr-2 h-4 w-4" />
@@ -75,7 +81,7 @@ export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
                         <DropdownMenuSubTrigger>
                           My Schedule
                         </DropdownMenuSubTrigger>
-                        <DropdownMenuSubContent sideOffset={-5} alignOffset={-5} align="start" className="w-48">
+                        <DropdownMenuSubContent sideOffset={-5} align="start" className="w-48">
                           <DropdownMenuItem onClick={() => handleClear('personal', 'day')}>
                             <Calendar className="mr-2 h-4 w-4" />
                             <span>For Today</span>
@@ -90,7 +96,7 @@ export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
                         <DropdownMenuSubTrigger>
                           General Schedule
                         </DropdownMenuSubTrigger>
-                        <DropdownMenuSubContent sideOffset={-5} alignOffset={-5} align="start" className="w-48">
+                        <DropdownMenuSubContent sideOffset={-5} align="start" className="w-48">
                           <DropdownMenuItem onClick={() => handleClear('general', 'day')}>
                             <Calendar className="mr-2 h-4 w-4" />
                             <span>For Today</span>
