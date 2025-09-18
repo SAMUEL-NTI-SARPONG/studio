@@ -21,6 +21,7 @@ import { useUser } from '@/contexts/user-context';
 import { BouncingBallLoader } from '@/components/ui/bouncing-ball-loader';
 import { EventNotification } from '@/components/timetable/event-notification';
 import { TimetableContext, useTimetableData, useTimetable } from '@/hooks/use-timetable';
+import { DrippingTapLoader } from '@/components/ui/dripping-tap-loader';
 
 function FloatingActionButtons() {
   const { openModal } = useModal();
