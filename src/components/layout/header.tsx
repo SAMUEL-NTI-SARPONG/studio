@@ -55,76 +55,82 @@ export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
           <TickingClock />
 
           {user && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src={user.avatarUrl} alt={userName} />
-                    <AvatarFallback>{userName.charAt(0).toUpperCase()}</AvatarFallback>
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
-                <DropdownMenuLabel className="font-normal">
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{userName}</p>
-                    <p className="text-xs leading-none text-muted-foreground">
-                      {userEmail}
-                    </p>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                  <DropdownMenuItem onClick={openModal}>
-                    <UserIcon className="mr-2 h-4 w-4" />
-                    <span>Profile</span>
-                  </DropdownMenuItem>
+            <>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <Trash className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end">
+                  <DropdownMenuLabel>Clear Schedule</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
                   <DropdownMenuSub>
                     <DropdownMenuSubTrigger>
-                      <Trash className="mr-2 h-4 w-4" />
-                      Clear Schedule
+                      My Schedule
                     </DropdownMenuSubTrigger>
                     <DropdownMenuSubContent className="w-48">
-                      <DropdownMenuSub>
-                        <DropdownMenuSubTrigger>
-                          My Schedule
-                        </DropdownMenuSubTrigger>
-                        <DropdownMenuSubContent className="w-48">
-                          <DropdownMenuItem onClick={() => handleClear('personal', 'day')}>
-                            <Calendar className="mr-2 h-4 w-4" />
-                            <span>For Today</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleClear('personal', 'all')}>
-                            <CalendarDays className="mr-2 h-4 w-4" />
-                            <span>For All Days</span>
-                          </DropdownMenuItem>
-                        </DropdownMenuSubContent>
-                      </DropdownMenuSub>
-                      <DropdownMenuSub>
-                        <DropdownMenuSubTrigger>
-                          General Schedule
-                        </DropdownMenuSubTrigger>
-                        <DropdownMenuSubContent className="w-48">
-                          <DropdownMenuItem onClick={() => handleClear('general', 'day')}>
-                            <Calendar className="mr-2 h-4 w-4" />
-                            <span>For Today</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleClear('general', 'all')}>
-                            <CalendarDays className="mr-2 h-4 w-4" />
-                            <span>For All Days</span>
-                          </DropdownMenuItem>
-                        </DropdownMenuSubContent>
-                      </DropdownMenuSub>
+                      <DropdownMenuItem onClick={() => handleClear('personal', 'day')}>
+                        <Calendar className="mr-2 h-4 w-4" />
+                        <span>For Today</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleClear('personal', 'all')}>
+                        <CalendarDays className="mr-2 h-4 w-4" />
+                        <span>For All Days</span>
+                      </DropdownMenuItem>
                     </DropdownMenuSubContent>
                   </DropdownMenuSub>
-                </DropdownMenuGroup>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout}>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Log out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger>
+                      General Schedule
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent className="w-48">
+                      <DropdownMenuItem onClick={() => handleClear('general', 'day')}>
+                        <Calendar className="mr-2 h-4 w-4" />
+                        <span>For Today</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleClear('general', 'all')}>
+                        <CalendarDays className="mr-2 h-4 w-4" />
+                        <span>For All Days</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={user.avatarUrl} alt={userName} />
+                      <AvatarFallback>{userName.charAt(0).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">{userName}</p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        {userEmail}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem onClick={openModal}>
+                      <UserIcon className="mr-2 h-4 w-4" />
+                      <span>Profile</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
           )}
         </div>
       </div>
