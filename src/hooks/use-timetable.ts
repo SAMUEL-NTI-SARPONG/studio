@@ -39,17 +39,8 @@ export function useTimetable() {
         'postgres_changes',
         { event: '*', schema: 'public', table: 'timetable_entries' },
         (payload) => {
-          if (payload.eventType === 'INSERT') {
-            setEntries((prev) => [...prev, payload.new as TimetableEntry]);
-          } else if (payload.eventType === 'UPDATE') {
-            setEntries((prev) =>
-              prev.map((entry) =>
-                entry.id === payload.new.id ? (payload.new as TimetableEntry) : entry
-              )
-            );
-          } else if (payload.eventType === 'DELETE') {
-            setEntries((prev) => prev.filter((entry) => entry.id !== payload.old.id));
-          }
+          // Re-fetch entries on any change to ensure data is fresh
+          fetchEntries();
         }
       )
       .subscribe();
@@ -57,7 +48,7 @@ export function useTimetable() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase, setEntries]);
+  }, [supabase, fetchEntries]);
 
   const addEntry = async (newEntry: Omit<TimetableEntry, 'id' | 'created_at' | 'user_id' >) => {
     const fullEntry = {
