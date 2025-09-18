@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
@@ -101,7 +102,7 @@ export function TimetableGrid() {
   return (
     <>
       <Card>
-        <CardContent className="p-0 sm:p-0">
+        <CardContent className="p-0 sm:px-6">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             {DAYS_OF_WEEK.map((day, dayIndex) => (
               <TabsContent key={day} value={day} className="mt-0">
