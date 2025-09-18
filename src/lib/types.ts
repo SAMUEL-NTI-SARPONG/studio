@@ -10,6 +10,8 @@ export type TimetableEntry = {
   title: string;
   description: string | null;
   created_at: string;
+  partner1_checked_in: boolean;
+  partner2_checked_in: boolean;
 };
 
 export type Database = {

@@ -28,31 +28,27 @@ const getDateTime = (day: number, time: string): Date => {
   return date;
 };
 
-const PartnerStatus = ({ entryId }: { entryId: string }) => {
-  const [partner1Active, setPartner1Active] = useState(false);
-  const [partner2Active, setPartner2Active] = useState(false);
-
-  // Stop propagation to prevent opening the modal
-  const handleClick = (e: React.MouseEvent, partner: number) => {
+const PartnerStatus = ({ entry, updateCheckIn }: { entry: TimetableEntry, updateCheckIn: (id: string, partner: 1 | 2, status: boolean) => void }) => {
+  const handleClick = (e: React.MouseEvent, partner: 1 | 2) => {
     e.stopPropagation();
     if (partner === 1) {
-      setPartner1Active(prev => !prev);
+      updateCheckIn(entry.id, 1, !entry.partner1_checked_in);
     } else {
-      setPartner2Active(prev => !prev);
+      updateCheckIn(entry.id, 2, !entry.partner2_checked_in);
     }
   };
 
   return (
     <div className="absolute bottom-1 right-1 flex items-center gap-1">
       <button onClick={(e) => handleClick(e, 1)} className="focus:outline-none">
-        {partner1Active ? (
+        {entry.partner1_checked_in ? (
           <CheckCircle2 className="h-4 w-4 text-green-500 bg-white rounded-full" />
         ) : (
           <Circle className="h-4 w-4 text-muted-foreground/50" />
         )}
       </button>
       <button onClick={(e) => handleClick(e, 2)} className="focus:outline-none">
-        {partner2Active ? (
+        {entry.partner2_checked_in ? (
           <CheckCircle2 className="h-4 w-4 text-green-500 bg-white rounded-full" />
         ) : (
           <Circle className="h-4 w-4 text-muted-foreground/50" />
@@ -64,7 +60,7 @@ const PartnerStatus = ({ entryId }: { entryId: string }) => {
 
 
 export function TimetableGrid() {
-  const { entries, loading } = useTimetable();
+  const { entries, loading, updateCheckIn } = useTimetable();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState<TimetableEntry | null>(null);
   const [selectedDay, setSelectedDay] = useState<number>(new Date().getDay());
@@ -217,7 +213,7 @@ export function TimetableGrid() {
                           })}>
                             {entry.user_email.split('@')[0]}
                           </p>
-                          {isActive && <PartnerStatus entryId={entry.id} />}
+                          {isActive && <PartnerStatus entry={entry} updateCheckIn={updateCheckIn} />}
                         </div>
                       );
                     })}
