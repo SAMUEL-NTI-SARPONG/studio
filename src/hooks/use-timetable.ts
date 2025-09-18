@@ -3,10 +3,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { TimetableEntry } from '@/lib/types';
 import { useToast } from './use-toast';
-import { useAuthContext } from '@/context/auth-provider';
+import { createClient } from '@/lib/supabase/client';
 
 export function useTimetable() {
-  const { supabase, user } = useAuthContext();
+  const supabase = createClient();
   const { toast } = useToast();
   const [entries, setEntries] = useState<TimetableEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -60,11 +60,10 @@ export function useTimetable() {
   }, [supabase, setEntries]);
 
   const addEntry = async (newEntry: Omit<TimetableEntry, 'id' | 'created_at' | 'user_id' | 'user_email' | 'partner1_checked_in' | 'partner2_checked_in'>) => {
-    if (!user) return false;
     const fullEntry = {
         ...newEntry,
-        user_id: user.id,
-        user_email: user.email!,
+        user_id: '00000000-0000-0000-0000-000000000000', // Anonymous user
+        user_email: 'anonymous@example.com',
         partner1_checked_in: false,
         partner2_checked_in: false
     }

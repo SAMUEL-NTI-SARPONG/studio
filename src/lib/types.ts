@@ -1,4 +1,4 @@
-import type { SupabaseClient, User } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 export type TimetableEntry = {
   id: string;
@@ -37,4 +37,5 @@ export type Database = {
 
 export type TypedSupabaseClient = SupabaseClient<Database>;
 
-export type AppUser = User;
+// AppUser is no longer needed as we removed authentication.
+// export type AppUser = User;

@@ -11,7 +11,6 @@ import { HourModal } from './hour-modal';
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 import { CheckCircle2, Circle } from 'lucide-react';
-import { useAuthContext } from '@/context/auth-provider';
 
 // Utility to parse "HH:mm" string to minutes from midnight
 const parseTime = (time: string): number => {
@@ -60,8 +59,7 @@ const PartnerStatus = ({ entry, updateCheckIn }: { entry: TimetableEntry, update
 };
 
 
-export function TimetableGrid() {
-  const { activeTab, user } = useAuthContext();
+export function TimetableGrid({ activeTab, setActiveTab }: { activeTab: string, setActiveTab: (tab: string) => void }) {
   const { entries, loading, updateCheckIn } = useTimetable();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState<TimetableEntry | null>(null);
@@ -133,7 +131,7 @@ export function TimetableGrid() {
     <>
       <Card>
         <CardContent className="p-0 sm:p-0">
-          <Tabs value={activeTab}>
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
             {DAYS_OF_WEEK.map((day, dayIndex) => (
               <TabsContent key={day} value={day} className="mt-0">
                 <div className="flex">
@@ -165,7 +163,8 @@ export function TimetableGrid() {
 
                       const isPast = now > endTime;
                       const isActive = now >= startTime && now <= endTime;
-                      const isOwn = user?.id === entry.user_id;
+                      
+                      const isOwn = false; // All events are public now
 
                       return (
                         <div
@@ -174,8 +173,7 @@ export function TimetableGrid() {
                             'absolute w-full p-2 rounded-lg border text-left cursor-pointer transition-all duration-200 ease-in-out transform hover:scale-[1.02] hover:z-10',
                              {
                               'bg-red-100 border-red-200 text-red-700 opacity-70': isPast,
-                              'bg-primary/20 border-primary/50': !isPast && isOwn,
-                              'bg-accent/50 border-accent/80': !isPast && !isOwn,
+                              'bg-accent/50 border-accent/80': !isPast,
                               'ring-2 ring-destructive ring-offset-2': (entry as any).conflicts,
                             }
                           )}
@@ -187,13 +185,11 @@ export function TimetableGrid() {
                           onClick={() => handleEntryClick(entry)}
                         >
                           <p className={cn("font-bold text-sm truncate", {
-                            'text-primary': !isPast && isOwn, 
-                            'text-accent-foreground': !isPast && !isOwn,
+                            'text-accent-foreground': !isPast,
                             'text-red-900': isPast
                           })}>{entry.title}</p>
                           <p className={cn("text-xs truncate", {
-                              'text-primary opacity-80': !isPast && isOwn,
-                              'text-accent-foreground/80': !isPast && !isOwn,
+                              'text-accent-foreground/80': !isPast,
                               'text-red-900/80': isPast
                           })}>{entry.description}</p>
                           {isActive && <PartnerStatus entry={entry} updateCheckIn={updateCheckIn} />}

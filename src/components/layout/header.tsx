@@ -2,12 +2,14 @@
 import { CalendarCheck } from 'lucide-react';
 import { TickingClock } from '../timetable/ticking-clock';
 import { TimetableHeader } from '../timetable/timetable-header';
-import { useAuthContext } from '@/context/auth-provider';
-import { UserNav } from './user-nav';
 import { ConnectionStatus } from '../timetable/connection-status';
+import { useState } from 'react';
+import { DAYS_OF_WEEK } from '@/lib/constants';
 
 export default function Header() {
-  const { activeTab, setActiveTab, user, loading } = useAuthContext();
+  const today = new Date().getDay();
+  const [activeTab, setActiveTab] = useState(DAYS_OF_WEEK[today]);
+
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-card">
       <div className="container mx-auto flex h-16 items-center px-4">
@@ -23,7 +25,6 @@ export default function Header() {
             <TickingClock />
             <ConnectionStatus />
           </div>
-          {!loading && user && <UserNav />}
         </div>
       </div>
     </header>
