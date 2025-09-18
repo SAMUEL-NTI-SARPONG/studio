@@ -140,7 +140,8 @@ export function TimetableGrid() {
                 <TabsList className="w-full justify-start">
                   {DAYS_OF_WEEK.map((day) => (
                     <TabsTrigger key={day} value={day}>
-                      {day}
+                      <span className="hidden sm:inline">{day}</span>
+                      <span className="sm:hidden">{day.substring(0, 3)}</span>
                     </TabsTrigger>
                   ))}
                 </TabsList>
