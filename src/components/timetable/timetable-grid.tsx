@@ -11,6 +11,7 @@ import { HourModal } from './hour-modal';
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 import { CheckCircle2, Circle } from 'lucide-react';
+import { useAuthContext } from '@/context/auth-provider';
 
 // Utility to parse "HH:mm" string to minutes from midnight
 const parseTime = (time: string): number => {
@@ -59,7 +60,8 @@ const PartnerStatus = ({ entry, updateCheckIn }: { entry: TimetableEntry, update
 };
 
 
-export function TimetableGrid({ activeTab, setActiveTab }: { activeTab: string, setActiveTab: (value: string) => void }) {
+export function TimetableGrid() {
+  const { activeTab } = useAuthContext();
   const { entries, loading, updateCheckIn } = useTimetable();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState<TimetableEntry | null>(null);
@@ -131,7 +133,7 @@ export function TimetableGrid({ activeTab, setActiveTab }: { activeTab: string, 
     <>
       <Card>
         <CardContent className="p-0 sm:p-0">
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <Tabs value={activeTab}>
             {DAYS_OF_WEEK.map((day, dayIndex) => (
               <TabsContent key={day} value={day} className="mt-0">
                 <div className="flex">
