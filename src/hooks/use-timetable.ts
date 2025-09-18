@@ -195,48 +195,44 @@ export function useTimetableData() {
 
   const copySchedule = useCallback(async (sourceDay: number, destinationDays: number[]) => {
     if (!user) {
-        toast({ title: 'Error', description: 'You must be logged in to copy a schedule.', variant: 'destructive' });
-        return false;
+      toast({ title: 'Error', description: 'You must be logged in to copy a schedule.', variant: 'destructive' });
+      return false;
     }
-
+  
     const entriesToCopy = entries.filter(entry => entry.day_of_week === sourceDay);
     if (entriesToCopy.length === 0) {
       toast({ title: 'No events to copy', description: 'The selected source day has no events.' });
       return false;
     }
-
-    const newEntries = destinationDays.flatMap(day => 
+  
+    const newEntries = destinationDays.flatMap(day =>
       entriesToCopy.map(entry => {
-        // Correctly create a new entry object without id and created_at
-        const { id, created_at, ...rest } = entry;
-        
+        // Manually construct the new entry to ensure no invalid fields are passed
         const newEntry: Omit<TimetableEntry, 'id' | 'created_at'> = {
-          ...rest,
+          title: entry.title,
+          description: entry.description,
+          start_time: entry.start_time,
+          end_time: entry.end_time,
           day_of_week: day,
-          engaging_user_ids: [],
+          user_id: entry.user_id ? user.id : null, // Re-assign personal events to the current user
+          engaging_user_ids: [], // Reset engagement for the new event
         };
-        
-        // If the original entry was personal, assign it to the current user.
-        if (newEntry.user_id) {
-          newEntry.user_id = user.id;
-        }
-        
         return newEntry;
       })
     );
-
+  
     if (newEntries.length === 0) {
       return true; // Nothing to copy
     }
-
+  
     const { error } = await supabase.from('timetable_entries').insert(newEntries);
-
+  
     if (error) {
       toast({ title: 'Error', description: 'Could not copy schedule.', variant: 'destructive' });
       console.error('Error copying schedule:', error);
       return false;
     }
-
+  
     toast({ title: 'Schedule Copied!', description: 'Events have been copied to the selected days.', variant: 'achievement' });
     return true;
   }, [entries, supabase, toast, user]);
