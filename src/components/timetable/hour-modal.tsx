@@ -118,9 +118,6 @@ export function HourModal({ isOpen, setIsOpen, entry, day, time }: HourModalProp
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>{entry ? 'Edit Event' : 'Create New Event'}</DialogTitle>
-          <DialogDescription>
-            Manage your schedule by adding or editing events.
-          </DialogDescription>
         </DialogHeader>
         <Separator />
         <Form {...form}>
