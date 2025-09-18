@@ -102,7 +102,7 @@ export function TimetableGrid() {
   return (
     <>
       <Card>
-        <CardContent className="p-0 sm:px-6">
+        <CardContent className="p-4 sm:p-6">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             {DAYS_OF_WEEK.map((day, dayIndex) => (
               <TabsContent key={day} value={day} className="mt-0">
