@@ -1,11 +1,13 @@
+
 {
+  "theme_color": "#84cc16",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "scope": "/",
+  "start_url": "/",
   "name": "Legend",
   "short_name": "Legend",
   "description": "A real-time collaborative timetable application.",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#84cc16",
   "icons": [
     {
       "src": "/icons/icon.svg",
