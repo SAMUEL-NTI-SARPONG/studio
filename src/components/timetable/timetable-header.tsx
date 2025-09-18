@@ -4,9 +4,15 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DAYS_OF_WEEK } from '@/lib/constants';
 import { useTimetableContext } from '@/contexts/timetable-context';
 import { cn } from '@/lib/utils';
+import { Button } from '../ui/button';
+import { Copy } from 'lucide-react';
+import { useCopySchedule } from '@/hooks/use-copy-schedule';
 
 export function TimetableHeader() {
   const { activeTab, setActiveTab } = useTimetableContext();
+  const { openCopyScheduleDialog } = useCopySchedule();
+  const dayIndex = DAYS_OF_WEEK.indexOf(activeTab);
+
   return (
     <div className="flex items-center justify-between px-4">
       <Tabs
@@ -29,6 +35,15 @@ export function TimetableHeader() {
           ))}
         </TabsList>
       </Tabs>
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => openCopyScheduleDialog({ day: dayIndex })}
+        className="ml-4"
+      >
+        <Copy className="h-5 w-5" />
+        <span className="sr-only">Copy Schedule</span>
+      </Button>
     </div>
   );
 }

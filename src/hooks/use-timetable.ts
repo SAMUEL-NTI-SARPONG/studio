@@ -181,6 +181,36 @@ export function useTimetable() {
     setLoading(false);
   };
 
+  const copySchedule = async (sourceDay: number, destinationDays: number[]) => {
+    const entriesToCopy = entries.filter(entry => entry.day_of_week === sourceDay);
+    if (entriesToCopy.length === 0) {
+      toast({ title: 'No events to copy', description: 'The selected source day has no events.' });
+      return false;
+    }
 
-  return { entries, loading, addEntry, updateEntry, deleteEntry, fetchEntries, clearPersonalScheduleForDay, clearPersonalScheduleForAllDays, clearGeneralScheduleForDay, clearGeneralScheduleForAllDays, toggleEventEngagement };
+    const newEntries = destinationDays.flatMap(day => 
+      entriesToCopy.map(entry => {
+        const { id, created_at, ...rest } = entry;
+        return {
+          ...rest,
+          day_of_week: day,
+          engaging_user_ids: [],
+        };
+      })
+    );
+
+    const { error } = await supabase.from('timetable_entries').insert(newEntries as any);
+
+    if (error) {
+      toast({ title: 'Error', description: 'Could not copy schedule.', variant: 'destructive' });
+      console.error('Error copying schedule:', error);
+      return false;
+    }
+
+    toast({ title: 'Success', description: 'Schedule copied successfully.' });
+    return true;
+  }
+
+
+  return { entries, loading, addEntry, updateEntry, deleteEntry, fetchEntries, clearPersonalScheduleForDay, clearPersonalScheduleForAllDays, clearGeneralScheduleForDay, clearGeneralScheduleForAllDays, toggleEventEngagement, copySchedule };
 }

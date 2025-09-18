@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import Header from '@/components/layout/header';
@@ -17,6 +18,8 @@ import { ClearScheduleDialog } from '@/components/timetable/clear-schedule-dialo
 import { ProfileModalProvider } from '@/contexts/profile-modal-context';
 import { ProfileModal } from '@/components/profile/profile-modal';
 import { TimetableProvider, useTimetableContext } from '@/contexts/timetable-context';
+import { CopyScheduleProvider } from '@/contexts/copy-schedule-context';
+import { CopyScheduleDialog } from '@/components/timetable/copy-schedule-dialog';
 
 function FloatingActionButton() {
   const { openModal } = useModal();
@@ -60,6 +63,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
       <FloatingActionButton />
       <ClearScheduleDialog />
       <ProfileModal />
+      <CopyScheduleDialog />
     </div>
   );
 }
@@ -87,9 +91,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     <ModalProvider>
       <ClearScheduleProvider>
         <ProfileModalProvider>
-          <TimetableProvider>
-            <AppLayoutContent>{children}</AppLayoutContent>
-          </TimetableProvider>
+          <CopyScheduleProvider>
+            <TimetableProvider>
+              <AppLayoutContent>{children}</AppLayoutContent>
+            </TimetableProvider>
+          </CopyScheduleProvider>
         </ProfileModalProvider>
       </ClearScheduleProvider>
     </ModalProvider>
