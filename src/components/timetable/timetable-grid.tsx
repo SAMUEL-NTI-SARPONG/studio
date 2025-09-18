@@ -59,13 +59,17 @@ const PartnerStatus = ({ entry, updateCheckIn }: { entry: TimetableEntry, update
 };
 
 
-export function TimetableGrid({ activeTab, setActiveTab }: { activeTab: string, setActiveTab: (tab: string) => void }) {
+export function TimetableGrid() {
   const { entries, loading, updateCheckIn } = useTimetable();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState<TimetableEntry | null>(null);
   const [selectedDay, setSelectedDay] = useState<number>(new Date().getDay());
   const [selectedTime, setSelectedTime] = useState<string>('00:00');
   const [now, setNow] = useState(new Date());
+
+  const today = new Date().getDay();
+  const [activeTab, setActiveTab] = useState(DAYS_OF_WEEK[today]);
+
 
   useEffect(() => {
     // Update the current time every minute

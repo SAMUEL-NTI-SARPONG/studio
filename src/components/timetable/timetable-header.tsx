@@ -11,7 +11,7 @@ export function TimetableHeader({
   setActiveTab: (value: string) => void;
 }) {
   return (
-    <div className="w-full max-w-2xl">
+    <div className="w-full">
       <Tabs
         value={activeTab}
         onValueChange={setActiveTab}
@@ -23,7 +23,7 @@ export function TimetableHeader({
               key={day}
               value={day}
               className={cn(
-                'text-muted-foreground/80 data-[state=active]:text-foreground data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-primary pb-3',
+                'text-muted-foreground/80 data-[state=active]:text-foreground data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-primary py-3',
               )}
             >
               <span className="sm:hidden">{day.substring(0, 3)}</span>
