@@ -34,7 +34,6 @@ export function useTimetable() {
   }, [supabase, toast]);
 
   useEffect(() => {
-    // Only fetch entries if a user is loaded.
     if (user) {
       fetchEntries();
     }
@@ -68,7 +67,7 @@ export function useTimetable() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase, setEntries]);
+  }, [supabase, setEntries, fetchEntries]);
 
 
   const addEntry = async (newEntry: Omit<TimetableEntry, 'id' | 'created_at' | 'engaging_user_ids'>) => {
