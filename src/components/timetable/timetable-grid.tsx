@@ -58,7 +58,7 @@ export function TimetableGrid() {
   const { entries, loading } = useTimetable();
   const { user } = useUser();
   const [now, setNow] = useState(new Date());
-
+  
   const today = new Date().getDay();
   const [activeTab, setActiveTab] = useState(DAYS_OF_WEEK[today]);
 
@@ -155,13 +155,12 @@ export function TimetableGrid() {
 
     return grouped;
   }, [entries]);
-
+  
   const activeDayIndex = useMemo(() => DAYS_OF_WEEK.indexOf(activeTab), [activeTab]);
-
 
   return (
     <>
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
+      <Tabs value={activeTab} onValueChange={setActiveTab} asChild={false}>
         {DAYS_OF_WEEK.map((day, dayIndex) => (
           <TabsContent key={day} value={day} className="mt-0">
             <div className="flex">
@@ -197,7 +196,6 @@ export function TimetableGrid() {
                   const width = `calc(${100 / columnCount}% - 2px)`;
                   const left = `calc(${column * (100 / columnCount)}% + 1px)`;
 
-
                   const endTime = getDateTime(dayIndex, entry.end_time);
                   const isPast = now > endTime;
 
@@ -208,19 +206,20 @@ export function TimetableGrid() {
                   const canModify = !entry.user_id || entry.user_id === user?.id;
 
                   return (
-                    <EventPopover
+                     <EventPopover
                       key={entry.id}
                       entry={entry}
                       canModify={canModify}
                     >
                       <div
+                        tabIndex={0}
                         className={cn(
                           'absolute p-2 border text-left cursor-pointer transition-all duration-200 ease-in-out',
                           'focus:outline-none focus:ring-2 focus:ring-ring focus:z-10',
-                          {
-                            'bg-primary border-primary/50 text-primary-foreground': !isPersonal,
-                            'bg-green-500 border-green-600 text-white': isUser1,
-                            'bg-orange-500 border-orange-600 text-white': isUser2,
+                           {
+                            'bg-primary border-primary-foreground/50': !isPersonal,
+                            'bg-green-500 border-green-600': isUser1,
+                            'bg-orange-500 border-orange-600': isUser2,
                             'opacity-60': isPast,
                           }
                         )}
@@ -234,8 +233,8 @@ export function TimetableGrid() {
                       >
                         <p
                           className={cn('font-bold text-sm truncate', {
-                            'text-primary-foreground': !isPersonal && !isPast,
-                            'text-white': isPersonal && !isPast,
+                            'text-primary-foreground': !isPersonal,
+                             'text-white': isPersonal,
                             'text-muted-foreground': isPast,
                           })}
                         >
