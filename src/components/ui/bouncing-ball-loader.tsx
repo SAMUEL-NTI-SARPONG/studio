@@ -21,7 +21,7 @@ export function BouncingBallLoader() {
   }, []);
 
   return (
-    <div className="relative w-full h-48 flex items-center justify-start overflow-hidden">
+    <div className="relative w-full h-48 flex items-center justify-start overflow-visible">
       <div className="w-8 h-8 bg-primary rounded-full animate-bounce-horizontal" />
     </div>
   );
