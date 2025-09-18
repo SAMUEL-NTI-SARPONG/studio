@@ -24,8 +24,9 @@ import {
 import { Input } from '@/components/ui/input';
 import { useTimetable } from '@/hooks/use-timetable';
 import type { TimetableEntry } from '@/lib/types';
-import { Loader2, Trash2, Clock } from 'lucide-react';
+import { Loader2, Trash2 } from 'lucide-react';
 import { Separator } from '../ui/separator';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 type HourModalProps = {
   isOpen: boolean;
@@ -37,8 +38,8 @@ type HourModalProps = {
 
 const formSchema = z.object({
   title: z.string().min(1, 'Title is required'),
-  start_time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid time format (HH:mm)'),
-  end_time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid time format (HH:mm)'),
+  start_time: z.string().nonempty('Start time is required'),
+  end_time: z.string().nonempty('End time is required'),
 }).refine(data => {
     if (!data.start_time || !data.end_time) return false;
     const start = parseInt(data.start_time.replace(':', ''), 10);
@@ -48,6 +49,20 @@ const formSchema = z.object({
     message: "End time must be after start time",
     path: ["end_time"],
 });
+
+const generateTimeSlots = () => {
+    const slots = [];
+    for (let h = 0; h < 24; h++) {
+      for (let m = 0; m < 60; m += 30) {
+        const hour = String(h).padStart(2, '0');
+        const minute = String(m).padStart(2, '0');
+        slots.push(`${hour}:${minute}`);
+      }
+    }
+    return slots;
+};
+  
+const timeSlots = generateTimeSlots();
 
 export function HourModal({ isOpen, setIsOpen, entry, day, time }: HourModalProps) {
   const { addEntry, updateEntry, deleteEntry } = useTimetable();
@@ -63,22 +78,24 @@ export function HourModal({ isOpen, setIsOpen, entry, day, time }: HourModalProp
   });
 
   useEffect(() => {
-    if (entry) {
-      form.reset({
-        title: entry.title,
-        start_time: entry.start_time,
-        end_time: entry.end_time,
-      });
-    } else {
-      const startHour = parseInt(time.split(':')[0], 10);
-      const endHour = startHour + 1;
-      form.reset({
-        title: '',
-        start_time: '',
-        end_time: '',
-      });
+    if (isOpen) {
+        if (entry) {
+            form.reset({
+                title: entry.title,
+                start_time: entry.start_time,
+                end_time: entry.end_time,
+            });
+        } else {
+            const startHour = parseInt(time.split(':')[0], 10);
+            const endHour = startHour + 1;
+            form.reset({
+                title: '',
+                start_time: `${String(startHour).padStart(2, '0')}:00`,
+                end_time: `${String(endHour).padStart(2, '0')}:00`,
+            });
+        }
     }
-  }, [entry, day, time, form, isOpen]);
+  }, [entry, time, form, isOpen]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     let success = false;
@@ -138,36 +155,44 @@ export function HourModal({ isOpen, setIsOpen, entry, day, time }: HourModalProp
                 
                 <div className="grid grid-cols-2 gap-4">
                     <FormField
-                    control={form.control}
-                    name="start_time"
-                    render={({ field }) => (
+                      control={form.control}
+                      name="start_time"
+                      render={({ field }) => (
                         <FormItem>
-                        <FormLabel className="text-xs text-muted-foreground">Start Time</FormLabel>
-                        <FormControl>
-                            <div className="relative">
-                                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                <Input type="time" className="pl-10" {...field} />
-                            </div>
-                        </FormControl>
-                        <FormMessage />
+                          <FormLabel className="text-xs text-muted-foreground">Start Time</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a time" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {timeSlots.map(slot => <SelectItem key={`start-${slot}`} value={slot}>{slot}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
                         </FormItem>
-                    )}
+                      )}
                     />
                     <FormField
-                    control={form.control}
-                    name="end_time"
-                    render={({ field }) => (
+                      control={form.control}
+                      name="end_time"
+                      render={({ field }) => (
                         <FormItem>
-                        <FormLabel className="text-xs text-muted-foreground">End Time</FormLabel>
-                        <FormControl>
-                            <div className="relative">
-                                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                <Input type="time" className="pl-10" {...field} />
-                            </div>
-                        </FormControl>
-                        <FormMessage />
+                          <FormLabel className="text-xs text-muted-foreground">End Time</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a time" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {timeSlots.map(slot => <SelectItem key={`end-${slot}`} value={slot}>{slot}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
                         </FormItem>
-                    )}
+                      )}
                     />
                 </div>
               </div>
