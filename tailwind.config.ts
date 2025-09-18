@@ -95,12 +95,12 @@ export default {
         },
         'bounce-vertical-perspective': {
           '0%, 100%': {
-            transform: 'translateY(40px) scale(1, 1)',
+            transform: 'translateY(100px) scale(1, 1)',
             backgroundColor: 'hsl(var(--primary))',
             animationTimingFunction: 'cubic-bezier(0.8, 0, 1, 1)',
           },
           '50%': {
-            transform: 'translateY(-100px) scale(0.5, 0.5)',
+            transform: 'translateY(-40px) scale(0.5, 0.5)',
             backgroundColor: 'hsl(var(--ring))',
             animationTimingFunction: 'cubic-bezier(0, 0, 0.2, 1)',
           },
