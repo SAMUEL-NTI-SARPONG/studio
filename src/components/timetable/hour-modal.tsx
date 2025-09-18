@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -53,9 +54,6 @@ export function HourModal({ isOpen, setIsOpen, entry, day, time }: HourModalProp
   const { addEntry, updateEntry, deleteEntry } = useTimetable();
   const [isDeleting, setIsDeleting] = useState(false);
   
-  // Mock user for UI development
-  const user = { id: 'mock-user-id' };
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -87,8 +85,6 @@ export function HourModal({ isOpen, setIsOpen, entry, day, time }: HourModalProp
   }, [entry, day, time, form, isOpen]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    if (!user) return;
-    
     let success = false;
     if (entry) {
       success = await updateEntry(entry.id, {
@@ -185,7 +181,7 @@ export function HourModal({ isOpen, setIsOpen, entry, day, time }: HourModalProp
 
                <DialogFooter className="pt-4 flex-col sm:flex-row sm:justify-between w-full">
                 <div>
-                {entry && entry.user_id === user?.id && (
+                {entry && (
                   <Button
                     type="button"
                     variant="destructive"
