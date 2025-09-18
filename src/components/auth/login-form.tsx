@@ -55,8 +55,8 @@ export function LoginForm() {
       });
     } else {
       toast({ title: 'Signed in successfully!' });
-      router.replace('/timetable');
-      router.refresh();
+      // Force a full page reload to ensure correct redirection.
+      window.location.href = '/timetable';
     }
     setLoading(false);
   }
