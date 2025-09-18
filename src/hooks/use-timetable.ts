@@ -60,9 +60,6 @@ export function useTimetable() {
   }, [supabase, setEntries]);
 
   const addEntry = async (newEntry: Omit<TimetableEntry, 'id' | 'created_at' | 'user_id' | 'user_email'>) => {
-    const { data: { user } } = await supabase.auth.getUser();
-    console.log('Current user:', user);
-
     const fullEntry = {
         ...newEntry,
         description: newEntry.description || '',
@@ -72,7 +69,7 @@ export function useTimetable() {
     const { error } = await supabase.from('timetable_entries').insert(fullEntry);
     if (error) {
       console.error('Error adding entry:', error);
-      toast({ title: 'Error saving event', description: "Failed to save the event. This is likely due to database security rules. Please check your Supabase Row Level Security policies to ensure anonymous users have permission to add entries.", variant: 'destructive' });
+      toast({ title: 'Error: Permission Denied', description: "Please run the following SQL in your Supabase project to allow anonymous inserts: CREATE POLICY \"Allow anon insert\" ON public.timetable_entries FOR INSERT TO anon WITH CHECK (true);", variant: 'destructive', duration: 20000 });
       return false;
     }
     toast({ title: 'Success', description: 'Event added to timetable.' });
