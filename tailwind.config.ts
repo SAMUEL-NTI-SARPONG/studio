@@ -93,33 +93,15 @@ export default {
           '0%, 100%': { transform: 'scale(1)' },
           '50%': { transform: 'scale(0.9)' },
         },
-        bounce: {
-          '0%, 100%': { transform: 'translateY(-120px)', animationTimingFunction: 'cubic-bezier(0.8, 0, 1, 1)' },
-          '50%': { transform: 'translateY(0)', animationTimingFunction: 'cubic-bezier(0, 0, 0.2, 1)' },
-          '99%': { opacity: '1' },
-          '100%': { opacity: '0' },
-        },
-        crack: {
-          '0%': { transform: 'scale(0)', opacity: '0' },
-          '50%': { transform: 'scale(1)', opacity: '1' },
-          '100%': { transform: 'scale(1)', opacity: '1' },
-        },
-        'ground-solid': {
-          '0%, 80%': { opacity: '1' },
-          '81%, 100%': { opacity: '0' },
-        },
-        'ground-break-left': {
-          '0%, 80%': { transform: 'translateX(0) translateY(0) rotate(0)', opacity: '0' },
-          '100%': { transform: 'translateX(-20px) translateY(40px) rotate(-15deg)', opacity: '1' },
-        },
-        'ground-break-right': {
-          '0%, 80%': { transform: 'translateX(0) translateY(0) rotate(0)', opacity: '0' },
-          '100%': { transform: 'translateX(20px) translateY(40px) rotate(15deg)', opacity: '1' },
-        },
-        'ball-fall-through': {
-          '0%, 80%': { opacity: '0' },
-          '81%': { transform: 'translateY(0)', opacity: '1' },
-          '100%': { transform: 'translateY(80px)', opacity: '1' },
+        'bounce-horizontal': {
+          '0%, 100%': { 
+            transform: 'translateX(0)', 
+            animationTimingFunction: 'cubic-bezier(0.8, 0, 1, 1)' 
+          },
+          '50%': { 
+            transform: 'translateX(calc(100vw - 8rem))', // container is w-full inside a centered div
+            animationTimingFunction: 'cubic-bezier(0, 0, 0.2, 1)' 
+          },
         },
          'trophy-pop': {
           '0%': { transform: 'scale(0)', opacity: '0' },
@@ -139,12 +121,7 @@ export default {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         pop: 'pop 0.2s ease-out',
-        bounce: 'bounce 1s infinite',
-        crack: 'crack 1s forwards',
-        'ground-solid': 'ground-solid 4s forwards',
-        'ground-break-left': 'ground-break-left 4s forwards',
-        'ground-break-right': 'ground-break-right 4s forwards',
-        'ball-fall-through': 'ball-fall-through 4s forwards',
+        'bounce-horizontal': 'bounce-horizontal 2s infinite',
         'trophy-pop': 'trophy-pop 0.5s ease-out forwards',
         sparkle: 'sparkle 0.4s ease-out forwards',
         'trophy-shine': 'trophy-shine 1s ease-in-out infinite',

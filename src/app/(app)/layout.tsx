@@ -88,7 +88,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   
   if (loading) {
     return (
-      <div className="flex h-screen w-full flex-col items-center justify-center bg-background gap-4">
+      <div className="flex h-screen w-full flex-col items-center justify-center bg-background gap-4 px-16">
         <BouncingBallLoader />
         <p className="text-muted-foreground">Loading CollabTime...</p>
       </div>

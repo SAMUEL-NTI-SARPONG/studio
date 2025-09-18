@@ -21,7 +21,7 @@ export default function LoginPage() {
 
   if (isPending) {
     return (
-      <div className="flex h-screen w-full flex-col items-center justify-center bg-background gap-4">
+      <div className="flex h-screen w-full flex-col items-center justify-center bg-background gap-4 px-16">
         <BouncingBallLoader />
         <p className="text-muted-foreground">Signing in...</p>
       </div>
