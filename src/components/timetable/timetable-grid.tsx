@@ -9,18 +9,11 @@ import type { TimetableEntry } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 import { useUser } from '@/contexts/user-context';
-import { useModal } from '@/hooks/use-modal';
+import { EventPopover } from './event-popover';
 
 const parseTime = (time: string): number => {
   const [hours, minutes] = time.split(':').map(Number);
   return hours * 60 + minutes;
-};
-
-const formatTime = (time: string): string => {
-    const [hours, minutes] = time.split(':').map(Number);
-    const period = hours >= 12 ? 'PM' : 'AM';
-    const hour12 = hours % 12 === 0 ? 12 : hours % 12;
-    return `${hour12}:${String(minutes).padStart(2, '0')} ${period}`;
 };
 
 const getDateTime = (day: number, time: string): Date => {
@@ -64,7 +57,6 @@ const CurrentTimeIndicator = ({ dayIndex }: { dayIndex: number }) => {
 export function TimetableGrid() {
   const { entries, loading } = useTimetable();
   const { user } = useUser();
-  const { openModal } = useModal();
   const [now, setNow] = useState(new Date());
 
   const today = new Date().getDay();
@@ -77,10 +69,6 @@ export function TimetableGrid() {
     }, 60 * 1000);
     return () => clearInterval(timer);
   }, []);
-
-  const handleEntryClick = (entry: TimetableEntry) => {
-    openModal({ entry, day: entry.day_of_week, source: 'slot' });
-  };
 
   const entriesByDay = useMemo(() => {
     const grouped: { [key: number]: TimetableEntry[] } = {};
@@ -217,45 +205,44 @@ export function TimetableGrid() {
                   const isUser1 = entry.user_id === 'user_1';
                   const isUser2 = entry.user_id === 'user_2';
                   
+                  const canModify = !entry.user_id || entry.user_id === user?.id;
+
                   return (
-                    <div
+                    <EventPopover
                       key={entry.id}
-                      className={cn(
-                        'absolute p-2 border text-left cursor-pointer transition-all duration-200 ease-in-out transform hover:scale-[1.02] hover:z-10 overflow-hidden',
-                        {
-                          'bg-primary border-primary/50 text-primary-foreground': !isPersonal,
-                          'bg-green-500 border-green-600 text-white': isUser1,
-                          'bg-orange-500 border-orange-600 text-white': isUser2,
-                          'opacity-60': isPast,
-                        }
-                      )}
-                      style={{
-                        top: `${top}%`,
-                        height: `${height}%`,
-                        left: left,
-                        width: width,
-                        minHeight: '1.5rem'
-                      }}
-                      onClick={() => handleEntryClick(entry)}
+                      entry={entry}
+                      canModify={canModify}
                     >
-                      <p className={cn("font-bold text-sm truncate", {
-                        'text-primary-foreground': !isPersonal && !isPast,
-                        'text-white': isPersonal && !isPast,
-                        'text-muted-foreground': isPast
-                      })}>{entry.title}</p>
-                      <p className={cn("text-xs truncate", {
-                         'text-primary-foreground/80': !isPersonal && !isPast,
-                         'text-white/80': isPersonal && !isPast,
-                         'text-muted-foreground/80': isPast,
-                      })}>
-                        {formatTime(entry.start_time)} - {formatTime(entry.end_time)}
-                      </p>
-                      <p className={cn("text-xs truncate pt-1", {
-                         'text-primary-foreground/70': !isPersonal && !isPast,
-                         'text-white/70': isPersonal && !isPast,
-                         'text-muted-foreground/70': isPast
-                      })}>{entry.description}</p>
-                    </div>
+                      <div
+                        className={cn(
+                          'absolute p-2 border text-left cursor-pointer transition-all duration-200 ease-in-out',
+                          'focus:outline-none focus:ring-2 focus:ring-ring focus:z-10',
+                          {
+                            'bg-primary border-primary/50 text-primary-foreground': !isPersonal,
+                            'bg-green-500 border-green-600 text-white': isUser1,
+                            'bg-orange-500 border-orange-600 text-white': isUser2,
+                            'opacity-60': isPast,
+                          }
+                        )}
+                        style={{
+                          top: `${top}%`,
+                          height: `${height}%`,
+                          left: left,
+                          width: width,
+                          minHeight: '1.5rem',
+                        }}
+                      >
+                        <p
+                          className={cn('font-bold text-sm truncate', {
+                            'text-primary-foreground': !isPersonal && !isPast,
+                            'text-white': isPersonal && !isPast,
+                            'text-muted-foreground': isPast,
+                          })}
+                        >
+                          {entry.title}
+                        </p>
+                      </div>
+                    </EventPopover>
                   );
                 })}
               </div>
