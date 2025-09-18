@@ -14,6 +14,7 @@ import { useModal } from '@/hooks/use-modal';
 import { USERS } from '@/lib/users';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import { useTimetableContext } from '@/contexts/timetable-context';
 
 const parseTime = (time: string): number => {
   const [hours, minutes] = time.split(':').map(Number);
@@ -153,12 +154,12 @@ export function TimetableGrid({ activeTab }: { activeTab: string }) {
   };
 
   return (
-    <>
+    <TabsContent value={activeTab} forceMount>
       <div className="flex">
-        <div className="w-20 text-right pr-2 text-xs text-muted-foreground">
+        <div className="w-20 text-right pr-2 text-xs text-primary">
             {Array.from({ length: 24 }).map((_, hour) => (
             <div key={hour} className="h-24 flex items-start justify-end pt-0.5 relative -top-2">
-                <span className='text-xs'>
+                <span className='text-xs font-medium'>
                 {hour === 0 ? '12 AM' : hour < 12 ? `${hour} AM` : hour === 12 ? '12 PM' : `${hour-12} PM`}
                 </span>
             </div>
@@ -283,6 +284,6 @@ export function TimetableGrid({ activeTab }: { activeTab: string }) {
             })}
         </div>
       </div>
-    </>
+    </TabsContent>
   );
 }
