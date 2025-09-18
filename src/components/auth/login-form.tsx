@@ -19,7 +19,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/use-auth';
-import { useRouter } from 'next/navigation';
 
 const formSchema = z.object({
   password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
@@ -30,7 +29,6 @@ const SHARED_EMAIL = 'shared-user@collabti.me';
 
 export function LoginForm() {
   const { supabase } = useAuth();
-  const router = useRouter();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [loginSuccess, setLoginSuccess] = useState(false);
@@ -56,7 +54,6 @@ export function LoginForm() {
         variant: 'destructive',
       });
     } else {
-      toast({ title: 'Signed in successfully!' });
       setLoginSuccess(true);
       // Hard redirect to ensure session is picked up by middleware
       window.location.href = '/timetable';
