@@ -62,6 +62,7 @@ export function useTimetable() {
   const addEntry = async (newEntry: Omit<TimetableEntry, 'id' | 'created_at'>) => {
     const fullEntry = {
         ...newEntry,
+        description: newEntry.description || '',
     }
     const { error } = await supabase.from('timetable_entries').insert(fullEntry);
     if (error) {
