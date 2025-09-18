@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -22,17 +23,11 @@ import {
 import { Input } from '@/components/ui/input';
 import { useTimetable } from '@/hooks/use-timetable';
 import { Loader2, Trash2 } from 'lucide-react';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../ui/select';
 import { Textarea } from '../ui/textarea';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { useUser } from '@/contexts/user-context';
 import { useModal } from '@/hooks/use-modal';
+import { VirtualizedTimeSelect } from './virtualized-time-select';
 
 const formSchema = z
   .object({
@@ -54,29 +49,6 @@ const formSchema = z
       path: ['end_time'],
     }
   );
-
-const formatTime12h = (h: number, m: number) => {
-  const period = h >= 12 ? 'PM' : 'AM';
-  const hour12 = h % 12 === 0 ? 12 : h % 12;
-  return `${String(hour12)}:${String(m).padStart(2, '0')} ${period}`;
-};
-
-const generateTimeSlots = () => {
-  const slots: { value: string; label: string }[] = [];
-  for (let h = 0; h < 24; h++) {
-    for (let m = 0; m < 60; m += 5) {
-      const hour = String(h).padStart(2, '0');
-      const minute = String(m).padStart(2, '0');
-      slots.push({
-        value: `${hour}:${minute}`,
-        label: formatTime12h(h, m),
-      });
-    }
-  }
-  return slots;
-};
-
-const timeSlots = generateTimeSlots();
 
 export function HourModal() {
   const { modalState, closeModal } = useModal();
@@ -255,28 +227,11 @@ export function HourModal() {
                       <FormLabel className="text-xs text-muted-foreground">
                         Start Time
                       </FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
+                      <VirtualizedTimeSelect
                         value={field.value}
+                        onChange={field.onChange}
                         disabled={isNewEntryFromSlot}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a time" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {timeSlots.map((slot) => (
-                            <SelectItem
-                              key={`start-${slot.value}`}
-                              value={slot.value}
-                            >
-                              {slot.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      />
                       <FormMessage />
                     </FormItem>
                   )}
@@ -289,24 +244,10 @@ export function HourModal() {
                       <FormLabel className="text-xs text-muted-foreground">
                         End Time
                       </FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
+                      <VirtualizedTimeSelect
                         value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a time" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {timeSlots.map((slot) => (
-                            <SelectItem key={`end-${slot.value}`} value={slot.value}>
-                              {slot.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                        onChange={field.onChange}
+                      />
                       <FormMessage />
                     </FormItem>
                   )}
