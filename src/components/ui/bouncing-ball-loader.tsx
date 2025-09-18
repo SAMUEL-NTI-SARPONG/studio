@@ -13,13 +13,19 @@ export function BouncingBallLoader() {
       }
     };
 
+    let intervalId: NodeJS.Timeout;
     const initialTimeout = setTimeout(() => {
-      vibrateOnImpact();
-      const interval = setInterval(vibrateOnImpact, 1000);
-      return () => clearInterval(interval);
+      vibrateOnImpact(); // First impact
+      intervalId = setInterval(vibrateOnImpact, 1000); // Subsequent impacts
     }, 500);
 
-    return () => clearTimeout(initialTimeout);
+    // Cleanup both the timeout and the interval
+    return () => {
+      clearTimeout(initialTimeout);
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
   }, []);
 
   return (
