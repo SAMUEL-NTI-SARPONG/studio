@@ -11,21 +11,20 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  DropdownMenuSub,
-  DropdownMenuSubTrigger,
-  DropdownMenuSubContent,
   DropdownMenuGroup,
 } from '../ui/dropdown-menu';
 import { Button } from '../ui/button';
-import { Trash, Calendar, CalendarDays, User as UserIcon, LogOut } from 'lucide-react';
+import { Trash, Calendar, CalendarDays, User as UserIcon, LogOut, ArrowLeft } from 'lucide-react';
 import { useClearSchedule } from '@/hooks/use-clear-schedule';
 import { useProfileModal } from '@/hooks/use-profile-modal';
+import { useState } from 'react';
 
 export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
   const { user, signOut } = useUser();
   const router = useRouter();
   const { openClearScheduleDialog } = useClearSchedule();
   const { openModal } = useProfileModal();
+  const [menuView, setMenuView] = useState<'main' | 'personal' | 'general'>('main');
 
   const handleLogout = async () => {
     await signOut();
@@ -56,20 +55,32 @@ export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
 
           {user && (
             <>
-              <DropdownMenu>
+              <DropdownMenu onOpenChange={(isOpen) => !isOpen && setMenuView('main')}>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon">
                     <Trash className="h-5 w-5" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56" align="end">
-                  <DropdownMenuLabel>Clear Schedule</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuSub>
-                    <DropdownMenuSubTrigger>
-                      My Schedule
-                    </DropdownMenuSubTrigger>
-                    <DropdownMenuSubContent className="w-48">
+                  {menuView === 'main' && (
+                    <>
+                      <DropdownMenuLabel>Clear Schedule</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onSelect={() => setMenuView('personal')}>
+                        My Schedule
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onSelect={() => setMenuView('general')}>
+                        General Schedule
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                   {menuView === 'personal' && (
+                    <>
+                      <DropdownMenuLabel className="flex items-center">
+                        <Button variant="ghost" size="icon" className="h-6 w-6 mr-2" onClick={(e) => {e.stopPropagation(); setMenuView('main');}}><ArrowLeft className="h-4 w-4" /></Button>
+                        My Schedule
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={() => handleClear('personal', 'day')}>
                         <Calendar className="mr-2 h-4 w-4" />
                         <span>For Today</span>
@@ -78,13 +89,15 @@ export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
                         <CalendarDays className="mr-2 h-4 w-4" />
                         <span>For All Days</span>
                       </DropdownMenuItem>
-                    </DropdownMenuSubContent>
-                  </DropdownMenuSub>
-                  <DropdownMenuSub>
-                    <DropdownMenuSubTrigger>
-                      General Schedule
-                    </DropdownMenuSubTrigger>
-                    <DropdownMenuSubContent className="w-48">
+                    </>
+                  )}
+                  {menuView === 'general' && (
+                    <>
+                       <DropdownMenuLabel className="flex items-center">
+                        <Button variant="ghost" size="icon" className="h-6 w-6 mr-2" onClick={(e) => {e.stopPropagation(); setMenuView('main');}}><ArrowLeft className="h-4 w-4" /></Button>
+                        General Schedule
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={() => handleClear('general', 'day')}>
                         <Calendar className="mr-2 h-4 w-4" />
                         <span>For Today</span>
@@ -93,8 +106,8 @@ export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
                         <CalendarDays className="mr-2 h-4 w-4" />
                         <span>For All Days</span>
                       </DropdownMenuItem>
-                    </DropdownMenuSubContent>
-                  </DropdownMenuSub>
+                    </>
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
 
