@@ -94,22 +94,19 @@ export default {
           '50%': { transform: 'scale(0.9)' },
         },
         'jiggle-bounce': {
-          '0%, 100%': {
-            transform: 'translateY(0)',
-            animationTimingFunction: 'cubic-bezier(0.8, 0, 1, 1)',
-            backgroundColor: 'hsl(var(--primary))',
-          },
-          '50%': {
+          '0%': {
             transform: 'translateY(-100%)',
-            animationTimingFunction: 'cubic-bezier(0, 0, 0.2, 1)',
+            animationTimingFunction: 'cubic-bezier(0.8, 0, 1, 1)',
             backgroundColor: 'hsl(var(--ring))',
           },
-          '60%': {
-            transform: 'translateY(0) scale(1.2, 0.8)',
-            backgroundColor: '#f97316', // Orange color on impact
+          '50%': {
+            transform: 'translateY(0)',
+            animationTimingFunction: 'cubic-bezier(0, 0, 0.2, 1)',
+            backgroundColor: '#f97316',
           },
-          '75%': {
-            transform: 'translateY(-25%) scale(0.9, 1.1)',
+          '100%': {
+            transform: 'translateY(-100%)',
+            animationTimingFunction: 'cubic-bezier(0.8, 0, 1, 1)',
             backgroundColor: 'hsl(var(--primary))',
           },
         },
