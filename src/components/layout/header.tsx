@@ -20,7 +20,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Button } from '../ui/button';
-import { Calendar, CalendarDays, User as UserIcon, LogOut } from 'lucide-react';
+import { Calendar, CalendarDays, User as UserIcon, LogOut, Trash2 } from 'lucide-react';
 import { useClearSchedule } from '@/hooks/use-clear-schedule';
 import { useProfileModal } from '@/hooks/use-profile-modal';
 
@@ -77,7 +77,12 @@ export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                   <DropdownMenuLabel>Clear Schedule</DropdownMenuLabel>
+                   <DropdownMenuLabel>
+                    <div className="flex items-center">
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      <span>Clear Schedule</span>
+                    </div>
+                   </DropdownMenuLabel>
                     <Accordion type="single" collapsible className="w-full">
                       <AccordionItem value="item-1">
                         <AccordionTrigger className="px-2 py-1.5 text-sm font-normal hover:no-underline">My Schedule</AccordionTrigger>
