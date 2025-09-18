@@ -63,6 +63,7 @@ export function TimetableGrid({ activeTab }: { activeTab?: string }) {
   
   const today = new Date().getDay();
   const currentTab = activeTab || DAYS_OF_WEEK[today];
+  const dayIndex = DAYS_OF_WEEK.indexOf(currentTab);
 
 
   useEffect(() => {
@@ -209,6 +210,14 @@ export function TimetableGrid({ activeTab }: { activeTab?: string }) {
                   const isUser2 = entry.user_id === 'user_2';
                   
                   const canModify = !entry.user_id || entry.user_id === user?.id;
+                  
+                  const fontSizeClass =
+                    duration < 30
+                      ? 'text-xs'
+                      : duration < 60
+                      ? 'text-sm'
+                      : 'text-base';
+
 
                   return (
                      <EventPopover
@@ -237,7 +246,7 @@ export function TimetableGrid({ activeTab }: { activeTab?: string }) {
                         }}
                       >
                         <p
-                          className={cn('font-bold text-sm text-center', {
+                          className={cn('font-bold text-center', fontSizeClass, {
                             'text-primary-foreground': !isPersonal,
                              'text-white': isPersonal,
                             'text-muted-foreground': isPast,
