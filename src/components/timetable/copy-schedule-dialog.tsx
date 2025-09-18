@@ -75,10 +75,7 @@ export function CopyScheduleDialog() {
     <Dialog open={state.isOpen} onOpenChange={handleOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Copy Schedule</DialogTitle>
-          <DialogDescription>
-            Copy all events from <strong>{sourceDayName}</strong> to other days of the week.
-          </DialogDescription>
+          <DialogTitle>Copy Schedule from {sourceDayName}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -88,7 +85,7 @@ export function CopyScheduleDialog() {
               render={() => (
                 <FormItem>
                   <div className="mb-4">
-                    <FormLabel className="text-base">Destination Days</FormLabel>
+                    <FormLabel className="text-base">To</FormLabel>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     {DAYS_OF_WEEK.map((day, index) => {
