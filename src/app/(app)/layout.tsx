@@ -13,9 +13,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     <div className="flex min-h-screen flex-col bg-background">
       <Header />
       <div className="sticky top-16 z-30 w-full border-b bg-background/95 backdrop-blur-sm">
-        <div className="container mx-auto px-4">
-          <TimetableHeader activeTab={activeTab} setActiveTab={setActiveTab} />
-        </div>
+        <TimetableHeader activeTab={activeTab} setActiveTab={setActiveTab} />
       </div>
       <main className="flex-1 container mx-auto px-4 py-2">{children}</main>
     </div>
