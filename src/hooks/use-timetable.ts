@@ -62,7 +62,7 @@ export function useTimetable() {
   const addEntry = async (newEntry: Omit<TimetableEntry, 'id' | 'created_at' | 'user_id' | 'user_email' | 'partner1_checked_in' | 'partner2_checked_in' | 'description'>) => {
     const fullEntry = {
         ...newEntry,
-        description: '',
+        description: '', // Always provide an empty string for description
         user_id: '00000000-0000-0000-0000-000000000000', // Anonymous user
         user_email: 'anonymous@example.com',
         partner1_checked_in: false,
@@ -71,7 +71,7 @@ export function useTimetable() {
     const { error } = await supabase.from('timetable_entries').insert(fullEntry);
     if (error) {
       console.error('Error adding entry:', error);
-      toast({ title: 'Error saving event', description: error.message, variant: 'destructive' });
+      toast({ title: 'Error saving event', description: "Failed to save event. Check your database's security policies.", variant: 'destructive' });
       return false;
     }
     toast({ title: 'Success', description: 'Event added to timetable.' });
@@ -82,7 +82,7 @@ export function useTimetable() {
     const { error } = await supabase.from('timetable_entries').update(updatedFields).eq('id', id);
      if (error) {
       console.error('Error updating entry:', error);
-      toast({ title: 'Error updating event', description: error.message, variant: 'destructive' });
+      toast({ title: 'Error updating event', description: "Failed to update event. Check your database's security policies.", variant: 'destructive' });
       return false;
     }
     toast({ title: 'Success', description: 'Event updated.' });
@@ -102,7 +102,7 @@ export function useTimetable() {
     const { error } = await supabase.from('timetable_entries').delete().eq('id', id);
     if (error) {
       console.error('Error deleting entry:', error);
-      toast({ title: 'Error deleting event', description: error.message, variant: 'destructive' });
+      toast({ title: 'Error deleting event', description: "Failed to delete event. Check your database's security policies.", variant: 'destructive' });
       return false;
     }
     toast({ title: 'Success', description: 'Event deleted.' });
