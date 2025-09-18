@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { useTimetable } from '@/hooks/use-timetable';
 import { DAYS_OF_WEEK } from '@/lib/constants';
@@ -11,7 +11,6 @@ import { HourModal } from './hour-modal';
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 import { CheckCircle2, Circle } from 'lucide-react';
-import { ScrollArea } from '@/components/ui/scroll-area';
 
 // Utility to parse "HH:mm" string to minutes from midnight
 const parseTime = (time: string): number => {
@@ -60,7 +59,7 @@ const PartnerStatus = ({ entry, updateCheckIn }: { entry: TimetableEntry, update
 };
 
 
-export function TimetableGrid() {
+export function TimetableGrid({ activeTab, setActiveTab }: { activeTab: string, setActiveTab: (value: string) => void }) {
   const { entries, loading, updateCheckIn } = useTimetable();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState<TimetableEntry | null>(null);
@@ -123,9 +122,6 @@ export function TimetableGrid() {
     return grouped;
   }, [entries]);
 
-  const today = new Date().getDay();
-  const [activeTab, setActiveTab] = useState(DAYS_OF_WEEK[today]);
-
   useEffect(() => {
     setSelectedDay(DAYS_OF_WEEK.indexOf(activeTab));
   }, [activeTab]);
@@ -134,19 +130,10 @@ export function TimetableGrid() {
   return (
     <>
       <Card>
-        <CardContent className="p-2 sm:p-4">
+        <CardContent className="p-0 sm:p-0">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-             <TabsList className="grid w-full grid-cols-7">
-              {DAYS_OF_WEEK.map((day) => (
-                <TabsTrigger key={day} value={day}>
-                  <span className="hidden sm:inline">{day}</span>
-                  <span className="sm:hidden">{day.substring(0, 3)}</span>
-                </TabsTrigger>
-              ))}
-            </TabsList>
-
             {DAYS_OF_WEEK.map((day, dayIndex) => (
-              <TabsContent key={day} value={day} className="mt-4">
+              <TabsContent key={day} value={day} className="mt-0">
                 <div className="flex">
                   <div className="w-16 text-right pr-2 text-xs text-muted-foreground">
                     {Array.from({ length: 24 }).map((_, hour) => (
