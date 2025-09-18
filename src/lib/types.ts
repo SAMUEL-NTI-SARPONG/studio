@@ -10,8 +10,6 @@ export type TimetableEntry = {
   title: string;
   description: string | null;
   created_at: string;
-  partner1_checked_in: boolean;
-  partner2_checked_in: boolean;
 };
 
 export type Database = {
@@ -36,6 +34,3 @@ export type Database = {
 };
 
 export type TypedSupabaseClient = SupabaseClient<Database>;
-
-// AppUser is no longer needed as we removed authentication.
-// export type AppUser = User;

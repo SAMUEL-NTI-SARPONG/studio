@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
@@ -10,7 +9,6 @@ import type { TimetableEntry } from '@/lib/types';
 import { HourModal } from './hour-modal';
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
-import { CheckCircle2, Circle } from 'lucide-react';
 
 // Utility to parse "HH:mm" string to minutes from midnight
 const parseTime = (time: string): number => {
@@ -28,39 +26,8 @@ const getDateTime = (day: number, time: string): Date => {
   return date;
 };
 
-const PartnerStatus = ({ entry, updateCheckIn }: { entry: TimetableEntry, updateCheckIn: (id: string, partner: 1 | 2, status: boolean) => void }) => {
-  const handleClick = (e: React.MouseEvent, partner: 1 | 2) => {
-    e.stopPropagation();
-    if (partner === 1) {
-      updateCheckIn(entry.id, 1, !entry.partner1_checked_in);
-    } else {
-      updateCheckIn(entry.id, 2, !entry.partner2_checked_in);
-    }
-  };
-
-  return (
-    <div className="absolute bottom-1 right-1 flex items-center gap-1">
-      <button onClick={(e) => handleClick(e, 1)} className="focus:outline-none">
-        {entry.partner1_checked_in ? (
-          <CheckCircle2 className="h-4 w-4 text-green-500 bg-white rounded-full" />
-        ) : (
-          <Circle className="h-4 w-4 text-muted-foreground/50" />
-        )}
-      </button>
-      <button onClick={(e) => handleClick(e, 2)} className="focus:outline-none">
-        {entry.partner2_checked_in ? (
-          <CheckCircle2 className="h-4 w-4 text-green-500 bg-white rounded-full" />
-        ) : (
-          <Circle className="h-4 w-4 text-muted-foreground/50" />
-        )}
-      </button>
-    </div>
-  );
-};
-
-
 export function TimetableGrid() {
-  const { entries, loading, updateCheckIn } = useTimetable();
+  const { entries, loading } = useTimetable();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState<TimetableEntry | null>(null);
   const [selectedDay, setSelectedDay] = useState<number>(new Date().getDay());
@@ -166,10 +133,7 @@ export function TimetableGrid() {
                       const endTime = getDateTime(dayIndex, entry.end_time);
 
                       const isPast = now > endTime;
-                      const isActive = now >= startTime && now <= endTime;
                       
-                      const isOwn = false; // All events are public now
-
                       return (
                         <div
                           key={entry.id}
@@ -196,7 +160,6 @@ export function TimetableGrid() {
                               'text-accent-foreground/80': !isPast,
                               'text-red-900/80': isPast
                           })}>{entry.description}</p>
-                          {isActive && <PartnerStatus entry={entry} updateCheckIn={updateCheckIn} />}
                         </div>
                       );
                     })}

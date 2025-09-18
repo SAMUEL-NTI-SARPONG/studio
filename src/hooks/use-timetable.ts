@@ -59,14 +59,18 @@ export function useTimetable() {
     };
   }, [supabase, setEntries]);
 
-  const addEntry = async (newEntry: Omit<TimetableEntry, 'id' | 'created_at' | 'user_id' | 'user_email' | 'partner1_checked_in' | 'partner2_checked_in' | 'description'>) => {
+  const addEntry = async (newEntry: Omit<TimetableEntry, 'id' | 'created_at' | 'user_id' | 'user_email'>) => {
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        toast({ title: 'Authentication Error', description: 'You must be logged in to add an event.', variant: 'destructive' });
+        return false;
+    }
+
     const fullEntry = {
         ...newEntry,
-        description: '', // Always provide an empty string for description
-        user_id: '00000000-0000-0000-0000-000000000000', // Anonymous user
-        user_email: 'anonymous@example.com',
-        partner1_checked_in: false,
-        partner2_checked_in: false
+        user_id: user.id,
+        user_email: user.email!,
     }
     const { error } = await supabase.from('timetable_entries').insert(fullEntry);
     if (error) {
@@ -88,15 +92,6 @@ export function useTimetable() {
     toast({ title: 'Success', description: 'Event updated.' });
     return true;
   };
-  
-  const updateCheckIn = async (id: string, partner: 1 | 2, status: boolean) => {
-    const updatedField = partner === 1 ? 'partner1_checked_in' : 'partner2_checked_in';
-    const { error } = await supabase.from('timetable_entries').update({ [updatedField]: status }).eq('id', id);
-    if (error) {
-      console.error(`Error updating partner ${partner} check-in:`, error);
-      toast({ title: 'Error', description: 'Could not update check-in status.', variant: 'destructive' });
-    }
-  };
 
   const deleteEntry = async (id: string) => {
     const { error } = await supabase.from('timetable_entries').delete().eq('id', id);
@@ -109,5 +104,5 @@ export function useTimetable() {
     return true;
   };
 
-  return { entries, loading, addEntry, updateEntry, deleteEntry, fetchEntries, updateCheckIn };
+  return { entries, loading, addEntry, updateEntry, deleteEntry, fetchEntries };
 }
