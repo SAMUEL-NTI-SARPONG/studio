@@ -152,14 +152,17 @@ export function TimetableGrid() {
                   </div>
                 ))}
               </div>
-              <div className="relative flex-1 border-l">
+              <div className="relative flex-1 border-l pr-px">
 
                 {Array.from({ length: 24 }).map((_, hour) => (
                   <div
                     key={hour}
-                    className="h-24 border-t cursor-pointer hover:bg-primary/5"
+                    className="h-24 border-t cursor-pointer hover:bg-primary/5 flex"
                     onClick={() => handleSlotClick(dayIndex, hour)}
                   >
+                     {Array.from({ length: 12 }).map((_, i) => (
+                      <div key={i} className="w-[8.3333%] h-full border-r border-border/70"></div>
+                    ))}
                   </div>
                 ))}
                 
