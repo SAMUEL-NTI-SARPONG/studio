@@ -15,10 +15,6 @@ export function useTimetable() {
   const [loading, setLoading] = useState(true);
 
   const fetchEntries = useCallback(async () => {
-    if (!user) {
-        setLoading(false);
-        return;
-    };
     setLoading(true);
 
     const { data, error } = await supabase.from('timetable_entries').select('*');
@@ -35,7 +31,7 @@ export function useTimetable() {
       setEntries(data || []);
     }
     setLoading(false);
-  }, [supabase, toast, user]);
+  }, [supabase, toast]);
 
   useEffect(() => {
     fetchEntries();
@@ -43,8 +39,6 @@ export function useTimetable() {
 
 
   useEffect(() => {
-    if (!user) return;
-  
     const channel = supabase
       .channel('timetable_entries_channel')
       .on<TimetableEntry>(
@@ -71,7 +65,7 @@ export function useTimetable() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase, user, setEntries]);
+  }, [supabase, setEntries]);
 
 
   const addEntry = async (newEntry: Omit<TimetableEntry, 'id' | 'created_at' | 'engaging_user_ids'>) => {
@@ -157,7 +151,7 @@ export function useTimetable() {
   const toggleEventEngagement = async (entryId: string, userId: string) => {
     setLoading(true);
     const entry = entries.find(e => e.id === entryId);
-    if (!entry) {
+    if (!entry || !user) {
       setLoading(false);
       return;
     }

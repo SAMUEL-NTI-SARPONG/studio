@@ -4,14 +4,11 @@
 import Header from '@/components/layout/header';
 import { TimetableHeader } from '@/components/timetable/timetable-header';
 import { DAYS_OF_WEEK } from '@/lib/constants';
-import { useState, useEffect } from 'react';
-import { useUser } from '@/contexts/user-context';
-import { useRouter } from 'next/navigation';
 import { ModalProvider } from '@/contexts/modal-context';
 import { HourModal } from '@/components/timetable/hour-modal';
-import { useModal } from '@/hooks/use-modal';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
+import { useModal } from '@/hooks/use-modal';
 import { ClearScheduleProvider } from '@/contexts/clear-schedule-context';
 import { ClearScheduleDialog } from '@/components/timetable/clear-schedule-dialog';
 import { ProfileModalProvider } from '@/contexts/profile-modal-context';
@@ -69,34 +66,6 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
 
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useUser();
-  const router = useRouter();
-
-  useEffect(() => {
-    // Wait until the initial loading is complete.
-    if (!loading) {
-      if (user) {
-        // If there is a user, ensure they are on a page within the app.
-        // This handles the case where they just logged in.
-        router.replace('/timetable');
-      } else {
-        // If there is no user, redirect them to the login page.
-        router.replace('/');
-      }
-    }
-  }, [user, loading, router]);
-
-  // While loading, or if there's no user yet, show a loading indicator.
-  // This prevents a flash of the login page for already authenticated users.
-  if (loading || !user) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center bg-background">
-        <p className="text-muted-foreground">Loading CollabTime...</p>
-      </div>
-    );
-  }
-
-  // Once loading is false and user is present, render the main app.
   return (
     <ModalProvider>
       <ClearScheduleProvider>

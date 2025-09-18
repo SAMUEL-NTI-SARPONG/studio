@@ -16,10 +16,9 @@ import {
   DropdownMenuGroup,
 } from '../ui/dropdown-menu';
 import { Button } from '../ui/button';
-import { LogOut, Trash, Calendar, CalendarDays, User as UserIcon } from 'lucide-react';
+import { Trash, Calendar, CalendarDays, User as UserIcon } from 'lucide-react';
 import { useClearSchedule } from '@/hooks/use-clear-schedule';
 import { useProfileModal } from '@/hooks/use-profile-modal';
-import { logout } from '@/app/auth/actions';
 
 export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
   const { user } = useUser();
@@ -34,8 +33,8 @@ export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
     });
   };
 
-  const userAvatar = user?.user_metadata?.avatar_url || '';
-  const userName = user?.user_metadata?.name || user?.email || 'User';
+  const userAvatar = user?.avatarUrl || '';
+  const userName = user?.name || 'User';
   const userEmail = user?.email || 'No email';
 
 
@@ -112,15 +111,6 @@ export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
                     </DropdownMenuSubContent>
                   </DropdownMenuSub>
                 </DropdownMenuGroup>
-                <DropdownMenuSeparator />
-                <form action={logout}>
-                  <DropdownMenuItem asChild>
-                     <button type="submit" className="w-full">
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>Log out</span>
-                    </button>
-                  </DropdownMenuItem>
-                </form>
               </DropdownMenuContent>
             </DropdownMenu>
           )}

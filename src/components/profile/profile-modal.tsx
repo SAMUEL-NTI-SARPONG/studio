@@ -58,7 +58,7 @@ export function ProfileModal() {
   useEffect(() => {
     if (user && isOpen) {
       form.reset({
-        name: user.user_metadata.name || user.email || '',
+        name: user.name || '',
         personalColor: colors.personal,
         generalColor: colors.general,
       });
