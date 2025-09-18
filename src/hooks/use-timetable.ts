@@ -34,8 +34,11 @@ export function useTimetable() {
   }, [supabase, toast]);
 
   useEffect(() => {
-    fetchEntries();
-  }, [fetchEntries]);
+    // Only fetch entries if a user is loaded.
+    if (user) {
+      fetchEntries();
+    }
+  }, [fetchEntries, user]);
 
 
   useEffect(() => {

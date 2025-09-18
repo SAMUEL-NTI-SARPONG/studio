@@ -1,5 +1,6 @@
 
 'use client';
+import { useRouter } from 'next/navigation';
 import { TickingClock } from '../timetable/ticking-clock';
 import { useUser } from '@/contexts/user-context';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
@@ -16,14 +17,20 @@ import {
   DropdownMenuGroup,
 } from '../ui/dropdown-menu';
 import { Button } from '../ui/button';
-import { Trash, Calendar, CalendarDays, User as UserIcon } from 'lucide-react';
+import { Trash, Calendar, CalendarDays, User as UserIcon, LogOut } from 'lucide-react';
 import { useClearSchedule } from '@/hooks/use-clear-schedule';
 import { useProfileModal } from '@/hooks/use-profile-modal';
 
 export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
-  const { user } = useUser();
+  const { user, signOut } = useUser();
+  const router = useRouter();
   const { openClearScheduleDialog } = useClearSchedule();
   const { openModal } = useProfileModal();
+
+  const handleLogout = async () => {
+    await signOut();
+    router.push('/login');
+  };
 
   const handleClear = (scope: 'personal' | 'general', time: 'day' | 'all') => {
     openClearScheduleDialog({
@@ -111,6 +118,11 @@ export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
                     </DropdownMenuSubContent>
                   </DropdownMenuSub>
                 </DropdownMenuGroup>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           )}

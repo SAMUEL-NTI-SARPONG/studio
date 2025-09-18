@@ -1,6 +1,8 @@
 
 'use client';
 
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 import Header from '@/components/layout/header';
 import { TimetableHeader } from '@/components/timetable/timetable-header';
 import { DAYS_OF_WEEK } from '@/lib/constants';
@@ -16,6 +18,8 @@ import { ProfileModal } from '@/components/profile/profile-modal';
 import { TimetableProvider, useTimetableContext } from '@/contexts/timetable-context';
 import { CopyScheduleProvider } from '@/contexts/copy-schedule-context';
 import { CopyScheduleDialog } from '@/components/timetable/copy-schedule-dialog';
+import { useUser } from '@/contexts/user-context';
+import { Loader2 } from 'lucide-react';
 
 function FloatingActionButton() {
   const { openModal } = useModal();
@@ -66,6 +70,16 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
 
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useUser();
+  
+  if (loading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <ModalProvider>
       <ClearScheduleProvider>

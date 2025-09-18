@@ -1,16 +1,16 @@
 
 'use client';
 
-import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { USERS } from '@/lib/users';
+import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
+import { createClient } from '@/lib/supabase/client';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 
-// This is a mock user type for the new setup.
-// It is simpler than the Supabase User type.
+// This is a more app-specific user type.
 export type AppUser = {
   id: string;
-  name: string;
+  name: string; // We can enrich this from a 'profiles' table later.
   email: string;
-  avatarUrl: string;
+  avatarUrl: string; // This can also come from a profile.
 };
 
 export type UserColors = {
@@ -24,28 +24,59 @@ type UserContextType = {
   colors: UserColors;
   setColors: (colors: UserColors) => void;
   updateUserName: (newName: string) => void;
+  signOut: () => Promise<void>;
 };
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export function UserProvider({ children }: { children: ReactNode }) {
-  // Default to the first user in the static list.
-  const [user, setUser] = useState<AppUser | null>(USERS[0] || null);
-  const [loading, setLoading] = useState(false); // No longer loading from an async source.
+  const supabase = createClient();
+  const [user, setUser] = useState<AppUser | null>(null);
+  const [loading, setLoading] = useState(true);
   const [colors, setColorsState] = useState<UserColors>({ personal: '#4299e1', general: '#4a5568' });
+
+  const mapSupabaseUserToAppUser = (supabaseUser: SupabaseUser): AppUser => {
+    // For now, we'll create a simple AppUser from the SupabaseUser.
+    // In a real app, you'd fetch a corresponding 'profiles' record.
+    return {
+      id: supabaseUser.id,
+      email: supabaseUser.email || '',
+      name: supabaseUser.email?.split('@')[0] || 'User',
+      avatarUrl: `https://picsum.photos/seed/${supabaseUser.id}/200/200`,
+    };
+  };
+  
+  const getSession = useCallback(async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if(session?.user){
+      const appUser = mapSupabaseUserToAppUser(session.user);
+      setUser(appUser);
+    }
+    setLoading(false);
+  }, [supabase.auth]);
+
+  useEffect(() => {
+    getSession();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session?.user) {
+        const appUser = mapSupabaseUserToAppUser(session.user);
+        setUser(appUser);
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [supabase, getSession]);
 
   useEffect(() => {
     if (user) {
       const storedColors = localStorage.getItem(`user-colors-${user.id}`);
       if (storedColors) {
         setColorsState(JSON.parse(storedColors));
-      } else {
-        const initialColors = {
-          personal: '#38a169',
-          general: '#718096',
-        };
-        setColorsState(initialColors);
-        localStorage.setItem(`user-colors-${user.id}`, JSON.stringify(initialColors));
       }
     }
   }, [user?.id]);
@@ -59,20 +90,19 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   const updateUserName = (newName: string) => {
     if (user) {
-      // In this mock setup, we just update the state.
-      // In a real app, this would be an API call.
+      // In a real app, this would be an API call to update a 'profiles' table.
       const updatedUser = { ...user, name: newName };
       setUser(updatedUser);
-      // We can also update our mock data source if we want persistence across reloads
-      const userIndex = USERS.findIndex(u => u.id === user.id);
-      if (userIndex !== -1) {
-        USERS[userIndex].name = newName;
-      }
+      // We could also update a mock user list if we were using one.
     }
   };
 
+  const signOut = async () => {
+    await supabase.auth.signOut();
+  };
+
   return (
-    <UserContext.Provider value={{ user, loading, colors, setColors, updateUserName }}>
+    <UserContext.Provider value={{ user, loading, colors, setColors, updateUserName, signOut }}>
       {children}
     </UserContext.Provider>
   );
