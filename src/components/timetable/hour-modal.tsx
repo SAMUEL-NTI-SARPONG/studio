@@ -133,15 +133,14 @@ export function HourModal({
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     let success = false;
-    const data = { ...values, description: null };
     if (entry) {
       success = await updateEntry(entry.id, {
-        ...data,
+        ...values,
         day_of_week: day,
       });
     } else {
       success = await addEntry({
-        ...data,
+        ...values,
         day_of_week: day,
       });
     }

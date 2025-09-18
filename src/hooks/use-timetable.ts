@@ -59,9 +59,10 @@ export function useTimetable() {
     };
   }, [supabase, setEntries]);
 
-  const addEntry = async (newEntry: Omit<TimetableEntry, 'id' | 'created_at' | 'user_id' | 'user_email' | 'partner1_checked_in' | 'partner2_checked_in'>) => {
+  const addEntry = async (newEntry: Omit<TimetableEntry, 'id' | 'created_at' | 'user_id' | 'user_email' | 'partner1_checked_in' | 'partner2_checked_in' | 'description'>) => {
     const fullEntry = {
         ...newEntry,
+        description: '',
         user_id: '00000000-0000-0000-0000-000000000000', // Anonymous user
         user_email: 'anonymous@example.com',
         partner1_checked_in: false,
