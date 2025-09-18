@@ -75,7 +75,7 @@ export function HourModal({ isOpen, setIsOpen, entry, day, time }: HourModalProp
       form.reset({
         title: '',
         start_time: '',
-        end_time: ``,
+        end_time: '',
       });
     }
   }, [entry, day, time, form, isOpen]);
