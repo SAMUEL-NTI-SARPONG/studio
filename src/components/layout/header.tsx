@@ -20,11 +20,13 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Button } from '../ui/button';
-import { Calendar, CalendarDays, User as UserIcon, LogOut, Trash2 } from 'lucide-react';
+import { Calendar, CalendarDays, User as UserIcon, LogOut, Trash2, Wifi, WifiOff } from 'lucide-react';
 import { useClearSchedule } from '@/hooks/use-clear-schedule';
 import { useProfileModal } from '@/hooks/use-profile-modal';
 import { useTimetableContext } from '@/contexts/timetable-context';
 import { Switch } from '@/components/ui/switch';
+import { useTimetable } from '@/hooks/use-timetable';
+import { cn } from '@/lib/utils';
 
 export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
   const { user, signOut } = useUser();
@@ -32,6 +34,7 @@ export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
   const { openClearScheduleDialog } = useClearSchedule();
   const { openModal } = useProfileModal();
   const { isFiltered, setIsFiltered } = useTimetableContext();
+  const { isOffline } = useTimetable();
 
   const handleLogout = async () => {
     await signOut();
@@ -63,6 +66,14 @@ export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
           <h1 className="text-xl font-semibold text-primary">Legend</h1>
         </div>
         <div className="flex items-center space-x-4">
+          <div className={cn(
+            "flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium",
+            isOffline ? "bg-destructive/10 text-destructive" : "bg-green-500/10 text-green-700"
+          )}>
+            {isOffline ? <WifiOff className="h-4 w-4" /> : <Wifi className="h-4 w-4" />}
+            <span>{isOffline ? 'Offline' : 'Online'}</span>
+          </div>
+
           <TickingClock />
 
           <Switch

@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, ReactNode } from 'react';
 import Header from '@/components/layout/header';
 import { TimetableHeader } from '@/components/timetable/timetable-header';
 import { DAYS_OF_WEEK } from '@/lib/constants';
@@ -20,12 +20,12 @@ import { CopyScheduleDialog } from '@/components/timetable/copy-schedule-dialog'
 import { useUser } from '@/contexts/user-context';
 import { BouncingBallLoader } from '@/components/ui/bouncing-ball-loader';
 import { EventNotification } from '@/components/timetable/event-notification';
-import { TimetableContext, useTimetableData } from '@/hooks/use-timetable';
-import { ReactNode } from 'react';
+import { TimetableContext, useTimetableData, useTimetable } from '@/hooks/use-timetable';
 
 function FloatingActionButtons() {
   const { openModal } = useModal();
   const { activeTab } = useTimetableContext();
+  const { isOffline } = useTimetable();
   const dayIndex = DAYS_OF_WEEK.indexOf(activeTab);
 
   const handleAddClick = () => {
@@ -39,7 +39,9 @@ function FloatingActionButtons() {
   };
 
   const handleReloadClick = () => {
-    window.location.reload();
+    if (!isOffline) {
+      window.location.reload();
+    }
   };
 
   return (
@@ -49,8 +51,9 @@ function FloatingActionButtons() {
         size="icon"
         variant="secondary"
         onClick={handleReloadClick}
+        disabled={isOffline}
       >
-        <RefreshCw className="h-7 w-7" />
+        <RefreshCw className={`h-7 w-7 ${!isOffline && "animate-spin"}`} />
         <span className="sr-only">Reload page</span>
       </Button>
       <Button
@@ -85,7 +88,6 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
-
 
 function TimetableDataProvider({ children }: { children: ReactNode }) {
   const timetableData = useTimetableData();
