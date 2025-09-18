@@ -58,21 +58,19 @@ export function LoginForm() {
     } else {
       toast({ title: 'Signed in successfully!' });
       setLoginSuccess(true);
+      // Hard redirect to ensure session is picked up by middleware
+      window.location.href = '/timetable';
     }
     setLoading(false);
   }
 
-  const handleGoToTimetable = () => {
-    window.location.href = '/timetable';
-  };
-
   if (loginSuccess) {
     return (
         <div className="space-y-4 pt-4 text-center">
-            <p className="text-foreground">Authentication successful!</p>
-            <Button className="w-full" onClick={handleGoToTimetable}>
-                Go to Timetable
-            </Button>
+            <p className="text-foreground">Authentication successful! Redirecting...</p>
+            <div className='flex justify-center'>
+              <Loader2 className="mr-2 h-8 w-8 animate-spin" />
+            </div>
         </div>
     );
   }
