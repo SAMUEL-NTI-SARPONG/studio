@@ -37,12 +37,18 @@ export function EventNotification() {
   }, []);
 
   const triggerAlerts = (entry: TimetableEntry) => {
-    // Web Notification
-    new Notification('Upcoming Event', {
-      body: `${entry.title} is starting now!`,
-      tag: entry.id,
-      renotify: true,
-    });
+    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+        navigator.serviceWorker.getRegistration().then(registration => {
+            if (registration) {
+                registration.showNotification('Upcoming Event', {
+                    body: `${entry.title} is starting now!`,
+                    tag: entry.id,
+                    renotify: true,
+                    vibrate: [200, 100, 200],
+                });
+            }
+        });
+    }
     
     // Sound
     audioRef.current?.play().catch(e => console.warn("Could not play notification sound:", e));
