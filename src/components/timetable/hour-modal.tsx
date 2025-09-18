@@ -26,7 +26,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useTimetable } from '@/hooks/use-timetable';
 import type { TimetableEntry } from '@/lib/types';
-import { Loader2, Trash2 } from 'lucide-react';
+import { Loader2, Trash2, CalendarDays, Clock } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
 
 type HourModalProps = {
   isOpen: boolean;
@@ -114,51 +115,25 @@ export function HourModal({ isOpen, setIsOpen, entry, day, time }: HourModalProp
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>{entry ? 'Edit Event' : 'Create Event'}</DialogTitle>
+          <DialogTitle>{entry ? 'Edit Event' : 'Create New Event'}</DialogTitle>
           <DialogDescription>
-            {entry ? 'Update the details of your event.' : 'Add a new event to your timetable.'}
+            Manage your schedule by adding or editing events.
           </DialogDescription>
         </DialogHeader>
-        <div className="py-4">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Title</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Team Meeting" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="Discuss project milestones" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className="grid grid-cols-2 gap-4">
+        <Separator />
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <div className="space-y-4">
                 <FormField
                   control={form.control}
-                  name="start_time"
+                  name="title"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Start Time</FormLabel>
+                      <FormLabel>Title</FormLabel>
                       <FormControl>
-                        <Input type="time" {...field} />
+                        <Input placeholder="e.g., Project Sync-up" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -166,25 +141,66 @@ export function HourModal({ isOpen, setIsOpen, entry, day, time }: HourModalProp
                 />
                 <FormField
                   control={form.control}
-                  name="end_time"
+                  name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>End Time</FormLabel>
+                      <FormLabel>Description (Optional)</FormLabel>
                       <FormControl>
-                        <Input type="time" {...field} />
+                        <Textarea placeholder="e.g., Discuss Q3 goals" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-              </div>
 
-               <DialogFooter className="pt-4 flex-col sm:flex-row sm:justify-between w-full">
+                <div>
+                    <FormLabel className="flex items-center gap-2 mb-3">
+                        <CalendarDays className="h-4 w-4 text-muted-foreground"/>
+                        <span className="text-sm font-medium">When</span>
+                    </FormLabel>
+                    <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                        control={form.control}
+                        name="start_time"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel className="text-xs text-muted-foreground">Start Time</FormLabel>
+                            <FormControl>
+                                <div className="relative">
+                                    <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                    <Input type="time" className="pl-10" {...field} />
+                                </div>
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                        <FormField
+                        control={form.control}
+                        name="end_time"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel className="text-xs text-muted-foreground">End Time</FormLabel>
+                            <FormControl>
+                                <div className="relative">
+                                    <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                    <Input type="time" className="pl-10" {...field} />
+                                </div>
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                    </div>
+                </div>
+              </div>
+              <DialogFooter className="pt-4 flex-col sm:flex-row sm:justify-between w-full">
                 <div>
                 {entry && (
                   <Button
                     type="button"
-                    variant="destructive"
+                    variant="ghost"
+                    className="text-destructive hover:text-destructive"
                     onClick={handleDelete}
                     disabled={isDeleting || form.formState.isSubmitting}
                   >
@@ -200,7 +216,6 @@ export function HourModal({ isOpen, setIsOpen, entry, day, time }: HourModalProp
               </DialogFooter>
             </form>
           </Form>
-        </div>
       </DialogContent>
     </Dialog>
   );
