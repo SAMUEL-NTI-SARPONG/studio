@@ -71,7 +71,7 @@ export function useTimetable() {
     const { error } = await supabase.from('timetable_entries').insert(fullEntry);
     if (error) {
       console.error('Error adding entry:', error);
-      toast({ title: 'Error saving event', description: "Failed to save event. Check your database's security policies.", variant: 'destructive' });
+      toast({ title: 'Error saving event', description: error.message, variant: 'destructive' });
       return false;
     }
     toast({ title: 'Success', description: 'Event added to timetable.' });
@@ -82,7 +82,7 @@ export function useTimetable() {
     const { error } = await supabase.from('timetable_entries').update(updatedFields).eq('id', id);
      if (error) {
       console.error('Error updating entry:', error);
-      toast({ title: 'Error updating event', description: "Failed to update event. Check your database's security policies.", variant: 'destructive' });
+      toast({ title: 'Error updating event', description: error.message, variant: 'destructive' });
       return false;
     }
     toast({ title: 'Success', description: 'Event updated.' });
@@ -102,7 +102,7 @@ export function useTimetable() {
     const { error } = await supabase.from('timetable_entries').delete().eq('id', id);
     if (error) {
       console.error('Error deleting entry:', error);
-      toast({ title: 'Error deleting event', description: "Failed to delete event. Check your database's security policies.", variant: 'destructive' });
+      toast({ title: 'Error deleting event', description: error.message, variant: 'destructive' });
       return false;
     }
     toast({ title: 'Success', description: 'Event deleted.' });
