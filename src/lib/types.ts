@@ -15,9 +15,36 @@ export type Database = {
   public: {
     Tables: {
       timetable_entries: {
-        Row: TimetableEntry;
-        Insert: Omit<TimetableEntry, 'id' | 'created_at'>;
-        Update: Partial<Omit<TimetableEntry, 'id' | 'created_at'>>;
+        Row: {
+          id: string;
+          created_at: string;
+          day_of_week: number;
+          start_time: string; // Assuming TIME without time zone is treated as string
+          end_time: string; // Assuming TIME without time zone is treated as string
+          title: string;
+          description: string | null;
+          user_id: string | null;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          day_of_week: number;
+          start_time: string;
+          end_time: string;
+          title: string;
+          description?: string | null;
+          user_id?: string | null;
+        };
+        Update: {
+          id?: string;
+          created_at?: string;
+          day_of_week?: number;
+          start_time?: string;
+          end_time?: string;
+          title?: string;
+          description?: string | null;
+          user_id?: string | null;
+        };
       };
     };
     Functions: {
