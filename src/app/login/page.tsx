@@ -18,16 +18,8 @@ import { BouncingBallLoader } from '@/components/ui/bouncing-ball-loader';
 
 export default function LoginPage() {
   const [state, formAction, isPending] = useActionState(login, undefined);
-  const [showContent, setShowContent] = useState(false);
 
-  useEffect(() => {
-    if (!isPending) {
-      setShowContent(true);
-    }
-  }, [isPending]);
-
-
-  if (!showContent) {
+  if (isPending) {
     return (
       <div className="flex h-screen w-full flex-col items-center justify-center bg-background px-16">
         <BouncingBallLoader showContent={!isPending} />
@@ -68,7 +60,7 @@ export default function LoginPage() {
                 <AlertDescription>{state.error}</AlertDescription>
               </Alert>
             )}
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full" disabled={isPending}>
               Login
             </Button>
           </form>
