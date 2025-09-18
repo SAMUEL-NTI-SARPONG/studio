@@ -196,13 +196,6 @@ export function TimetableGrid() {
                               'text-accent-foreground/80': !isPast && !isOwn,
                               'text-red-900/80': isPast
                           })}>{entry.description}</p>
-                           <p className={cn("text-xs italic truncate opacity-70", {
-                            'text-primary': !isPast && isOwn, 
-                            'text-accent-foreground': !isPast && !isOwn,
-                            'text-red-900/70': isPast
-                          })}>
-                            {entry.user_email.split('@')[0]}
-                          </p>
                           {isActive && <PartnerStatus entry={entry} updateCheckIn={updateCheckIn} />}
                         </div>
                       );
