@@ -6,10 +6,10 @@ import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { useTimetable } from '@/hooks/use-timetable';
 import { DAYS_OF_WEEK } from '@/lib/constants';
 import type { TimetableEntry } from '@/lib/types';
-import { HourModal } from './hour-modal';
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 import { useUser } from '@/contexts/user-context';
+import { useModal } from '@/hooks/use-modal';
 
 const parseTime = (time: string): number => {
   const [hours, minutes] = time.split(':').map(Number);
@@ -64,10 +64,7 @@ const CurrentTimeIndicator = ({ dayIndex }: { dayIndex: number }) => {
 export function TimetableGrid() {
   const { entries, loading } = useTimetable();
   const { user } = useUser();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedEntry, setSelectedEntry] = useState<TimetableEntry | null>(null);
-  const [selectedDay, setSelectedDay] = useState<number>(new Date().getDay());
-  const [selectedTime, setSelectedTime] = useState<string>('00:00');
+  const { openModal } = useModal();
   const [now, setNow] = useState(new Date());
 
   const today = new Date().getDay();
@@ -82,16 +79,15 @@ export function TimetableGrid() {
   }, []);
 
   const handleSlotClick = (day: number, hour: number) => {
-    setSelectedDay(day);
-    setSelectedTime(`${String(hour).padStart(2, '0')}:00`);
-    setSelectedEntry(null);
-    setIsModalOpen(true);
+    openModal({
+      entry: null,
+      day,
+      time: `${String(hour).padStart(2, '0')}:00`,
+    });
   };
 
   const handleEntryClick = (entry: TimetableEntry) => {
-    setSelectedEntry(entry);
-    setSelectedDay(entry.day_of_week);
-    setIsModalOpen(true);
+    openModal({ entry, day: entry.day_of_week });
   };
 
   const entriesByDay = useMemo(() => {
@@ -127,7 +123,7 @@ export function TimetableGrid() {
           let hasOverlap = false;
           for (let j = 0; j < i; j++) {
             const otherEntry = visualInfo[j];
-            if (otherEntry.column === col && currentEntry.start < otherEntry.end) {
+            if (otherEntry.column === col && currentEntry.start < otherEntry.end && currentEntry.end > otherEntry.start) {
               hasOverlap = true;
               break;
             }
@@ -180,9 +176,7 @@ export function TimetableGrid() {
     return grouped;
   }, [entries]);
 
-  useEffect(() => {
-    setSelectedDay(DAYS_OF_WEEK.indexOf(activeTab));
-  }, [activeTab]);
+  const activeDayIndex = useMemo(() => DAYS_OF_WEEK.indexOf(activeTab), [activeTab]);
 
 
   return (
@@ -221,8 +215,9 @@ export function TimetableGrid() {
                   
                   const columnCount = (entry as any).columnCount || 1;
                   const column = (entry as any).column || 0;
-                  const width = 100 / columnCount;
-                  const left = column * width;
+                  const width = `calc(${100 / columnCount}% - 2px)`;
+                  const left = `calc(${column * (100 / columnCount)}% + 1px)`;
+
 
                   const endTime = getDateTime(dayIndex, entry.end_time);
                   const isPast = now > endTime;
@@ -246,8 +241,8 @@ export function TimetableGrid() {
                       style={{
                         top: `${top}%`,
                         height: `${height}%`,
-                        left: `${left}%`,
-                        width: `${width}%`,
+                        left: left,
+                        width: width,
                         minHeight: '1.5rem'
                       }}
                       onClick={() => handleEntryClick(entry)}
@@ -277,13 +272,6 @@ export function TimetableGrid() {
           </TabsContent>
         ))}
       </Tabs>
-      <HourModal
-        isOpen={isModalOpen}
-        setIsOpen={setIsModalOpen}
-        entry={selectedEntry}
-        day={selectedDay}
-        time={selectedTime}
-      />
     </>
   );
 }

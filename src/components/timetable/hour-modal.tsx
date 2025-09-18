@@ -21,7 +21,6 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useTimetable } from '@/hooks/use-timetable';
-import type { TimetableEntry } from '@/lib/types';
 import { Loader2, Trash2 } from 'lucide-react';
 import {
   Select,
@@ -33,15 +32,7 @@ import {
 import { Textarea } from '../ui/textarea';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { useUser } from '@/contexts/user-context';
-import { cn } from '@/lib/utils';
-
-type HourModalProps = {
-  isOpen: boolean;
-  setIsOpen: (isOpen: boolean) => void;
-  entry: TimetableEntry | null;
-  day: number;
-  time: string;
-};
+import { useModal } from '@/hooks/use-modal';
 
 const formSchema = z
   .object({
@@ -87,16 +78,12 @@ const generateTimeSlots = () => {
 
 const timeSlots = generateTimeSlots();
 
-export function HourModal({
-  isOpen,
-  setIsOpen,
-  entry,
-  day,
-  time,
-}: HourModalProps) {
+export function HourModal() {
+  const { modalState, closeModal } = useModal();
   const { addEntry, updateEntry, deleteEntry } = useTimetable();
   const { user } = useUser();
   const [isDeleting, setIsDeleting] = useState(false);
+  const { isOpen, day, time, entry } = modalState || {};
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -120,7 +107,7 @@ export function HourModal({
           type: entry.user_id ? 'personal' : 'general',
         });
       } else {
-        const startHour = parseInt(time.split(':')[0], 10);
+        const startHour = parseInt(time!.split(':')[0], 10);
         const startMinute = 0;
 
         let endHour = startHour + 1;
@@ -146,6 +133,10 @@ export function HourModal({
     }
   }, [entry, time, form, isOpen]);
 
+  if (!isOpen) {
+    return null;
+  }
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const entryData = {
       title: values.title,
@@ -160,10 +151,10 @@ export function HourModal({
     if (entry) {
       success = await updateEntry(entry.id, entryData);
     } else {
-      success = await addEntry(entryData);
+      success = await addEntry(entryData as any);
     }
     if (success) {
-      setIsOpen(false);
+      closeModal();
     }
   };
 
@@ -172,16 +163,18 @@ export function HourModal({
     setIsDeleting(true);
     const success = await deleteEntry(entry.id);
     if (success) {
-      setIsOpen(false);
+      closeModal();
     }
     setIsDeleting(false);
   };
   
   const canModify =
     !entry || entry.user_id === null || entry.user_id === user?.id;
+  
+  const isNewEntry = !entry;
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={closeModal}>
       <DialogContent className="sm:max-w-lg bg-card/95 backdrop-blur-sm">
         <DialogHeader>
           <DialogTitle className="text-lg font-medium tracking-tight">
@@ -266,7 +259,7 @@ export function HourModal({
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                         value={field.value}
-                        disabled={!entry} // Disable when creating a new entry
+                        disabled={isNewEntry}
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -348,7 +341,7 @@ export function HourModal({
                   {entry ? 'Save Changes' : 'Save'}
                 </Button>
                ) : (
-                <Button type="button" onClick={() => setIsOpen(false)}>Close</Button>
+                <Button type="button" onClick={closeModal}>Close</Button>
                )}
             </div>
           </form>
