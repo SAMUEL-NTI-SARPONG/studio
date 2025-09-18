@@ -111,7 +111,7 @@ export function TimetableGrid() {
                   </div>
                 ))}
               </div>
-              <div className="relative flex-1 bg-card border-l rounded-lg border">
+              <div className="relative flex-1 bg-card border-l border">
                 {Array.from({ length: 24 }).map((_, hour) => (
                   <div
                     key={hour}
