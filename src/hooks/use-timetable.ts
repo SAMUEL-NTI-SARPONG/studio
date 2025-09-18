@@ -59,7 +59,7 @@ export function useTimetable() {
     };
   }, [supabase, setEntries]);
 
-  const addEntry = async (newEntry: Omit<TimetableEntry, 'id' | 'created_at' | 'user_id' | 'user_email'>) => {
+  const addEntry = async (newEntry: Omit<TimetableEntry, 'id' | 'created_at' | 'user_id' | 'user_email' | 'description'>) => {
     const fullEntry = {
         ...newEntry,
         user_id: '00000000-0000-0000-0000-000000000000', // Anonymous user
@@ -69,14 +69,14 @@ export function useTimetable() {
     const { error } = await supabase.from('timetable_entries').insert(fullEntry);
     if (error) {
       console.error('Error adding entry:', error);
-      toast({ title: 'Error saving event', description: error.message, variant: 'destructive' });
+      toast({ title: 'Error saving event', description: "Failed to save the event. This is likely due to database security rules. Please check your Supabase Row Level Security policies to ensure anonymous users have permission to add entries.", variant: 'destructive' });
       return false;
     }
     toast({ title: 'Success', description: 'Event added to timetable.' });
     return true;
   };
 
-  const updateEntry = async (id: string, updatedFields: Partial<Omit<TimetableEntry, 'id' | 'created_at' | 'user_id'>>) => {
+  const updateEntry = async (id: string, updatedFields: Partial<Omit<TimetableEntry, 'id' | 'created_at' | 'user_id' | 'description'>>) => {
     const { error } = await supabase.from('timetable_entries').update(updatedFields).eq('id', id);
      if (error) {
       console.error('Error updating entry:', error);
