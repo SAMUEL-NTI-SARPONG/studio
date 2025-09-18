@@ -43,49 +43,6 @@ export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
         <div className="flex items-center space-x-2">
           <TickingClock />
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon">
-                <Trash className="h-4 w-4" />
-                <span className="sr-only">Clear Schedule</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-64" align="end">
-              <DropdownMenuLabel>Clear Schedule</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger>
-                  My Schedule
-                </DropdownMenuSubTrigger>
-                <DropdownMenuSubContent>
-                  <DropdownMenuItem onClick={() => handleClear('personal', 'day')}>
-                    <Calendar className="mr-2 h-4 w-4" />
-                    <span>For Today</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleClear('personal', 'all')}>
-                    <CalendarDays className="mr-2 h-4 w-4" />
-                    <span>For All Days</span>
-                  </DropdownMenuItem>
-                </DropdownMenuSubContent>
-              </DropdownMenuSub>
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger>
-                  General Schedule
-                </DropdownMenuSubTrigger>
-                <DropdownMenuSubContent>
-                  <DropdownMenuItem onClick={() => handleClear('general', 'day')}>
-                    <Calendar className="mr-2 h-4 w-4" />
-                    <span>For Today</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleClear('general', 'all')}>
-                    <CalendarDays className="mr-2 h-4 w-4" />
-                    <span>For All Days</span>
-                  </DropdownMenuItem>
-                </DropdownMenuSubContent>
-              </DropdownMenuSub>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
           {user && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -105,6 +62,47 @@ export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
                     </p>
                   </div>
                 </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger>
+                      <Trash className="mr-2 h-4 w-4" />
+                      Clear Schedule
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent className="w-48">
+                      <DropdownMenuSub>
+                        <DropdownMenuSubTrigger>
+                          My Schedule
+                        </DropdownMenuSubTrigger>
+                        <DropdownMenuSubContent>
+                          <DropdownMenuItem onClick={() => handleClear('personal', 'day')}>
+                            <Calendar className="mr-2 h-4 w-4" />
+                            <span>For Today</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleClear('personal', 'all')}>
+                            <CalendarDays className="mr-2 h-4 w-4" />
+                            <span>For All Days</span>
+                          </DropdownMenuItem>
+                        </DropdownMenuSubContent>
+                      </DropdownMenuSub>
+                      <DropdownMenuSub>
+                        <DropdownMenuSubTrigger>
+                          General Schedule
+                        </DropdownMenuSubTrigger>
+                        <DropdownMenuSubContent>
+                          <DropdownMenuItem onClick={() => handleClear('general', 'day')}>
+                            <Calendar className="mr-2 h-4 w-4" />
+                            <span>For Today</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleClear('general', 'all')}>
+                            <CalendarDays className="mr-2 h-4 w-4" />
+                            <span>For All Days</span>
+                          </DropdownMenuItem>
+                        </DropdownMenuSubContent>
+                      </DropdownMenuSub>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+                </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout}>
                   <LogOut className="mr-2 h-4 w-4" />
