@@ -1,3 +1,4 @@
+
 import type {NextConfig} from 'next';
 import withPWA from '@ducanh2912/next-pwa';
 
@@ -39,4 +40,11 @@ export default withPWA({
   register: true,
   skipWaiting: true,
   customWorker: 'worker',
+  dynamicStartUrl: false, // We will use our own manifest.
+  fallbacks: {}, // We don't need fallbacks for this app.
+  cacheStartUrl: false,
+  generateSW: true,
+  sw: 'sw.js',
+  // Turn off manifest generation
+  manifest: false,
 })(nextConfig);
