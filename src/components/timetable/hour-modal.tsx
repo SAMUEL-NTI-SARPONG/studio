@@ -11,7 +11,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-  DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import {
@@ -26,7 +25,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useTimetable } from '@/hooks/use-timetable';
 import type { TimetableEntry } from '@/lib/types';
-import { Loader2, Trash2, CalendarDays, Clock } from 'lucide-react';
+import { Loader2, Trash2, Clock } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
 type HourModalProps = {
@@ -150,45 +149,39 @@ export function HourModal({ isOpen, setIsOpen, entry, day, time }: HourModalProp
                   )}
                 />
 
-                <div>
-                    <FormLabel className="flex items-center gap-2 mb-3">
-                        <CalendarDays className="h-4 w-4 text-muted-foreground"/>
-                        <span className="text-sm font-medium">When</span>
-                    </FormLabel>
-                    <div className="grid grid-cols-2 gap-4">
-                        <FormField
-                        control={form.control}
-                        name="start_time"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel className="text-xs text-muted-foreground">Start Time</FormLabel>
-                            <FormControl>
-                                <div className="relative">
-                                    <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                    <Input type="time" className="pl-10" {...field} />
-                                </div>
-                            </FormControl>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                        />
-                        <FormField
-                        control={form.control}
-                        name="end_time"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel className="text-xs text-muted-foreground">End Time</FormLabel>
-                            <FormControl>
-                                <div className="relative">
-                                    <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                    <Input type="time" className="pl-10" {...field} />
-                                </div>
-                            </FormControl>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                        />
-                    </div>
+                <div className="grid grid-cols-2 gap-4 pt-2">
+                    <FormField
+                    control={form.control}
+                    name="start_time"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel className="text-xs text-muted-foreground">Start Time</FormLabel>
+                        <FormControl>
+                            <div className="relative">
+                                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Input type="time" className="pl-10" {...field} />
+                            </div>
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                    <FormField
+                    control={form.control}
+                    name="end_time"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel className="text-xs text-muted-foreground">End Time</FormLabel>
+                        <FormControl>
+                            <div className="relative">
+                                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Input type="time" className="pl-10" {...field} />
+                            </div>
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
                 </div>
               </div>
               <DialogFooter className="pt-4 flex-col sm:flex-row sm:justify-between w-full">
