@@ -29,6 +29,14 @@ const getDateTime = (day: number, time: string): Date => {
   return date;
 };
 
+const formatTime = (time: string): string => {
+  const [hours, minutes] = time.split(':').map(Number);
+  const period = hours >= 12 ? 'PM' : 'AM';
+  const hour12 = hours % 12 === 0 ? 12 : hours % 12;
+  return `${hour12}:${String(minutes).padStart(2, '0')} ${period}`;
+};
+
+
 const CurrentTimeIndicator = ({ dayIndex, gridHours }: { dayIndex: number, gridHours: number[] }) => {
   const [now, setNow] = useState(new Date());
 
@@ -256,7 +264,7 @@ export function TimetableGrid({ activeTab }: { activeTab: string }) {
                     <div
                     tabIndex={0}
                     className={cn(
-                        'absolute p-2 cursor-pointer transition-all duration-200 ease-in-out flex flex-col items-start justify-start rounded-lg shadow-inner',
+                        'absolute p-2 cursor-pointer transition-all duration-200 ease-in-out flex flex-col items-start justify-start rounded-lg shadow-inner overflow-hidden',
                         'focus:outline-none focus:ring-2 focus:ring-ring focus:z-10',
                         {
                         'opacity-60': isPast,
@@ -280,6 +288,15 @@ export function TimetableGrid({ activeTab }: { activeTab: string }) {
                     >
                         {entry.title}
                     </p>
+                    {duration >= 45 && (
+                      <p
+                        className={cn('text-white/90', fontSizeClass, {
+                          'text-gray-200/90': isPast,
+                        })}
+                      >
+                        {formatTime(entry.start_time)} - {formatTime(entry.end_time)}
+                      </p>
+                    )}
                     {engagedUsers.length > 0 && (
                         <div className="absolute bottom-1 right-1 flex items-center space-x-1">
                         <TooltipProvider>
