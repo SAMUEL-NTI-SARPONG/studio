@@ -8,7 +8,23 @@ import { cn } from "@/lib/utils"
 
 const DropdownMenu = DropdownMenuPrimitive.Root
 
-const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger
+const DropdownMenuTrigger = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.Trigger>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Trigger>
+>(({ onClick, ...props }, ref) => {
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
+      window.navigator.vibrate(50);
+    }
+    if (onClick) {
+      onClick(event);
+    }
+  };
+
+  return <DropdownMenuPrimitive.Trigger ref={ref} onClick={handleClick} {...props} />;
+});
+DropdownMenuTrigger.displayName = DropdownMenuPrimitive.Trigger.displayName
+
 
 const DropdownMenuGroup = DropdownMenuPrimitive.Group
 
