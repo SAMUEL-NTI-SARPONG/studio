@@ -25,7 +25,6 @@ import { useClearSchedule } from '@/hooks/use-clear-schedule';
 import { useProfileModal } from '@/hooks/use-profile-modal';
 import { useTimetableContext } from '@/contexts/timetable-context';
 import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
 
 export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
   const { user, signOut } = useUser();
@@ -60,14 +59,11 @@ export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
         <div className="flex items-center space-x-4">
           <TickingClock />
 
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="filter-switch"
-              checked={isFiltered}
-              onCheckedChange={setIsFiltered}
-            />
-            <Label htmlFor="filter-switch">Filter</Label>
-          </div>
+          <Switch
+            id="filter-switch"
+            checked={isFiltered}
+            onCheckedChange={setIsFiltered}
+          />
 
           {user && (
             <>
