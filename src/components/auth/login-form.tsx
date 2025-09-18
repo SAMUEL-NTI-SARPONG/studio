@@ -62,11 +62,15 @@ export function LoginForm() {
     setLoading(false);
   }
 
+  const handleGoToTimetable = () => {
+    window.location.href = '/timetable';
+  };
+
   if (loginSuccess) {
     return (
         <div className="space-y-4 pt-4 text-center">
             <p className="text-foreground">Authentication successful!</p>
-            <Button className="w-full" onClick={() => router.push('/timetable')}>
+            <Button className="w-full" onClick={handleGoToTimetable}>
                 Go to Timetable
             </Button>
         </div>
