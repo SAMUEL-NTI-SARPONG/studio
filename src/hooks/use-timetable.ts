@@ -3,19 +3,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { TimetableEntry } from '@/lib/types';
 import { useToast } from './use-toast';
-import { createClient } from '@/lib/supabase/client';
+import { useAuthContext } from '@/context/auth-provider';
 
 export function useTimetable() {
-  const supabase = createClient();
+  const { supabase, user } = useAuthContext();
   const { toast } = useToast();
   const [entries, setEntries] = useState<TimetableEntry[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // Mock user for UI development without auth
-  const user = {
-    id: 'mock-user-id',
-    email: 'user@example.com',
-  };
 
   const fetchEntries = useCallback(async () => {
     setLoading(true);
@@ -24,10 +18,10 @@ export function useTimetable() {
       console.error('Error fetching timetable entries:', error);
       toast({
         title: 'Error',
-        description: 'Could not fetch timetable data. Using mock data.',
+        description: 'Could not fetch timetable data.',
         variant: 'destructive',
       });
-      setEntries([]); // Or set mock data
+      setEntries([]);
     } else {
       setEntries(data || []);
     }

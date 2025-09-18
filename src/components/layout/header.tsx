@@ -2,13 +2,12 @@
 import { CalendarCheck } from 'lucide-react';
 import { TickingClock } from '../timetable/ticking-clock';
 import { TimetableHeader } from '../timetable/timetable-header';
+import { useAuthContext } from '@/context/auth-provider';
+import { UserNav } from './user-nav';
+import { ConnectionStatus } from '../timetable/connection-status';
 
-type HeaderProps = {
-  activeTab: string;
-  setActiveTab: (value: string) => void;
-};
-
-export default function Header({ activeTab, setActiveTab }: HeaderProps) {
+export default function Header() {
+  const { activeTab, setActiveTab, user, loading } = useAuthContext();
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-card">
       <div className="container mx-auto flex h-16 items-center px-4">
@@ -22,7 +21,9 @@ export default function Header({ activeTab, setActiveTab }: HeaderProps) {
         <div className="flex items-center justify-end space-x-4">
           <div className="flex items-center space-x-2">
             <TickingClock />
+            <ConnectionStatus />
           </div>
+          {!loading && user && <UserNav />}
         </div>
       </div>
     </header>
