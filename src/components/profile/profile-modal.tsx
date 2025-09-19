@@ -30,7 +30,6 @@ import { useToast } from '@/hooks/use-toast';
 const profileFormSchema = z.object({
   name: z.string().min(1, 'Name is required').max(50, 'Name is too long'),
   personalColor: z.string(),
-  generalColor: z.string(),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -51,7 +50,6 @@ export function ProfileModal() {
     defaultValues: {
       name: '',
       personalColor: '',
-      generalColor: '',
     },
   });
 
@@ -60,7 +58,6 @@ export function ProfileModal() {
       form.reset({
         name: user.name || '',
         personalColor: colors.personal,
-        generalColor: colors.general,
       });
     }
   }, [user, colors, isOpen, form]);
@@ -71,7 +68,7 @@ export function ProfileModal() {
     updateUserName(data.name);
     setColors({
         personal: data.personalColor,
-        general: data.generalColor,
+        general: colors.general, // Keep general color from context
     });
     toast({
         title: 'Profile Updated!',
@@ -132,35 +129,6 @@ export function ProfileModal() {
               )}
             />
             
-            <FormField
-              control={form.control}
-              name="generalColor"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>General Schedule Color</FormLabel>
-                   <FormControl>
-                        <div className="grid grid-cols-6 gap-2">
-                        {COLOR_SWATCHES.map(color => (
-                            <button
-                            type="button"
-                            key={color}
-                            className={cn(
-                                'h-8 w-8 rounded-full border-2 flex items-center justify-center',
-                                field.value === color ? 'border-primary' : 'border-transparent'
-                            )}
-                            style={{ backgroundColor: color }}
-                            onClick={() => field.onChange(color)}
-                            >
-                            {field.value === color && <Check className="h-4 w-4 text-white" />}
-                            </button>
-                        ))}
-                        </div>
-                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             <div className="flex justify-end">
               <Button type="submit" disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

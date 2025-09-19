@@ -33,7 +33,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const supabase = createClient();
   const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
-  const [colors, setColorsState] = useState<UserColors>({ personal: '#4299e1', general: '#4a5568' });
+  const [colors, setColorsState] = useState<UserColors>({ personal: '#4299e1', general: '#0D5EA6' });
 
   const mapSupabaseUserToAppUser = (supabaseUser: SupabaseUser): AppUser => {
     // For now, we'll create a simple AppUser from the SupabaseUser.
@@ -76,15 +76,22 @@ export function UserProvider({ children }: { children: ReactNode }) {
     if (user) {
       const storedColors = localStorage.getItem(`user-colors-${user.id}`);
       if (storedColors) {
-        setColorsState(JSON.parse(storedColors));
+        // We only care about the personal color from storage now.
+        const parsedColors = JSON.parse(storedColors);
+        setColorsState(currentColors => ({
+          ...currentColors,
+          personal: parsedColors.personal || '#4299e1'
+        }));
       }
     }
   }, [user?.id]);
 
   const setColors = (newColors: UserColors) => {
     if (user) {
-      localStorage.setItem(`user-colors-${user.id}`, JSON.stringify(newColors));
-      setColorsState(newColors);
+      // Only store and update the personal color.
+      const colorsToStore = { personal: newColors.personal };
+      localStorage.setItem(`user-colors-${user.id}`, JSON.stringify(colorsToStore));
+      setColorsState(currentColors => ({...currentColors, personal: newColors.personal}));
     }
   };
 
