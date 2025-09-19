@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { Tabs, TabsContent } from '@/components/ui/tabs';
+import { TabsContent } from '@/components/ui/tabs';
 import { useTimetable } from '@/hooks/use-timetable';
 import { DAYS_OF_WEEK } from '@/lib/constants';
 import type { TimetableEntry } from '@/lib/types';
@@ -10,7 +10,6 @@ import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 import { useUser } from '@/contexts/user-context';
 import { EventPopover } from './event-popover';
-import { useModal } from '@/hooks/use-modal';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { useTimetableContext } from '@/contexts/timetable-context';
@@ -35,28 +34,6 @@ const formatTime = (time: string): string => {
   const hour12 = hours % 12 === 0 ? 12 : hours % 12;
   return `${hour12}:${String(minutes).padStart(2, '0')} ${period}`;
 };
-
-const USER_COLORS = [
-  '#ef4444', '#f97316', '#eab308', '#84cc16', '#22c55e', '#14b8a6',
-  '#0ea5e9', '#3b82f6', '#8b5cf6', '#d946ef', '#ec4899', '#78716c'
-];
-
-const hashCode = (str: string) => {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash = hash & hash; // Convert to 32bit integer
-  }
-  return hash;
-}
-
-const getColorForUser = (userId: string) => {
-  const hash = hashCode(userId);
-  const index = Math.abs(hash) % USER_COLORS.length;
-  return USER_COLORS[index];
-};
-
 
 const CurrentTimeIndicator = ({ dayIndex, gridHours }: { dayIndex: number, gridHours: number[] }) => {
   const [now, setNow] = useState(new Date());
@@ -97,7 +74,6 @@ const CurrentTimeIndicator = ({ dayIndex, gridHours }: { dayIndex: number, gridH
 export function TimetableGrid({ activeTab }: { activeTab: string }) {
   const { entries, loading } = useTimetable();
   const { user, colors } = useUser();
-  const { openModal } = useModal();
   const { isFiltered } = useTimetableContext();
   const [now, setNow] = useState(new Date());
   
@@ -266,10 +242,7 @@ export function TimetableGrid({ activeTab }: { activeTab: string }) {
                     ? 'text-xs'
                     : 'text-sm';
                 
-                const personalColor = user?.id === entry.user_id 
-                    ? colors.personal 
-                    : getColorForUser(entry.user_id || '');
-                const eventColor = isPersonal ? personalColor : colors.general;
+                const eventColor = isPersonal ? (entry.user_color || colors.personal) : colors.general;
 
                 const engagedUsers = (entry.engaging_user_ids || [])
                 .map(userId => ({ id: userId, name: 'User', avatarUrl: `https://picsum.photos/seed/${userId}/200/200`}));

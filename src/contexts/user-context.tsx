@@ -8,9 +8,10 @@ import type { User as SupabaseUser } from '@supabase/supabase-js';
 // This is a more app-specific user type.
 export type AppUser = {
   id: string;
-  name: string; // We can enrich this from a 'profiles' table later.
+  name: string;
   email: string;
-  avatarUrl: string; // This can also come from a profile.
+  avatarUrl: string;
+  personal_color: string;
 };
 
 export type UserColors = {
@@ -22,7 +23,7 @@ type UserContextType = {
   user: AppUser | null;
   loading: boolean;
   colors: UserColors;
-  setColors: (colors: UserColors) => void;
+  setColors: (colors: Pick<UserColors, 'personal'>) => void;
   updateUserName: (newName: string) => void;
   signOut: () => Promise<void>;
   isInitialColorPickerOpen: boolean;
@@ -35,15 +36,17 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const supabase = createClient();
   const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
-  const [colors, setColorsState] = useState<UserColors>({ personal: '#4299e1', general: '#000000' });
+  const [colors, setColorsState] = useState<UserColors>({ personal: '#84cc16', general: '#000000' });
   const [isInitialColorPickerOpen, setInitialColorPickerOpen] = useState(false);
 
   const mapSupabaseUserToAppUser = (supabaseUser: SupabaseUser): AppUser => {
+    const personalColor = supabaseUser.user_metadata?.personal_color || '#84cc16';
     return {
       id: supabaseUser.id,
       email: supabaseUser.email || '',
-      name: supabaseUser.email?.split('@')[0] || 'User',
+      name: supabaseUser.user_metadata?.name || supabaseUser.email?.split('@')[0] || 'User',
       avatarUrl: `https://picsum.photos/seed/${supabaseUser.id}/200/200`,
+      personal_color: personalColor,
     };
   };
   
@@ -52,6 +55,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     if(session?.user){
       const appUser = mapSupabaseUserToAppUser(session.user);
       setUser(appUser);
+      setColorsState(prev => ({ ...prev, personal: appUser.personal_color }));
     }
     setLoading(false);
   }, [supabase.auth]);
@@ -62,49 +66,47 @@ export function UserProvider({ children }: { children: ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session?.user) {
+      setLoading(true);
+      if (session?.user) {
         const appUser = mapSupabaseUserToAppUser(session.user);
         setUser(appUser);
-      } else if (event === 'SIGNED_OUT') {
+        setColorsState(prev => ({ ...prev, personal: appUser.personal_color }));
+        if (!session.user.user_metadata?.personal_color) {
+          setInitialColorPickerOpen(true);
+        }
+      } else {
         setUser(null);
+        setInitialColorPickerOpen(false);
       }
+      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
-  }, [supabase, getSession]);
+  }, [supabase.auth, getSession]);
 
-  useEffect(() => {
+  const setColors = async (newColors: Pick<UserColors, 'personal'>) => {
     if (user) {
-      const storedColors = localStorage.getItem(`user-colors-${user.id}`);
-      const hasChosenInitialColor = localStorage.getItem(`has-chosen-initial-color-${user.id}`);
-
-      if (storedColors) {
-        const parsedColors = JSON.parse(storedColors);
-        setColorsState(currentColors => ({
-          ...currentColors,
-          personal: parsedColors.personal || '#4299e1'
-        }));
-      }
-
-      if (!hasChosenInitialColor) {
-        setInitialColorPickerOpen(true);
-      }
-    }
-  }, [user?.id]);
-
-  const setColors = (newColors: UserColors) => {
-    if (user) {
-      const colorsToStore = { personal: newColors.personal };
-      localStorage.setItem(`user-colors-${user.id}`, JSON.stringify(colorsToStore));
-      localStorage.setItem(`has-chosen-initial-color-${user.id}`, 'true');
+      setUser(prev => prev ? ({ ...prev, personal_color: newColors.personal }) : null);
       setColorsState(currentColors => ({...currentColors, personal: newColors.personal}));
+      
+      const { error } = await supabase.auth.updateUser({
+          data: { ...user.user_metadata, personal_color: newColors.personal }
+      });
+      if(error){
+          console.error("Error saving color to db");
+      }
     }
   };
 
-  const updateUserName = (newName: string) => {
+  const updateUserName = async (newName: string) => {
     if (user) {
-      const updatedUser = { ...user, name: newName };
-      setUser(updatedUser);
+        setUser(prev => prev ? ({ ...prev, name: newName }) : null);
+        const { error } = await supabase.auth.updateUser({
+            data: { ...user.user_metadata, name: newName }
+        });
+        if(error) {
+            console.error("Error saving name to db");
+        }
     }
   };
 
@@ -113,7 +115,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <UserContext.Provider value={{ user, loading, colors, setColors, updateUserName, signOut, isInitialColorPickerOpen, setInitialColorPickerOpen }}>
+    <UserContext.Provider value={{ user, loading, colors: { personal: user?.personal_color || '#84cc16', general: colors.general }, setColors, updateUserName, signOut, isInitialColorPickerOpen, setInitialColorPickerOpen }}>
       {children}
     </UserContext.Provider>
   );

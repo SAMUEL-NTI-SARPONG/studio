@@ -17,7 +17,7 @@ type TimetableContextType = {
   entries: TimetableEntry[];
   loading: boolean;
   isOffline: boolean;
-  addEntry: (newEntry: Omit<TimetableEntry, 'id' | 'created_at' | 'engaging_user_ids'>) => Promise<boolean>;
+  addEntry: (newEntry: Omit<TimetableEntry, 'id' | 'created_at' | 'engaging_user_ids' | 'user_name' | 'user_color'>) => Promise<boolean>;
   updateEntry: (id: string, updatedFields: Partial<Omit<TimetableEntry, 'id' | 'created_at'>>) => Promise<boolean>;
   deleteEntry: (id: string) => Promise<boolean>;
   clearPersonalScheduleForDay: (dayOfWeek: number) => Promise<boolean>;
@@ -97,7 +97,6 @@ export function useTimetableData() {
     setActionQueue([]); // Clear queue optimistically
 
     for (const action of currentQueue) {
-      let success = false;
       try {
         if (action.type === 'add') {
           const { error } = await supabase.from('timetable_entries').insert(action.payload as any);
@@ -121,7 +120,6 @@ export function useTimetableData() {
             if (error) throw error;
           }
         }
-        success = true;
       } catch (error: any) {
         console.error('Failed to process queued action:', action, error);
         // If an action fails, put it back in the queue
@@ -136,7 +134,7 @@ export function useTimetableData() {
     await fetchInitialEntries(false);
     toast({ title: 'Sync Complete!', description: 'Your schedule is up to date.', variant: 'achievement'});
 
-  }, [actionQueue, isOffline, supabase, user]);
+  }, [actionQueue, isOffline, supabase]);
 
   const fetchInitialEntries = useCallback(async (showLoading = true) => {
     if (isOffline) {
@@ -201,10 +199,18 @@ export function useTimetableData() {
   }, [user, toast, supabase, isOffline, processQueue, fetchInitialEntries]);
   
 
-  const addEntry = useCallback(async (newEntry: Omit<TimetableEntry, 'id' | 'created_at' | 'engaging_user_ids'>) => {
+  const addEntry = useCallback(async (newEntry: Omit<TimetableEntry, 'id' | 'created_at' | 'engaging_user_ids' | 'user_name' | 'user_color'>) => {
+    if (!user) return false;
+
+    const entryWithUserData = {
+      ...newEntry,
+      user_name: newEntry.user_id ? user.name : null,
+      user_color: newEntry.user_id ? user.personal_color : null,
+    };
+
     const tempId = `offline-${Date.now()}`;
     const optimisticEntry: TimetableEntry = {
-      ...newEntry,
+      ...entryWithUserData,
       id: tempId,
       created_at: new Date().toISOString(),
       engaging_user_ids: [],
@@ -213,12 +219,12 @@ export function useTimetableData() {
     setEntries(prev => [...prev, optimisticEntry]);
     
     if (isOffline) {
-      setActionQueue(prev => [...prev, { type: 'add', payload: newEntry }]);
+      setActionQueue(prev => [...prev, { type: 'add', payload: entryWithUserData }]);
       toast({ title: 'Saved Locally', description: 'Event will be synced when you\'re back online.' });
       return true;
     }
     
-    const { error } = await supabase.from('timetable_entries').insert(newEntry as any);
+    const { error } = await supabase.from('timetable_entries').insert(entryWithUserData as any);
     if (error) {
       console.error('Error adding entry:', error);
       toast({ title: 'Error: Could not add event', description: error.message, variant: 'destructive'});
@@ -228,7 +234,7 @@ export function useTimetableData() {
     await fetchInitialEntries(false); // Re-sync with server to get the real ID
     toast({ title: 'Event Added!', description: 'A new event is on the timetable.', variant: 'achievement' });
     return true;
-  }, [supabase, toast, isOffline, fetchInitialEntries]);
+  }, [supabase, toast, isOffline, fetchInitialEntries, user]);
 
   const updateEntry = useCallback(async (id: string, updatedFields: Partial<Omit<TimetableEntry, 'id' | 'created_at'>>) => {
     const originalEntries = entries;
@@ -380,9 +386,16 @@ export function useTimetableData() {
           start_time: entry.start_time,
           end_time: entry.end_time,
           day_of_week: day,
-          user_id: entry.user_id ? user.id : null,
+          user_id: entry.user_id, // Keep the original user_id
+          user_name: entry.user_name,
+          user_color: entry.user_color,
           engaging_user_ids: [],
         };
+        // If it's the current user's personal event being copied, use their current info
+        if (entry.user_id && entry.user_id === user.id) {
+            newEntry.user_name = user.name;
+            newEntry.user_color = user.personal_color;
+        }
         return newEntry;
       })
     );
@@ -394,13 +407,13 @@ export function useTimetableData() {
     // For offline, we can just run addEntry for each
     if (isOffline) {
         for (const entry of newEntries) {
-            await addEntry(entry);
+            await addEntry(entry as any);
         }
         toast({ title: 'Copied Locally!', description: 'Schedule will be synced when you\'re back online.' });
         return true;
     }
 
-    const { error } = await supabase.from('timetable_entries').insert(newEntries);
+    const { error } = await supabase.from('timetable_entries').insert(newEntries as any);
   
     if (error) {
       toast({ title: 'Error', description: 'Could not copy schedule.', variant: 'destructive' });

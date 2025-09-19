@@ -47,7 +47,7 @@ const COLOR_SWATCHES = [
   // Purples & Indigos
   '#8b5cf6', '#d946ef', '#c4b5fd',
   // Browns
-  '#78716c', '#a16207', '#d2b48c', '#854d0e', '#saddlebrown',
+  '#78716c', '#a16207', '#d2b48c', '#854d0e', '#a52a2a',
 ];
 
 
@@ -80,12 +80,9 @@ export function ProfileModal() {
 
   const handleClose = () => {
     if (isFirstTimeSetup) {
-      // If the user tries to close the initial setup modal without saving,
-      // we can pick a default color for them.
-      if (!localStorage.getItem(`has-chosen-initial-color-${user.id}`)) {
+      if (!user.personal_color || user.personal_color === '#84cc16') {
          setColors({
-           personal: colors.personal || '#84cc16', // Default green
-           general: colors.general,
+           personal: '#84cc16', // Default green
          });
       }
       setInitialColorPickerOpen(false);
@@ -97,7 +94,6 @@ export function ProfileModal() {
     updateUserName(data.name);
     setColors({
         personal: data.personalColor,
-        general: colors.general,
     });
     toast({
         title: 'Profile Updated!',

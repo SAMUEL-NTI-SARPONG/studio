@@ -10,14 +10,12 @@ import { Button } from '@/components/ui/button';
 import type { TimetableEntry } from '@/lib/types';
 import { Trash, UserCheck, Users } from 'lucide-react';
 import { useModal } from '@/hooks/use-modal';
-import { USERS } from '@/lib/users';
 import { Badge } from '../ui/badge';
 import { useState, useMemo } from 'react';
 import { useUser } from '@/contexts/user-context';
 import { useTimetable } from '@/hooks/use-timetable';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
-import { cn } from '@/lib/utils';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -66,10 +64,7 @@ export function EventPopover({
   const engagedUsers = (entry.engaging_user_ids || [])
     .map(userId => ({ id: userId, name: 'User', avatarUrl: `https://picsum.photos/seed/${userId}/200/200`}))
     
-  const owner = useMemo(() => {
-    if (!entry.user_id) return null;
-    return { name: entry.user_id.substring(0, 5), avatarUrl: `https://picsum.photos/seed/${entry.user_id}/200/200` };
-  }, [entry.user_id]);
+  const ownerName = useMemo(() => entry.user_name || 'Unknown User', [entry.user_name]);
 
   return (
     <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
@@ -91,13 +86,13 @@ export function EventPopover({
                 <Badge variant={entry.user_id ? 'secondary' : 'default'} className="text-xs">
                     {entry.user_id ? 'Personal' : 'General'}
                 </Badge>
-                {owner && (
+                {entry.user_id && (
                   <div className="flex items-center gap-1 text-xs text-muted-foreground">
                     <Avatar className="h-4 w-4">
-                        <AvatarImage src={owner.avatarUrl} />
-                        <AvatarFallback>{owner.name.charAt(0)}</AvatarFallback>
+                        <AvatarImage src={`https://picsum.photos/seed/${entry.user_id}/200/200`} />
+                        <AvatarFallback>{ownerName.charAt(0)}</AvatarFallback>
                     </Avatar>
-                    <span>{owner.name}</span>
+                    <span>{ownerName}</span>
                   </div>
                 )}
             </div>

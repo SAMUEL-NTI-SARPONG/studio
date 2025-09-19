@@ -11,6 +11,8 @@ export type TimetableEntry = {
   description: string | null;
   created_at: string;
   engaging_user_ids: string[] | null;
+  user_name: string | null;
+  user_color: string | null;
 };
 
 export type Database = {
@@ -27,6 +29,8 @@ export type Database = {
           description: string | null;
           user_id: string | null;
           engaging_user_ids: string[] | null;
+          user_name: string | null;
+          user_color: string | null;
         };
         Insert: {
           id?: string;
@@ -38,6 +42,8 @@ export type Database = {
           description?: string | null;
           user_id?: string | null;
           engaging_user_ids?: string[] | null;
+          user_name?: string | null;
+          user_color?: string | null;
         };
         Update: {
           id?: string;
@@ -49,6 +55,8 @@ export type Database = {
           description?: string | null;
           user_id?: string | null;
           engaging_user_ids?: string[] | null;
+          user_name?: string | null;
+          user_color?: string | null;
         };
       };
     };
