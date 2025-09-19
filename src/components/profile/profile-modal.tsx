@@ -10,6 +10,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import {
@@ -35,15 +36,28 @@ const profileFormSchema = z.object({
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 const COLOR_SWATCHES = [
-  '#ef4444', '#f97316', '#eab308', '#84cc16', '#22c55e', '#14b8a6',
-  '#0ea5e9', '#3b82f6', '#8b5cf6', '#d946ef', '#ec4899', '#78716c'
+  // Reds & Pinks
+  '#ef4444', '#ec4899', '#fca5a5',
+  // Oranges & Yellows
+  '#f97316', '#eab308', '#fcd34d',
+  // Greens
+  '#84cc16', '#22c55e', '#86efac',
+  // Teals & Blues
+  '#14b8a6', '#0ea5e9', '#3b82f6',
+  // Purples & Indigos
+  '#8b5cf6', '#d946ef', '#c4b5fd',
+  // Browns
+  '#78716c', '#a16207', '#d2b48c', '#854d0e', '#saddlebrown',
 ];
 
 
 export function ProfileModal() {
   const { isOpen, closeModal } = useProfileModal();
-  const { user, colors, setColors, updateUserName } = useUser();
+  const { user, colors, setColors, updateUserName, isInitialColorPickerOpen, setInitialColorPickerOpen } = useUser();
   const { toast } = useToast();
+
+  const isFirstTimeSetup = isInitialColorPickerOpen && !isOpen;
+  const isModalOpen = isOpen || isFirstTimeSetup;
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -54,58 +68,84 @@ export function ProfileModal() {
   });
 
   useEffect(() => {
-    if (user && isOpen) {
+    if (user && isModalOpen) {
       form.reset({
         name: user.name || '',
         personalColor: colors.personal,
       });
     }
-  }, [user, colors, isOpen, form]);
+  }, [user, colors, isModalOpen, form]);
 
   if (!user) return null;
+
+  const handleClose = () => {
+    if (isFirstTimeSetup) {
+      // If the user tries to close the initial setup modal without saving,
+      // we can pick a default color for them.
+      if (!localStorage.getItem(`has-chosen-initial-color-${user.id}`)) {
+         setColors({
+           personal: colors.personal || '#84cc16', // Default green
+           general: colors.general,
+         });
+      }
+      setInitialColorPickerOpen(false);
+    }
+    closeModal();
+  };
 
   const onSubmit = (data: ProfileFormValues) => {
     updateUserName(data.name);
     setColors({
         personal: data.personalColor,
-        general: colors.general, // Keep general color from context
+        general: colors.general,
     });
     toast({
         title: 'Profile Updated!',
         description: 'Your changes have been saved.',
         variant: 'achievement',
     });
+    
+    if (isFirstTimeSetup) {
+      setInitialColorPickerOpen(false);
+    }
     closeModal();
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={closeModal}>
-      <DialogContent>
+    <Dialog open={isModalOpen} onOpenChange={(open) => !open && handleClose()}>
+      <DialogContent onInteractOutside={isFirstTimeSetup ? (e) => e.preventDefault() : undefined}>
         <DialogHeader>
-          <DialogTitle>Edit Profile</DialogTitle>
+          <DialogTitle>{isFirstTimeSetup ? "Welcome! Let's get you set up." : 'Edit Profile'}</DialogTitle>
+          {isFirstTimeSetup && (
+            <DialogDescription>
+              Choose a color for your personal events to get started.
+            </DialogDescription>
+          )}
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {!isFirstTimeSetup && (
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Name</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
             <FormField
               control={form.control}
               name="personalColor"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>My Schedule Color</FormLabel>
+                  <FormLabel>{isFirstTimeSetup ? "Choose Your Color" : "My Schedule Color"}</FormLabel>
                    <FormControl>
                         <div className="grid grid-cols-6 gap-2">
                         {COLOR_SWATCHES.map(color => (
@@ -132,7 +172,7 @@ export function ProfileModal() {
             <div className="flex justify-end">
               <Button type="submit" disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Save Changes
+                {isFirstTimeSetup ? 'Continue' : 'Save Changes'}
               </Button>
             </div>
           </form>

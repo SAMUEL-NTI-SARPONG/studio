@@ -25,6 +25,8 @@ type UserContextType = {
   setColors: (colors: UserColors) => void;
   updateUserName: (newName: string) => void;
   signOut: () => Promise<void>;
+  isInitialColorPickerOpen: boolean;
+  setInitialColorPickerOpen: (isOpen: boolean) => void;
 };
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -34,10 +36,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [colors, setColorsState] = useState<UserColors>({ personal: '#4299e1', general: '#000000' });
+  const [isInitialColorPickerOpen, setInitialColorPickerOpen] = useState(false);
 
   const mapSupabaseUserToAppUser = (supabaseUser: SupabaseUser): AppUser => {
-    // For now, we'll create a simple AppUser from the SupabaseUser.
-    // In a real app, you'd fetch a corresponding 'profiles' record.
     return {
       id: supabaseUser.id,
       email: supabaseUser.email || '',
@@ -75,32 +76,35 @@ export function UserProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (user) {
       const storedColors = localStorage.getItem(`user-colors-${user.id}`);
+      const hasChosenInitialColor = localStorage.getItem(`has-chosen-initial-color-${user.id}`);
+
       if (storedColors) {
-        // We only care about the personal color from storage now.
         const parsedColors = JSON.parse(storedColors);
         setColorsState(currentColors => ({
           ...currentColors,
           personal: parsedColors.personal || '#4299e1'
         }));
       }
+
+      if (!hasChosenInitialColor) {
+        setInitialColorPickerOpen(true);
+      }
     }
   }, [user?.id]);
 
   const setColors = (newColors: UserColors) => {
     if (user) {
-      // Only store and update the personal color.
       const colorsToStore = { personal: newColors.personal };
       localStorage.setItem(`user-colors-${user.id}`, JSON.stringify(colorsToStore));
+      localStorage.setItem(`has-chosen-initial-color-${user.id}`, 'true');
       setColorsState(currentColors => ({...currentColors, personal: newColors.personal}));
     }
   };
 
   const updateUserName = (newName: string) => {
     if (user) {
-      // In a real app, this would be an API call to update a 'profiles' table.
       const updatedUser = { ...user, name: newName };
       setUser(updatedUser);
-      // We could also update a mock user list if we were using one.
     }
   };
 
@@ -109,7 +113,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <UserContext.Provider value={{ user, loading, colors, setColors, updateUserName, signOut }}>
+    <UserContext.Provider value={{ user, loading, colors, setColors, updateUserName, signOut, isInitialColorPickerOpen, setInitialColorPickerOpen }}>
       {children}
     </UserContext.Provider>
   );
