@@ -11,7 +11,8 @@ type QueuedAction =
   | { type: 'add', payload: Omit<TimetableEntry, 'id' | 'created_at' | 'engaging_user_ids'> }
   | { type: 'update', payload: { id: string, fields: Partial<Omit<TimetableEntry, 'id' | 'created_at'>> } }
   | { type: 'delete', payload: { id: string } }
-  | { type: 'toggle_engagement', payload: { entryId: string; userId: string } };
+  | { type: 'toggle_engagement', payload: { entryId: string; userId: string } }
+  | { type: 'update_user_entries', payload: { userId: string, newName: string, newColor: string } };
 
 type TimetableContextType = {
   entries: TimetableEntry[];
@@ -34,12 +35,21 @@ export const TimetableContext = createContext<TimetableContextType | undefined>(
 const getLocalStorage = <T>(key: string, defaultValue: T): T => {
   if (typeof window === 'undefined') return defaultValue;
   const stored = localStorage.getItem(key);
-  return stored ? JSON.parse(stored) : defaultValue;
+  try {
+    return stored ? JSON.parse(stored) : defaultValue;
+  } catch (e) {
+    console.error("Failed to parse localStorage item", e);
+    return defaultValue;
+  }
 };
 
 const setLocalStorage = <T>(key: string, value: T) => {
   if (typeof window === 'undefined') return;
-  localStorage.setItem(key, JSON.stringify(value));
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (e) {
+    console.error("Failed to set localStorage item", e);
+  }
 };
 
 export function useTimetableData() {
@@ -76,11 +86,14 @@ export function useTimetableData() {
     };
 
     if (typeof window !== 'undefined') {
-      window.addEventListener('online', handleOnline);
-      window.addEventListener('offline', handleOffline);
+      // Set initial state
       if (!window.navigator.onLine) {
         handleOffline();
+      } else {
+        setIsOffline(false);
       }
+      window.addEventListener('online', handleOnline);
+      window.addEventListener('offline', handleOffline);
     }
 
     return () => {
@@ -120,6 +133,10 @@ export function useTimetableData() {
             const { error } = await supabase.from('timetable_entries').update({ engaging_user_ids: newEngagedUsers }).eq('id', entryId);
             if (error) throw error;
           }
+        } else if (action.type === 'update_user_entries') {
+          const { userId, newName, newColor } = action.payload;
+          const { error } = await supabase.from('timetable_entries').update({ user_name: newName, user_color: newColor }).eq('user_id', userId);
+          if (error) throw error;
         }
       } catch (error: any) {
         console.error('Failed to process queued action:', action, error);
@@ -200,7 +217,7 @@ export function useTimetableData() {
   }, [user, toast, supabase, isOffline, processQueue, fetchInitialEntries]);
   
 
-  const addEntry = useCallback(async (newEntry: Omit<TimetableEntry, 'id' | 'created_at' | 'engaging_user_ids' | 'user_name' | 'user_color'>) => {
+  const addEntry = useCallback(async (newEntry: Omit<TimetableEntry, 'id' | 'created_at' | 'engaging_user_ids'>) => {
     if (!user) return false;
 
     const entryWithUserData = {
@@ -327,6 +344,11 @@ export function useTimetableData() {
   
   const clearPersonalScheduleForDay = useCallback(async (dayOfWeek: number) => {
     if(!user) return false;
+    // This action is destructive and complex to queue, so we disable it offline.
+    if (isOffline) {
+      toast({ title: 'Offline', description: 'Cannot clear schedule while offline.', variant: 'destructive' });
+      return false;
+    }
     const { error } = await supabase.from('timetable_entries').delete().eq('user_id', user.id).eq('day_of_week', dayOfWeek);
     if (error) {
       toast({ title: 'Error', description: 'Could not clear personal schedule for the day.', variant: 'destructive' });
@@ -334,10 +356,14 @@ export function useTimetableData() {
     }
     toast({ title: 'Schedule Cleared!', description: 'Your schedule for the selected day is empty.', variant: 'achievement' });
     return true;
-  }, [supabase, user, toast]);
+  }, [supabase, user, toast, isOffline]);
   
   const clearPersonalScheduleForAllDays = useCallback(async () => {
     if(!user) return false;
+    if (isOffline) {
+      toast({ title: 'Offline', description: 'Cannot clear schedule while offline.', variant: 'destructive' });
+      return false;
+    }
     const { error } = await supabase.from('timetable_entries').delete().eq('user_id', user.id);
      if (error) {
       toast({ title: 'Error', description: 'Could not clear your personal schedule.', variant: 'destructive' });
@@ -345,9 +371,13 @@ export function useTimetableData() {
     }
     toast({ title: 'Schedule Cleared!', description: 'Your entire personal schedule is now empty.', variant: 'achievement' });
     return true;
-  }, [supabase, user, toast]);
+  }, [supabase, user, toast, isOffline]);
 
   const clearGeneralScheduleForDay = useCallback(async (dayOfWeek: number) => {
+    if (isOffline) {
+      toast({ title: 'Offline', description: 'Cannot clear schedule while offline.', variant: 'destructive' });
+      return false;
+    }
     const { error } = await supabase.from('timetable_entries').delete().is('user_id', null).eq('day_of_week', dayOfWeek);
     if (error) {
       toast({ title: 'Error', description: 'Could not clear general schedule for the day.', variant: 'destructive' });
@@ -355,9 +385,13 @@ export function useTimetableData() {
     }
     toast({ title: 'Schedule Cleared!', description: 'General schedule for the day is now empty.', variant: 'achievement' });
     return true;
-  }, [supabase, toast]);
+  }, [supabase, toast, isOffline]);
 
   const clearGeneralScheduleForAllDays = useCallback(async () => {
+    if (isOffline) {
+      toast({ title: 'Offline', description: 'Cannot clear schedule while offline.', variant: 'destructive' });
+      return false;
+    }
     const { error } = await supabase.from('timetable_entries').delete().is('user_id', null);
     if (error) {
       toast({ title: 'Error', description: 'Could not clear the general schedule.', variant: 'destructive' });
@@ -365,7 +399,7 @@ export function useTimetableData() {
     }
     toast({ title: 'Schedule Cleared!', description: 'The entire general schedule is now empty.', variant: 'achievement' });
     return true;
-  }, [supabase, toast]);
+  }, [supabase, toast, isOffline]);
 
   const copySchedule = useCallback(async (sourceDay: number, destinationDays: number[]) => {
     if (!user) {
@@ -387,16 +421,11 @@ export function useTimetableData() {
           start_time: entry.start_time,
           end_time: entry.end_time,
           day_of_week: day,
-          user_id: entry.user_id, // Keep the original user_id
-          user_name: entry.user_name,
-          user_color: entry.user_color,
+          user_id: entry.user_id,
+          user_name: entry.user_id ? (entry.user_id === user.id ? user.name : entry.user_name) : null,
+          user_color: entry.user_id ? (entry.user_id === user.id ? user.personal_color : entry.user_color) : null,
           engaging_user_ids: [],
         };
-        // If it's the current user's personal event being copied, use their current info
-        if (entry.user_id && entry.user_id === user.id) {
-            newEntry.user_name = user.name;
-            newEntry.user_color = user.personal_color;
-        }
         return newEntry;
       })
     );
@@ -427,10 +456,21 @@ export function useTimetableData() {
   }, [entries, supabase, toast, user, isOffline, addEntry]);
 
   const updateUserEntries = useCallback(async (userId: string, newName: string, newColor: string) => {
+    // Optimistic UI update
+    setEntries(prevEntries => 
+      prevEntries.map(entry => 
+        entry.user_id === userId 
+          ? { ...entry, user_name: newName, user_color: newColor }
+          : entry
+      )
+    );
+
     if (isOffline) {
-      toast({ title: 'Offline', description: 'Cannot update all entries while offline.', variant: 'destructive' });
+      setActionQueue(prev => [...prev, { type: 'update_user_entries', payload: { userId, newName, newColor } }]);
+      toast({ title: 'Saved Locally', description: 'Profile changes will be synced when you\'re back online.' });
       return;
     }
+
     const { error } = await supabase
       .from('timetable_entries')
       .update({ user_name: newName, user_color: newColor })
@@ -439,15 +479,8 @@ export function useTimetableData() {
     if (error) {
       console.error('Error updating user entries:', error);
       toast({ title: 'Error', description: 'Could not update your existing events.', variant: 'destructive' });
-    } else {
-      // Optimistically update local state to reflect changes immediately
-      setEntries(prevEntries => 
-        prevEntries.map(entry => 
-          entry.user_id === userId 
-            ? { ...entry, user_name: newName, user_color: newColor }
-            : entry
-        )
-      );
+      // Note: We are not reverting the optimistic update here to avoid UI flicker.
+      // The state will be corrected on the next successful fetch or page reload.
     }
   }, [supabase, toast, isOffline]);
 
