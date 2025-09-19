@@ -23,8 +23,8 @@ type UserContextType = {
   user: AppUser | null;
   loading: boolean;
   colors: UserColors;
-  setColors: (colors: Pick<UserColors, 'personal'>) => void;
-  updateUserName: (newName: string) => void;
+  setColors: (colors: Pick<UserColors, 'personal'>) => Promise<void>;
+  updateUserName: (newName: string) => Promise<void>;
   signOut: () => Promise<void>;
   isInitialColorPickerOpen: boolean;
   setInitialColorPickerOpen: (isOpen: boolean) => void;
@@ -86,6 +86,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   const setColors = async (newColors: Pick<UserColors, 'personal'>) => {
     if (user) {
+      // Optimistically update local state
       setUser(prev => prev ? ({ ...prev, personal_color: newColors.personal }) : null);
       setColorsState(currentColors => ({...currentColors, personal: newColors.personal}));
       
@@ -93,19 +94,24 @@ export function UserProvider({ children }: { children: ReactNode }) {
           data: { ...user.user_metadata, personal_color: newColors.personal }
       });
       if(error){
-          console.error("Error saving color to db");
+          console.error("Error saving color to db", error);
       }
     }
   };
 
   const updateUserName = async (newName: string) => {
     if (user) {
+        // Optimistically update local state
         setUser(prev => prev ? ({ ...prev, name: newName }) : null);
-        const { error } = await supabase.auth.updateUser({
-            data: { ...user.user_metadata, name: newName }
+        
+        const { data, error } = await supabase.auth.updateUser({
+            data: { name: newName }
         });
+
         if(error) {
-            console.error("Error saving name to db");
+            console.error("Error saving name to db", error);
+            // Revert optimistic update if there was an error
+            setUser(prev => prev ? ({...prev, name: user.name}) : null);
         }
     }
   };

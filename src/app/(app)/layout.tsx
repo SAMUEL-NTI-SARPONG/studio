@@ -72,6 +72,7 @@ function FloatingActionButtons() {
 function AppLayoutContent({ children }: { children: React.ReactNode }) {
   const { activeTab } = useTimetableContext();
   const activeDayIndex = DAYS_OF_WEEK.indexOf(activeTab);
+  const { updateUserEntries } = useTimetable();
   
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -83,7 +84,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
       <HourModal />
       <FloatingActionButtons />
       <ClearScheduleDialog />
-      <ProfileModal />
+      <ProfileModal updateUserEntries={updateUserEntries} />
       <CopyScheduleDialog />
       <EventNotification />
     </div>

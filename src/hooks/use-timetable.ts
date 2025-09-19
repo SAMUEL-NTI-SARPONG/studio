@@ -26,6 +26,7 @@ type TimetableContextType = {
   clearGeneralScheduleForAllDays: () => Promise<boolean>;
   toggleEventEngagement: (entryId: string, userId: string) => Promise<void>;
   copySchedule: (sourceDay: number, destinationDays: number[]) => Promise<boolean>;
+  updateUserEntries: (userId: string, newName: string, newColor: string) => Promise<void>;
 };
 
 export const TimetableContext = createContext<TimetableContextType | undefined>(undefined);
@@ -425,8 +426,33 @@ export function useTimetableData() {
     return true;
   }, [entries, supabase, toast, user, isOffline, addEntry]);
 
+  const updateUserEntries = useCallback(async (userId: string, newName: string, newColor: string) => {
+    if (isOffline) {
+      toast({ title: 'Offline', description: 'Cannot update all entries while offline.', variant: 'destructive' });
+      return;
+    }
+    const { error } = await supabase
+      .from('timetable_entries')
+      .update({ user_name: newName, user_color: newColor })
+      .eq('user_id', userId);
 
-  const value = { entries, loading, isOffline, addEntry, updateEntry, deleteEntry, clearPersonalScheduleForDay, clearPersonalScheduleForAllDays, clearGeneralScheduleForDay, clearGeneralScheduleForAllDays, toggleEventEngagement, copySchedule };
+    if (error) {
+      console.error('Error updating user entries:', error);
+      toast({ title: 'Error', description: 'Could not update your existing events.', variant: 'destructive' });
+    } else {
+      // Optimistically update local state to reflect changes immediately
+      setEntries(prevEntries => 
+        prevEntries.map(entry => 
+          entry.user_id === userId 
+            ? { ...entry, user_name: newName, user_color: newColor }
+            : entry
+        )
+      );
+    }
+  }, [supabase, toast, isOffline]);
+
+
+  const value = { entries, loading, isOffline, addEntry, updateEntry, deleteEntry, clearPersonalScheduleForDay, clearPersonalScheduleForAllDays, clearGeneralScheduleForDay, clearGeneralScheduleForAllDays, toggleEventEngagement, copySchedule, updateUserEntries };
   
   return value;
 }

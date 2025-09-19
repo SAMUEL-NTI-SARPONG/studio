@@ -51,7 +51,7 @@ const COLOR_SWATCHES = [
 ];
 
 
-export function ProfileModal() {
+export function ProfileModal({ updateUserEntries }: { updateUserEntries: (userId: string, newName: string, newColor: string) => Promise<void> }) {
   const { isOpen, closeModal } = useProfileModal();
   const { user, colors, setColors, updateUserName, isInitialColorPickerOpen, setInitialColorPickerOpen } = useUser();
   const { toast } = useToast();
@@ -90,11 +90,25 @@ export function ProfileModal() {
     closeModal();
   };
 
-  const onSubmit = (data: ProfileFormValues) => {
-    updateUserName(data.name);
-    setColors({
-        personal: data.personalColor,
-    });
+  const onSubmit = async (data: ProfileFormValues) => {
+    if (!user) return;
+    
+    const hasNameChanged = data.name !== user.name;
+    const hasColorChanged = data.personalColor !== user.personal_color;
+
+    if (hasNameChanged) {
+      await updateUserName(data.name);
+    }
+    if (hasColorChanged) {
+      await setColors({
+          personal: data.personalColor,
+      });
+    }
+
+    if (hasNameChanged || hasColorChanged) {
+      await updateUserEntries(user.id, data.name, data.personalColor);
+    }
+
     toast({
         title: 'Profile Updated!',
         description: 'Your changes have been saved.',
