@@ -12,7 +12,7 @@ import { Trash, UserCheck, Users } from 'lucide-react';
 import { useModal } from '@/hooks/use-modal';
 import { USERS } from '@/lib/users';
 import { Badge } from '../ui/badge';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useUser } from '@/contexts/user-context';
 import { useTimetable } from '@/hooks/use-timetable';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
@@ -66,6 +66,10 @@ export function EventPopover({
   const engagedUsers = (entry.engaging_user_ids || [])
     .map(userId => ({ id: userId, name: 'User', avatarUrl: `https://picsum.photos/seed/${userId}/200/200`}))
     
+  const owner = useMemo(() => {
+    if (!entry.user_id) return null;
+    return { name: entry.user_id.substring(0, 5), avatarUrl: `https://picsum.photos/seed/${entry.user_id}/200/200` };
+  }, [entry.user_id]);
 
   return (
     <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
@@ -83,9 +87,20 @@ export function EventPopover({
           </div>
           
           <div className="flex items-center justify-between">
-            <Badge variant={entry.user_id ? 'secondary' : 'default'} className="text-xs">
-                {entry.user_id ? 'Personal' : 'General'}
-            </Badge>
+             <div className="flex items-center gap-2">
+                <Badge variant={entry.user_id ? 'secondary' : 'default'} className="text-xs">
+                    {entry.user_id ? 'Personal' : 'General'}
+                </Badge>
+                {owner && (
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <Avatar className="h-4 w-4">
+                        <AvatarImage src={owner.avatarUrl} />
+                        <AvatarFallback>{owner.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <span>{owner.name}</span>
+                  </div>
+                )}
+            </div>
             <div className="flex items-center gap-2">
                 {user && (
                   <Button

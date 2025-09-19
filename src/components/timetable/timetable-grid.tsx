@@ -36,6 +36,27 @@ const formatTime = (time: string): string => {
   return `${hour12}:${String(minutes).padStart(2, '0')} ${period}`;
 };
 
+const USER_COLORS = [
+  '#ef4444', '#f97316', '#eab308', '#84cc16', '#22c55e', '#14b8a6',
+  '#0ea5e9', '#3b82f6', '#8b5cf6', '#d946ef', '#ec4899', '#78716c'
+];
+
+const hashCode = (str: string) => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return hash;
+}
+
+const getColorForUser = (userId: string) => {
+  const hash = hashCode(userId);
+  const index = Math.abs(hash) % USER_COLORS.length;
+  return USER_COLORS[index];
+};
+
 
 const CurrentTimeIndicator = ({ dayIndex, gridHours }: { dayIndex: number, gridHours: number[] }) => {
   const [now, setNow] = useState(new Date());
@@ -245,7 +266,9 @@ export function TimetableGrid({ activeTab }: { activeTab: string }) {
                     ? 'text-xs'
                     : 'text-sm';
                 
-                const personalColor = user?.id === entry.user_id ? colors.personal : '#a0aec0';
+                const personalColor = user?.id === entry.user_id 
+                    ? colors.personal 
+                    : getColorForUser(entry.user_id || '');
                 const eventColor = isPersonal ? personalColor : colors.general;
 
                 const engagedUsers = (entry.engaging_user_ids || [])
@@ -288,7 +311,7 @@ export function TimetableGrid({ activeTab }: { activeTab: string }) {
                     >
                         {entry.title}
                     </p>
-                    <p
+                     <p
                         className={cn('text-white/90', fontSizeClass, {
                             'text-gray-200/90': isPast,
                         })}
