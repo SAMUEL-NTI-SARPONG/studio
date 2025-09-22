@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -40,6 +41,8 @@ Events are the heart of your timetable. They can be for everyone ("General") or 
 3. Collaboration and User Identity
 
 Legend is built for teams.
+
+- Online Users: In the header, you can see the avatars of other users who are currently online, letting you know who you're collaborating with in real-time.
 
 - Personal Colors:
   - To make it easy to see who's doing what, each user has a unique color for their personal events.

@@ -25,6 +25,7 @@ import { useClearSchedule } from '@/hooks/use-clear-schedule';
 import { useProfileModal } from '@/hooks/use-profile-modal';
 import { useTimetableContext } from '@/contexts/timetable-context';
 import { Switch } from '@/components/ui/switch';
+import { UserPresence } from './user-presence';
 
 export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
   const { user, signOut } = useUser();
@@ -59,8 +60,9 @@ export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-card">
       <div className="flex h-16 items-center justify-between px-4">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-4">
           <h1 className="text-xl font-semibold text-primary">Legend</h1>
+          <UserPresence />
         </div>
         <div className="flex items-center space-x-4">
           <TickingClock />
@@ -131,6 +133,10 @@ export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
                     <DropdownMenuItem onClick={openModal}>
                       <UserIcon className="mr-2 h-4 w-4" />
                       <span>Profile</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => router.push('/guide')}>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 h-4 w-4"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" /><path d="m16 10-4 4-4-4" /></svg>
+                      <span>Guide</span>
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator />
