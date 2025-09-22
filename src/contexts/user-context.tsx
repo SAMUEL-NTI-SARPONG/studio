@@ -37,23 +37,17 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const supabase = createClient();
   const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
-  const [colors, setColorsState] = useState<UserColors>({ personal: '#84cc16', general: 'hsl(var(--primary))' });
+  const [colors, setColorsState] = useState<UserColors>({ personal: '#84cc16', general: '#a1a1aa' });
   const [isInitialColorPickerOpen, setInitialColorPickerOpen] = useState(false);
   const { resolvedTheme } = useTheme();
 
   useEffect(() => {
-    // This function will be defined in a style tag by ThemeProvider
-    // and is safe to call here.
     const root = document.documentElement;
     const primaryColor = getComputedStyle(root).getPropertyValue('--primary').trim();
-    
-    // Convert HSL string to hex if necessary, or just use the HSL value.
-    // For now, let's assume we can get the raw HSL values and re-compose it.
     if(primaryColor) {
-      const generalColor = `hsl(${primaryColor})`;
-      setColorsState(currentColors => ({...currentColors, general: generalColor}));
+      // In a real app, you might want to adjust general color based on theme,
+      // but for now we'll keep it consistent.
     }
-    
   }, [resolvedTheme]);
 
 
