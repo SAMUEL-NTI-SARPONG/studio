@@ -1,10 +1,11 @@
 
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { useTheme } from 'next-themes';
 import {
   Dialog,
   DialogContent,
@@ -22,9 +23,11 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Separator } from '@/components/ui/separator';
 import { useUser } from '@/contexts/user-context';
 import { useProfileModal } from '@/hooks/use-profile-modal';
-import { Check, Loader2 } from 'lucide-react';
+import { Check, Loader2, Moon, Sun, Monitor } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 
@@ -36,25 +39,19 @@ const profileFormSchema = z.object({
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 const COLOR_SWATCHES = [
-  // Reds & Pinks
   '#ef4444', '#ec4899', '#fca5a5',
-  // Oranges & Yellows
   '#f97316', '#eab308', '#fcd34d',
-  // Greens
   '#84cc16', '#22c55e', '#86efac',
-  // Teals & Blues
   '#14b8a6', '#0ea5e9', '#3b82f6',
-  // Purples & Indigos
   '#8b5cf6', '#d946ef', '#c4b5fd',
-  // Browns
   '#78716c', '#a16207', '#d2b48c', '#854d0e', '#a52a2a',
 ];
-
 
 export function ProfileModal({ updateUserEntries }: { updateUserEntries: (userId: string, newName: string, newColor: string) => Promise<void> }) {
   const { isOpen, closeModal } = useProfileModal();
   const { user, colors, setColors, updateUserName, isInitialColorPickerOpen, setInitialColorPickerOpen } = useUser();
   const { toast } = useToast();
+  const { theme, setTheme } = useTheme();
 
   const isFirstTimeSetup = isInitialColorPickerOpen && !isOpen;
   const isModalOpen = isOpen || isFirstTimeSetup;
@@ -82,7 +79,7 @@ export function ProfileModal({ updateUserEntries }: { updateUserEntries: (userId
     if (isFirstTimeSetup) {
       if (!user.personal_color || user.personal_color === '#84cc16') {
          setColors({
-           personal: '#84cc16', // Default green
+           personal: '#84cc16',
          });
       }
       setInitialColorPickerOpen(false);
@@ -132,10 +129,10 @@ export function ProfileModal({ updateUserEntries }: { updateUserEntries: (userId
             </DialogDescription>
           )}
         </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            {!isFirstTimeSetup && (
-              <>
+        <div className="space-y-6">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              {!isFirstTimeSetup && (
                 <FormField
                   control={form.control}
                   name="name"
@@ -149,46 +146,88 @@ export function ProfileModal({ updateUserEntries }: { updateUserEntries: (userId
                     </FormItem>
                   )}
                 />
-              </>
-            )}
-
-            <FormField
-              control={form.control}
-              name="personalColor"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{isFirstTimeSetup ? "Choose Your Color" : "My Schedule Color"}</FormLabel>
-                   <FormControl>
-                        <div className="grid grid-cols-6 gap-2">
-                        {COLOR_SWATCHES.map(color => (
-                            <button
-                            type="button"
-                            key={color}
-                            className={cn(
-                                'h-8 w-8 rounded-full border-2 flex items-center justify-center',
-                                field.value === color ? 'border-primary' : 'border-transparent'
-                            )}
-                            style={{ backgroundColor: color }}
-                            onClick={() => field.onChange(color)}
-                            >
-                            {field.value === color && <Check className="h-4 w-4 text-white" />}
-                            </button>
-                        ))}
-                        </div>
-                   </FormControl>
-                  <FormMessage />
-                </FormItem>
               )}
-            />
-            
-            <div className="flex justify-end">
-              <Button type="submit" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {isFirstTimeSetup ? 'Continue' : 'Save Changes'}
-              </Button>
-            </div>
-          </form>
-        </Form>
+
+              <FormField
+                control={form.control}
+                name="personalColor"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{isFirstTimeSetup ? "Choose Your Color" : "My Schedule Color"}</FormLabel>
+                     <FormControl>
+                          <div className="grid grid-cols-6 gap-2">
+                          {COLOR_SWATCHES.map(color => (
+                              <button
+                              type="button"
+                              key={color}
+                              className={cn(
+                                  'h-8 w-8 rounded-full border-2 flex items-center justify-center',
+                                  field.value === color ? 'border-primary' : 'border-transparent'
+                              )}
+                              style={{ backgroundColor: color }}
+                              onClick={() => field.onChange(color)}
+                              >
+                              {field.value === color && <Check className="h-4 w-4 text-white" />}
+                              </button>
+                          ))}
+                          </div>
+                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <div className="flex justify-end">
+                <Button type="submit" disabled={form.formState.isSubmitting}>
+                  {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {isFirstTimeSetup ? 'Continue' : 'Save Profile'}
+                </Button>
+              </div>
+            </form>
+          </Form>
+
+          <Separator />
+
+          <div className="space-y-4">
+            <FormLabel>Appearance</FormLabel>
+            <RadioGroup
+              value={theme}
+              onValueChange={setTheme}
+              className="grid grid-cols-3 gap-4"
+            >
+              <div>
+                <RadioGroupItem value="light" id="light" className="peer sr-only" />
+                <Label
+                  htmlFor="light"
+                  className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                >
+                  <Sun className="mb-2 h-6 w-6" />
+                  Light
+                </Label>
+              </div>
+              <div>
+                <RadioGroupItem value="dark" id="dark" className="peer sr-only" />
+                <Label
+                  htmlFor="dark"
+                  className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                >
+                  <Moon className="mb-2 h-6 w-6" />
+                  Dark
+                </Label>
+              </div>
+              <div>
+                <RadioGroupItem value="system" id="system" className="peer sr-only" />
+                <Label
+                  htmlFor="system"
+                  className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                >
+                  <Monitor className="mb-2 h-6 w-6" />
+                  System
+                </Label>
+              </div>
+            </RadioGroup>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );
