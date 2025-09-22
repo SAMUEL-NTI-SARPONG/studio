@@ -37,7 +37,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const supabase = createClient();
   const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
-  const [colors, setColorsState] = useState<UserColors>({ personal: '#84cc16', general: '#347433' });
+  const [colors, setColorsState] = useState<UserColors>({ personal: '#84cc16', general: 'hsl(var(--primary))' });
   const [isInitialColorPickerOpen, setInitialColorPickerOpen] = useState(false);
   const { resolvedTheme } = useTheme();
 
@@ -48,8 +48,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     const primaryColor = getComputedStyle(root).getPropertyValue('--primary').trim();
     
     // Convert HSL string to hex if necessary, or just use the HSL value.
-    // For now, let's assume we can get the hex value.
-    // Let's get the raw HSL values and re-compose it.
+    // For now, let's assume we can get the raw HSL values and re-compose it.
     if(primaryColor) {
       const generalColor = `hsl(${primaryColor})`;
       setColorsState(currentColors => ({...currentColors, general: generalColor}));
