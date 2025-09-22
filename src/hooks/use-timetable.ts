@@ -301,43 +301,68 @@ export function useTimetableData() {
     if (!user) return;
 
     const originalEntries = entries;
-    const optimisticEntries = entries.map(entry => {
-      if (entry.id === entryId) {
-        const currentEngagedUsers = entry.engaging_user_ids || [];
-        const isEngaged = currentEngagedUsers.includes(userId);
-        const newEngagedUsers = isEngaged
-          ? currentEngagedUsers.filter(id => id !== userId)
-          : [...currentEngagedUsers, userId];
-        return { ...entry, engaging_user_ids: newEngagedUsers };
-      }
-      return entry;
-    });
-    setEntries(optimisticEntries);
+    const targetEntry = entries.find(e => e.id === entryId);
+    if (!targetEntry) return;
 
+    const isCurrentlyEngaged = targetEntry.engaging_user_ids?.includes(userId) ?? false;
+
+    // Optimistic UI Update
+    setEntries(prevEntries => 
+        prevEntries.map(entry => {
+            // If this is the target event, toggle engagement
+            if (entry.id === entryId) {
+                const engagedUsers = entry.engaging_user_ids || [];
+                return {
+                    ...entry,
+                    engaging_user_ids: isCurrentlyEngaged 
+                        ? engagedUsers.filter(id => id !== userId)
+                        : [...engagedUsers, userId]
+                };
+            }
+            // If this is any other event, disengage the user
+            if (entry.engaging_user_ids?.includes(userId)) {
+                return {
+                    ...entry,
+                    engaging_user_ids: entry.engaging_user_ids.filter(id => id !== userId)
+                };
+            }
+            return entry;
+        })
+    );
+
+    // Offline and API logic
     if (isOffline) {
+      // For simplicity in offline queue, we can just queue the toggle.
+      // The single-engagement rule will be enforced on sync.
       setActionQueue(prev => [...prev, { type: 'toggle_engagement', payload: { entryId, userId } }]);
       return;
     }
 
-    const entry = entries.find(e => e.id === entryId);
-    if (!entry) return;
+    try {
+        // Disengage from all other events first
+        const { error: disengageError } = await supabase
+            .rpc('disengage_user_from_all_events', { p_user_id: userId });
 
-    const currentEngagedUsers = entry.engaging_user_ids || [];
-    const isEngaged = currentEngagedUsers.includes(userId);
+        if (disengageError) throw disengageError;
 
-    const newEngagedUsers = isEngaged
-      ? currentEngagedUsers.filter(id => id !== userId)
-      : [...currentEngagedUsers, userId];
+        // If the user was not already engaged with the target event, engage them.
+        if (!isCurrentlyEngaged) {
+            const { data: currentEntry } = await supabase.from('timetable_entries').select('engaging_user_ids').eq('id', entryId).single();
+            if (currentEntry) {
+                const newEngagedUsers = [...(currentEntry.engaging_user_ids || []), userId];
+                const { error: engageError } = await supabase
+                    .from('timetable_entries')
+                    .update({ engaging_user_ids: newEngagedUsers })
+                    .eq('id', entryId);
+                if (engageError) throw engageError;
+            }
+        }
+        // If they were already engaged, clicking again serves to disengage, which is covered by the RPC call.
 
-    const { error } = await supabase
-      .from('timetable_entries')
-      .update({ engaging_user_ids: newEngagedUsers })
-      .eq('id', entryId);
-
-    if (error) {
-      console.error('Engagement error:', error);
-      toast({ title: 'Error', description: 'Could not update engagement status.', variant: 'destructive' });
-      setEntries(originalEntries); // Rollback
+    } catch (error: any) {
+        console.error('Engagement error:', error);
+        toast({ title: 'Error', description: 'Could not update engagement status.', variant: 'destructive' });
+        setEntries(originalEntries); // Rollback on error
     }
   }, [entries, supabase, user, toast, isOffline]);
 
@@ -457,6 +482,7 @@ export function useTimetableData() {
 
   const updateUserEntries = useCallback(async (userId: string, newName: string, newColor: string) => {
     // Optimistic UI update
+    const originalEntries = entries;
     setEntries(prevEntries => 
       prevEntries.map(entry => 
         entry.user_id === userId 
@@ -479,10 +505,9 @@ export function useTimetableData() {
     if (error) {
       console.error('Error updating user entries:', error);
       toast({ title: 'Error', description: 'Could not update your existing events.', variant: 'destructive' });
-      // Note: We are not reverting the optimistic update here to avoid UI flicker.
-      // The state will be corrected on the next successful fetch or page reload.
+      setEntries(originalEntries);
     }
-  }, [supabase, toast, isOffline]);
+  }, [supabase, toast, isOffline, entries]);
 
 
   const value = { entries, loading, isOffline, addEntry, updateEntry, deleteEntry, clearPersonalScheduleForDay, clearPersonalScheduleForAllDays, clearGeneralScheduleForDay, clearGeneralScheduleForAllDays, toggleEventEngagement, copySchedule, updateUserEntries };
@@ -497,5 +522,3 @@ export function useTimetable() {
   }
   return context;
 }
-
-    
