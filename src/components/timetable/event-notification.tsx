@@ -3,7 +3,7 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useTimetable } from '@/hooks/use-timetable';
-import { useUser } from '@/hooks/use-user';
+import { useUser } from '@/contexts/user-context';
 import { useToast } from '@/hooks/use-toast';
 import type { TimetableEntry } from '@/lib/types';
 
@@ -15,7 +15,6 @@ export function EventNotification() {
   const { user } = useUser();
   const { toast, dismiss } = useToast();
   const [alarmingEvents, setAlarmingEvents] = useState<Set<string>>(new Set());
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const foregroundIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const requestNotificationPermission = useCallback(async () => {
@@ -28,16 +27,9 @@ export function EventNotification() {
 
   useEffect(() => {
     requestNotificationPermission();
-
-    if (typeof Audio !== 'undefined') {
-      audioRef.current = new Audio('/notification.mp3');
-      audioRef.current.loop = false;
-    }
   }, [requestNotificationPermission]);
 
-  const triggerForegroundAlerts = (entry: TimetableEntry) => {
-    // Sound
-    audioRef.current?.play().catch(e => console.warn("Could not play notification sound:", e));
+  const triggerForegroundAlerts = () => {
     // Vibration
     if (typeof window !== 'undefined' && window.navigator.vibrate) {
       window.navigator.vibrate([200, 100, 200]);
@@ -126,7 +118,7 @@ export function EventNotification() {
       upcomingEvents.forEach(entry => {
         if (!alarmingEvents.has(entry.id)) {
           showToast(entry);
-          triggerForegroundAlerts(entry);
+          triggerForegroundAlerts();
         }
       });
       
@@ -146,7 +138,7 @@ export function EventNotification() {
         alarmingEvents.forEach(eventId => {
             const entry = entries.find(e => e.id === eventId);
             if (entry) {
-                triggerForegroundAlerts(entry);
+                triggerForegroundAlerts();
             }
         });
       }, ALERT_INTERVAL_MS);
