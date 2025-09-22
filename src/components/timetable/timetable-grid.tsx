@@ -222,12 +222,12 @@ export function TimetableGrid({ activeTab }: { activeTab: string }) {
                 const top = (startTimeInView / totalMinutesInView) * 100;
 
                 const duration = parseTime(entry.end_time) - parseTime(entry.start_time);
-                const height = (duration / totalMinutesInView) * 100;
+                const height = `calc(${(duration / totalMinutesInView) * 100}% - 2px)`;
                 
                 const columnCount = (entry as any).columnCount || 1;
                 const column = (entry as any).column || 0;
-                const width = `calc(${100 / columnCount}% - 2px)`;
-                const left = `calc(${column * (100 / columnCount)}% + 1px)`;
+                const width = `calc(${100 / columnCount}% - 4px)`;
+                const left = `calc(${column * (100 / columnCount)}% + 2px)`;
 
                 const endTime = getDateTime(dayIndex, entry.end_time);
                 const isPast = now > endTime;
@@ -268,7 +268,7 @@ export function TimetableGrid({ activeTab }: { activeTab: string }) {
                     )}
                     style={{
                         top: `${top}%`,
-                        height: `${height}%`,
+                        height: height,
                         left: left,
                         width: width,
                         minHeight: '2rem',
