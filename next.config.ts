@@ -42,11 +42,23 @@ export default withPWA({
   customWorker: 'worker',
   dynamicStartUrl: false,
   workboxOptions: {
-    // Ensure the notification sound is cached
     additionalManifestEntries: [
       { url: '/notification.mp3', revision: '1' }
     ]
   },
-  // Turn off manifest generation
-  manifest: false,
+  manifest: {
+    name: 'ScheduleMe',
+    short_name: 'ScheduleMe',
+    description: 'A real-time collaborative timetable application.',
+    background_color: '#ffffff',
+    theme_color: '#347433',
+    display: 'standalone',
+    icons: [
+      {
+        src: '/icons/icon.svg',
+        sizes: 'any',
+        type: 'image/svg+xml',
+      },
+    ],
+  },
 })(nextConfig);

@@ -6,6 +6,7 @@ import { UserProvider } from '@/contexts/user-context';
 export const metadata: Metadata = {
   title: 'ScheduleMe',
   description: 'A real-time collaborative timetable application.',
+  manifest: '/manifest.json',
 };
 
 export default function RootLayout({
@@ -16,7 +17,6 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#347433" />
         <link rel="apple-touch-icon" href="/icons/icon.svg"></link>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
