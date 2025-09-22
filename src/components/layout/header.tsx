@@ -61,8 +61,10 @@ export default function Header({ activeDayIndex }: { activeDayIndex: number }) {
     <header className="sticky top-0 z-40 w-full border-b bg-card">
       <div className="flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-4">
-          <h1 className="text-xl font-semibold text-primary">ScheduleMe</h1>
-          <UserPresence />
+          <div>
+            <h1 className="text-lg font-semibold text-primary">ScheduleMe</h1>
+            <UserPresence />
+          </div>
         </div>
         <div className="flex items-center space-x-4">
           <TickingClock />

@@ -5,8 +5,6 @@ import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useUser } from '@/contexts/user-context';
 import type { RealtimeChannel, RealtimePresenceState } from '@supabase/supabase-js';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 type Presence = {
   user_id: string;
@@ -77,37 +75,27 @@ export function UserPresence() {
     return null;
   }
 
+  const getPresenceText = () => {
+    const count = presentUsers.length;
+    if (count === 1) {
+      return `${presentUsers[0].name} is online`;
+    }
+    if (count > 1) {
+      return `${count} users online`;
+    }
+    return null;
+  };
+
+  const text = getPresenceText();
+  if (!text) return null;
+
   return (
-    <div className="flex items-center pl-4 border-l border-border">
-      <TooltipProvider>
-        <div className="flex -space-x-3">
-          {presentUsers.slice(0, 3).map((p) => (
-            <Tooltip key={p.user_id}>
-              <TooltipTrigger asChild>
-                <Avatar className="h-8 w-8 border-2 border-card hover:z-10 transition-transform hover:scale-110">
-                  <AvatarImage src={p.avatar_url} alt={p.name} />
-                  <AvatarFallback>{p.name.charAt(0).toUpperCase()}</AvatarFallback>
-                </Avatar>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{p.name}</p>
-              </TooltipContent>
-            </Tooltip>
-          ))}
-          {presentUsers.length > 3 && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground border-2 border-card">
-                  +{presentUsers.length - 3}
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{presentUsers.slice(3).map(p => p.name).join(', ')}</p>
-              </TooltipContent>
-            </Tooltip>
-          )}
-        </div>
-      </TooltipProvider>
+    <div className="flex items-center text-xs text-muted-foreground">
+      <span className="relative flex h-2 w-2 mr-2">
+        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+        <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+      </span>
+      <span>{text}</span>
     </div>
   );
 }
