@@ -6,6 +6,7 @@ import { useTimetable } from '@/hooks/use-timetable';
 import { useUser } from '@/contexts/user-context';
 import { useToast } from '@/hooks/use-toast';
 import type { TimetableEntry } from '@/lib/types';
+import { getNotificationSound } from '@/lib/db';
 
 const NOTIFICATION_THRESHOLD_MS = 60 * 1000; // 1 minute
 const ALERT_INTERVAL_MS = 5000; // 5 seconds
@@ -26,14 +27,41 @@ export function EventNotification() {
       }
     }
   }, []);
+  
+  const setupAudio = useCallback(async () => {
+    if (typeof Audio === 'undefined') return;
+
+    const customSound = await getNotificationSound();
+    const audioSrc = customSound ? URL.createObjectURL(customSound) : '/notification.mp3';
+
+    if (audioRef.current) {
+        // Clean up old object URL to prevent memory leaks
+        if (audioRef.current.src.startsWith('blob:')) {
+            URL.revokeObjectURL(audioRef.current.src);
+        }
+    }
+    
+    audioRef.current = new Audio(audioSrc);
+    audioRef.current.loop = false;
+  }, []);
 
   useEffect(() => {
     requestNotificationPermission();
-    if (typeof Audio !== 'undefined') {
-      audioRef.current = new Audio('/notification.mp3');
-      audioRef.current.loop = false;
+    setupAudio();
+
+    // Listen for custom event when sound is updated
+    const handleSoundUpdate = () => {
+        setupAudio();
+    };
+    window.addEventListener('notificationSoundUpdated', handleSoundUpdate);
+
+    return () => {
+        window.removeEventListener('notificationSoundUpdated', handleSoundUpdate);
+        if (audioRef.current && audioRef.current.src.startsWith('blob:')) {
+            URL.revokeObjectURL(audioRef.current.src);
+        }
     }
-  }, [requestNotificationPermission]);
+  }, [requestNotificationPermission, setupAudio]);
 
   const triggerForegroundAlerts = (entry: TimetableEntry) => {
     // Sound
@@ -164,7 +192,7 @@ export function EventNotification() {
   
   // Effect for scheduling/cancelling background notifications
   useEffect(() => {
-    const scheduleBackgroundNotification = () => {
+    const scheduleBackgroundNotification = async () => {
       if (!user || !navigator.serviceWorker.ready) return;
 
       const now = new Date();
@@ -174,7 +202,10 @@ export function EventNotification() {
               notifications.forEach(notification => notification.close());
           });
       });
-      
+
+      const customSoundBlob = await getNotificationSound();
+      const soundPath = customSoundBlob ? '/notification.mp3' : undefined; // The service worker will use its cached version
+
       const upcomingEvents = entries
         .map(entry => {
           const [hours, minutes] = entry.start_time.split(':').map(Number);
@@ -203,7 +234,7 @@ export function EventNotification() {
                     tag: eventInfo.entry.id,
                     renotify: true,
                     vibrate: [200, 100, 200],
-                    sound: '/notification.mp3',
+                    sound: soundPath,
                     icon: '/icons/icon.svg',
                 });
               });

@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -24,9 +24,10 @@ import {
 import { Input } from '@/components/ui/input';
 import { useUser } from '@/contexts/user-context';
 import { useProfileModal } from '@/hooks/use-profile-modal';
-import { Check, Loader2 } from 'lucide-react';
+import { Check, Loader2, Music, Upload } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { setNotificationSound } from '@/lib/db';
 
 const profileFormSchema = z.object({
   name: z.string().min(1, 'Name is required').max(50, 'Name is too long'),
@@ -55,6 +56,7 @@ export function ProfileModal({ updateUserEntries }: { updateUserEntries: (userId
   const { isOpen, closeModal } = useProfileModal();
   const { user, colors, setColors, updateUserName, isInitialColorPickerOpen, setInitialColorPickerOpen } = useUser();
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isFirstTimeSetup = isInitialColorPickerOpen && !isOpen;
   const isModalOpen = isOpen || isFirstTimeSetup;
@@ -120,6 +122,40 @@ export function ProfileModal({ updateUserEntries }: { updateUserEntries: (userId
     }
     closeModal();
   };
+  
+  const handleSoundUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('audio/')) {
+        toast({
+            title: 'Invalid File Type',
+            description: 'Please select an audio file.',
+            variant: 'destructive',
+        });
+        return;
+    }
+
+    try {
+        await setNotificationSound(file);
+        toast({
+            title: 'Sound Updated!',
+            description: 'Your new notification sound has been saved.',
+            variant: 'achievement',
+        });
+    } catch (error) {
+        console.error('Failed to save sound:', error);
+        toast({
+            title: 'Error',
+            description: 'Could not save the notification sound.',
+            variant: 'destructive',
+        });
+    }
+  };
 
   return (
     <Dialog open={isModalOpen} onOpenChange={(open) => !open && handleClose()}>
@@ -135,19 +171,38 @@ export function ProfileModal({ updateUserEntries }: { updateUserEntries: (userId
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             {!isFirstTimeSetup && (
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <>
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Name</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                 <FormItem>
+                    <FormLabel>Notification Sound</FormLabel>
+                    <div className="flex items-center gap-2">
+                        <Button type="button" variant="outline" onClick={handleSoundUploadClick}>
+                            <Upload className="mr-2 h-4 w-4" />
+                            Upload Sound
+                        </Button>
+                        <p className="text-sm text-muted-foreground">Set a custom alert sound.</p>
+                    </div>
+                    <input 
+                        type="file" 
+                        ref={fileInputRef} 
+                        onChange={handleFileChange}
+                        accept="audio/*"
+                        className="hidden" 
+                    />
+                </FormItem>
+              </>
             )}
 
             <FormField
@@ -191,5 +246,3 @@ export function ProfileModal({ updateUserEntries }: { updateUserEntries: (userId
     </Dialog>
   );
 }
-
-    
