@@ -219,7 +219,7 @@ export function TimetableGrid({ activeTab }: { activeTab: string }) {
                   ? (gridHours.indexOf(Math.floor(startMinutes/60)) * 60) + (startMinutes % 60)
                   : startMinutes;
 
-                const top = (startTimeInView / totalMinutesInView) * 100;
+                const top = `calc(${(startTimeInView / totalMinutesInView) * 100}% + 1px)`;
 
                 const duration = parseTime(entry.end_time) - parseTime(entry.start_time);
                 const height = `calc(${(duration / totalMinutesInView) * 100}% - 2px)`;
@@ -260,14 +260,14 @@ export function TimetableGrid({ activeTab }: { activeTab: string }) {
                     <div
                     tabIndex={0}
                     className={cn(
-                        'absolute p-2 cursor-pointer transition-all duration-200 ease-in-out flex flex-col items-center justify-center shadow-inner overflow-hidden',
+                        'absolute p-2 cursor-pointer transition-all duration-200 ease-in-out flex flex-col items-center justify-center shadow-inner overflow-hidden rounded-md',
                         'focus:outline-none focus:ring-2 focus:ring-ring focus:z-10',
                         {
                         'opacity-60': isPast,
                         }
                     )}
                     style={{
-                        top: `${top}%`,
+                        top: top,
                         height: height,
                         left: left,
                         width: width,
