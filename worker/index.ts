@@ -31,6 +31,16 @@ self.addEventListener('message', (event) => {
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
+  const tag = event.notification.tag;
+  let eventId = tag;
+  let notificationType = 'start'; // Default
+
+  if (tag.startsWith('start-') || tag.startsWith('end-')) {
+    const parts = tag.split('-');
+    notificationType = parts[0];
+    eventId = parts.slice(1).join('-');
+  }
+
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientsArr) => {
       const hadWindowToFocus = clientsArr.length > 0;
@@ -38,7 +48,7 @@ self.addEventListener('notificationclick', (event) => {
         // If an app window is already open, focus it
         const appWindow = clientsArr[0];
         appWindow.focus();
-        appWindow.postMessage({ type: 'notification-clicked', eventId: event.notification.tag });
+        appWindow.postMessage({ type: 'notification-clicked', eventId, notificationType });
       } else {
         // Otherwise, open a new window
         self.clients.openWindow('/');

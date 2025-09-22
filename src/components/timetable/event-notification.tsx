@@ -36,32 +36,33 @@ export function EventNotification() {
     }
   };
   
-  const showToast = (entry: TimetableEntry) => {
-    const toastId = `event-${entry.id}`;
+  const showToast = (entry: TimetableEntry, type: 'start' | 'end') => {
+    const toastId = `event-${type}-${entry.id}`;
     toast({
       id: toastId,
-      title: 'Event Starting Soon!',
-      description: `${entry.title} is about to begin.`,
+      title: type === 'start' ? 'Event Starting Soon!' : 'Event Concluded',
+      description: `${entry.title} is about to ${type === 'start' ? 'begin' : 'end'}.`,
       duration: Infinity,
       variant: 'default',
     });
   };
 
-  const stopAlarming = (eventId: string) => {
+  const stopAlarming = (eventId: string, type: 'start' | 'end') => {
+    const alarmId = `${type}-${eventId}`;
     setAlarmingEvents(prev => {
         const newSet = new Set(prev);
-        newSet.delete(eventId);
+        newSet.delete(alarmId);
         return newSet;
     });
-    dismiss(`event-${eventId}`);
+    dismiss(`event-${alarmId}`);
   };
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
         if (event.data && event.data.type === 'notification-clicked') {
-            const { eventId } = event.data;
-            if (eventId) {
-                stopAlarming(eventId);
+            const { eventId, notificationType } = event.data;
+            if (eventId && notificationType) {
+                stopAlarming(eventId, notificationType);
             }
         }
     };
@@ -77,7 +78,10 @@ export function EventNotification() {
   
   useEffect(() => {
     if (!user) {
-        alarmingEvents.forEach(id => stopAlarming(id));
+        alarmingEvents.forEach(id => {
+            const [type, eventId] = id.split('-');
+            stopAlarming(eventId, type as 'start' | 'end');
+        });
         return;
     }
   }, [user, alarmingEvents]);
@@ -88,41 +92,57 @@ export function EventNotification() {
       if (!user || document.visibilityState !== 'visible') return;
 
       const now = new Date();
-      const upcomingEvents = entries.filter(entry => {
-        const [hours, minutes] = entry.start_time.split(':').map(Number);
-        const eventTime = new Date();
-        eventTime.setHours(hours, minutes, 0, 0);
+      const currentAlarms = new Set<string>();
 
-        const timeDiff = eventTime.getTime() - now.getTime();
-        
+      entries.forEach(entry => {
         const isToday = entry.day_of_week === now.getDay();
-        const isApproaching = timeDiff > 0 && timeDiff <= NOTIFICATION_THRESHOLD_MS;
+        if (!isToday) return;
+
         const isUserEngaged = entry.engaging_user_ids?.includes(user.id) ?? false;
+
+        // Check for starting events
+        const [startHours, startMinutes] = entry.start_time.split(':').map(Number);
+        const startTime = new Date();
+        startTime.setHours(startHours, startMinutes, 0, 0);
+        const startTimeDiff = startTime.getTime() - now.getTime();
         
-        const isPast = timeDiff < -5000; // Allow a small grace period
-        if (isPast && alarmingEvents.has(entry.id)) {
-            stopAlarming(entry.id);
+        if (startTimeDiff > 0 && startTimeDiff <= NOTIFICATION_THRESHOLD_MS && !isUserEngaged) {
+          const alarmId = `start-${entry.id}`;
+          currentAlarms.add(alarmId);
+          if (!alarmingEvents.has(alarmId)) {
+            showToast(entry, 'start');
+            triggerForegroundAlerts();
+          }
+        } else if (startTimeDiff < -5000 && alarmingEvents.has(`start-${entry.id}`)) {
+          stopAlarming(entry.id, 'start');
         }
 
-        return isToday && isApproaching && !isUserEngaged;
+        // Check for ending events
+        const [endHours, endMinutes] = entry.end_time.split(':').map(Number);
+        const endTime = new Date();
+        endTime.setHours(endHours, endMinutes, 0, 0);
+        const endTimeDiff = endTime.getTime() - now.getTime();
+        
+        if (endTimeDiff > 0 && endTimeDiff <= NOTIFICATION_THRESHOLD_MS) {
+          const alarmId = `end-${entry.id}`;
+          currentAlarms.add(alarmId);
+          if (!alarmingEvents.has(alarmId)) {
+            showToast(entry, 'end');
+            triggerForegroundAlerts();
+          }
+        } else if (endTimeDiff < -5000 && alarmingEvents.has(`end-${entry.id}`)) {
+          stopAlarming(entry.id, 'end');
+        }
       });
-
-      const upcomingEventIds = new Set(upcomingEvents.map(e => e.id));
       
       alarmingEvents.forEach(id => {
-        if (!upcomingEventIds.has(id)) {
-          dismiss(`event-${id}`);
+        if (!currentAlarms.has(id)) {
+          const [type, eventId] = id.split('-');
+          dismiss(`event-${type}-${eventId}`);
         }
       });
       
-      upcomingEvents.forEach(entry => {
-        if (!alarmingEvents.has(entry.id)) {
-          showToast(entry);
-          triggerForegroundAlerts();
-        }
-      });
-      
-      setAlarmingEvents(upcomingEventIds);
+      setAlarmingEvents(currentAlarms);
     };
 
     const intervalId = setInterval(checkUpcomingEvents, 1000);
@@ -135,12 +155,7 @@ export function EventNotification() {
     if (alarmingEvents.size > 0 && document.visibilityState === 'visible') {
       if (foregroundIntervalRef.current) clearInterval(foregroundIntervalRef.current);
       foregroundIntervalRef.current = setInterval(() => {
-        alarmingEvents.forEach(eventId => {
-            const entry = entries.find(e => e.id === eventId);
-            if (entry) {
-                triggerForegroundAlerts();
-            }
-        });
+        triggerForegroundAlerts();
       }, ALERT_INTERVAL_MS);
     } else {
       if (foregroundIntervalRef.current) {
@@ -152,53 +167,70 @@ export function EventNotification() {
     return () => {
       if(foregroundIntervalRef.current) clearInterval(foregroundIntervalRef.current);
     }
-  }, [alarmingEvents, entries]);
+  }, [alarmingEvents]);
   
   // Effect for scheduling/cancelling background notifications
   useEffect(() => {
-    const scheduleBackgroundNotification = async () => {
+    const scheduleBackgroundNotifications = async () => {
       if (!user || !navigator.serviceWorker.ready) return;
 
       const now = new Date();
       
+      // Clear all existing notifications before scheduling new ones
       navigator.serviceWorker.ready.then(registration => {
           registration.getNotifications().then(notifications => {
               notifications.forEach(notification => notification.close());
           });
       });
 
-      const upcomingEvents = entries
-        .map(entry => {
-          const [hours, minutes] = entry.start_time.split(':').map(Number);
-          const eventTime = new Date();
-          eventTime.setHours(hours, minutes, 0, 0);
-          
-          const isToday = entry.day_of_week === now.getDay();
-          const isUserEngaged = entry.engaging_user_ids?.includes(user.id) ?? false;
-          
-          if (isToday && !isUserEngaged && eventTime > now) {
-            return { entry, eventTime };
-          }
-          return null;
-        })
-        .filter((e): e is { entry: TimetableEntry; eventTime: Date } => !!e);
+      entries.forEach(entry => {
+        const isToday = entry.day_of_week === now.getDay();
+        if (!isToday) return;
 
-      upcomingEvents.forEach(eventInfo => {
-        const notificationTime = eventInfo.eventTime.getTime() - NOTIFICATION_THRESHOLD_MS;
-        const delay = notificationTime - now.getTime();
+        const isUserEngaged = entry.engaging_user_ids?.includes(user.id) ?? false;
 
-        if (delay > 0) {
+        // Schedule start notification
+        const [startHours, startMinutes] = entry.start_time.split(':').map(Number);
+        const startTime = new Date();
+        startTime.setHours(startHours, startMinutes, 0, 0);
+
+        if (startTime > now && !isUserEngaged) {
+          const startDelay = startTime.getTime() - NOTIFICATION_THRESHOLD_MS - now.getTime();
+          if (startDelay > 0) {
             setTimeout(() => {
               navigator.serviceWorker.ready.then(registration => {
-                registration.showNotification('Upcoming Event: ' + eventInfo.entry.title, {
-                    body: `${eventInfo.entry.title} is starting soon!`,
-                    tag: eventInfo.entry.id,
+                registration.showNotification('Upcoming Event: ' + entry.title, {
+                    body: `${entry.title} is starting soon!`,
+                    tag: `start-${entry.id}`,
                     renotify: true,
                     vibrate: [200, 100, 200],
                     icon: '/icons/icon.svg',
                 });
               });
-            }, delay);
+            }, startDelay);
+          }
+        }
+        
+        // Schedule end notification
+        const [endHours, endMinutes] = entry.end_time.split(':').map(Number);
+        const endTime = new Date();
+        endTime.setHours(endHours, endMinutes, 0, 0);
+
+        if (endTime > now) {
+          const endDelay = endTime.getTime() - NOTIFICATION_THRESHOLD_MS - now.getTime();
+          if (endDelay > 0) {
+            setTimeout(() => {
+              navigator.serviceWorker.ready.then(registration => {
+                registration.showNotification('Event Ending: ' + entry.title, {
+                    body: `${entry.title} is ending soon.`,
+                    tag: `end-${entry.id}`,
+                    renotify: true,
+                    vibrate: [200, 100, 200],
+                    icon: '/icons/icon.svg',
+                });
+              });
+            }, endDelay);
+          }
         }
       });
     };
@@ -215,9 +247,12 @@ export function EventNotification() {
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
-        scheduleBackgroundNotification();
+        scheduleBackgroundNotifications();
         // Clear foreground alarms when going to background
-        alarmingEvents.forEach(id => stopAlarming(id));
+        alarmingEvents.forEach(id => {
+          const [type, eventId] = id.split('-');
+          stopAlarming(eventId, type as 'start' | 'end')
+        });
       } else {
         cancelBackgroundNotifications();
         requestNotificationPermission(); // Re-check permission on focus
@@ -227,7 +262,7 @@ export function EventNotification() {
     document.addEventListener('visibilitychange', handleVisibilityChange);
     // Also schedule on initial load if page is not visible
     if(document.visibilityState === 'hidden') {
-        scheduleBackgroundNotification();
+        scheduleBackgroundNotifications();
     }
 
     return () => {
