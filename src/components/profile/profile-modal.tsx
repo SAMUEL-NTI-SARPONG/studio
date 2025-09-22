@@ -190,7 +190,7 @@ export function ProfileModal({ updateUserEntries }: { updateUserEntries: (userId
           <Separator />
 
           <div className="space-y-4">
-            <FormLabel>Appearance</FormLabel>
+            <Label className="text-sm font-medium">Appearance</Label>
             <RadioGroup
               value={theme}
               onValueChange={setTheme}
