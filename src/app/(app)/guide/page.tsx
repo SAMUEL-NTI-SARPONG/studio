@@ -8,9 +8,9 @@ import { Check, Clipboard, Download } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const appDescription = `
-Welcome to Legend: Your Collaborative Timetable
+Welcome to ScheduleMe: Your Collaborative Timetable
 
-Legend is a modern, real-time scheduling application designed to help you and your team organize your time seamlessly. Think of it as a digital whiteboard for your week, but smarter. Everyone can see the same schedule, add events, and see changes happen instantly. It even works when you're offline, so you never have to worry about losing your changes.
+ScheduleMe is a modern, real-time scheduling application designed to help you and your team organize your time seamlessly. Think of it as a digital whiteboard for your week, but smarter. Everyone can see the same schedule, add events, and see changes happen instantly. It even works when you're offline, so you never have to worry about losing your changes.
 
 Core Features and How to Use Them
 
@@ -40,7 +40,7 @@ Events are the heart of your timetable. They can be for everyone ("General") or 
 
 3. Collaboration and User Identity
 
-Legend is built for teams.
+ScheduleMe is built for teams.
 
 - Online Users: In the header, you can see the avatars of other users who are currently online, letting you know who you're collaborating with in real-time.
 
@@ -103,7 +103,7 @@ export default function GuidePage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'legend-app-guide.txt';
+    a.download = 'scheduleme-app-guide.txt';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -122,7 +122,7 @@ export default function GuidePage() {
               <div className="flex-1">
                 <CardTitle className="text-2xl">Application Guide</CardTitle>
                 <CardDescription className="mt-1">
-                  A complete overview of all features in the Legend application.
+                  A complete overview of all features in the ScheduleMe application.
                 </CardDescription>
               </div>
               <div className="flex items-center gap-2">

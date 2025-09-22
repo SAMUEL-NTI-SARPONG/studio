@@ -4,7 +4,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { UserProvider } from '@/contexts/user-context';
 
 export const metadata: Metadata = {
-  title: 'Legend',
+  title: 'ScheduleMe',
   description: 'A real-time collaborative timetable application.',
 };
 
