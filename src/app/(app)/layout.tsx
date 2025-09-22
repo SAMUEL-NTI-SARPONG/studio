@@ -62,7 +62,7 @@ function FloatingActionButtons() {
         size="icon"
         onClick={handleAddClick}
       >
-        <Plus className="h-8 w-8" />
+        <Plus className="h-8 w-8 text-primary-foreground" />
         <span className="sr-only">Add new event</span>
       </Button>
     </div>
