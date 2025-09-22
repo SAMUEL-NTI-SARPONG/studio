@@ -55,6 +55,41 @@ export function EventNotification() {
     });
   };
 
+  const stopAlarming = (eventId: string) => {
+    setAlarmingEvents(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(eventId);
+        return newSet;
+    });
+    dismiss(`event-${eventId}`);
+  };
+
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+        if (event.data && event.data.type === 'notification-clicked') {
+            const { eventId } = event.data;
+            if (eventId) {
+                stopAlarming(eventId);
+            }
+        }
+    };
+    if (typeof window !== 'undefined') {
+        window.addEventListener('message', handleMessage);
+    }
+    return () => {
+        if (typeof window !== 'undefined') {
+            window.removeEventListener('message', handleMessage);
+        }
+    };
+  }, []);
+  
+  useEffect(() => {
+    if (!user) {
+        alarmingEvents.forEach(id => stopAlarming(id));
+        return;
+    }
+  }, [user, alarmingEvents]);
+
   // Effect for foreground notifications (when app is visible)
   useEffect(() => {
     const checkUpcomingEvents = () => {
@@ -71,6 +106,11 @@ export function EventNotification() {
         const isToday = entry.day_of_week === now.getDay();
         const isApproaching = timeDiff > 0 && timeDiff <= NOTIFICATION_THRESHOLD_MS;
         const isUserEngaged = entry.engaging_user_ids?.includes(user.id) ?? false;
+        
+        const isPast = timeDiff < -5000; // Allow a small grace period
+        if (isPast && alarmingEvents.has(entry.id)) {
+            stopAlarming(entry.id);
+        }
 
         return isToday && isApproaching && !isUserEngaged;
       });
@@ -128,6 +168,13 @@ export function EventNotification() {
       if (!user || !navigator.serviceWorker.ready) return;
 
       const now = new Date();
+      
+      navigator.serviceWorker.ready.then(registration => {
+          registration.getNotifications().then(notifications => {
+              notifications.forEach(notification => notification.close());
+          });
+      });
+      
       const upcomingEvents = entries
         .map(entry => {
           const [hours, minutes] = entry.start_time.split(':').map(Number);
@@ -142,50 +189,46 @@ export function EventNotification() {
           }
           return null;
         })
-        .filter((e): e is { entry: TimetableEntry; eventTime: Date } => !!e)
-        .sort((a, b) => a.eventTime.getTime() - b.eventTime.getTime());
+        .filter((e): e is { entry: TimetableEntry; eventTime: Date } => !!e);
 
-      if (upcomingEvents.length > 0) {
-        const nextEvent = upcomingEvents[0];
-        const notificationTime = nextEvent.eventTime.getTime() - NOTIFICATION_THRESHOLD_MS;
+      upcomingEvents.forEach(eventInfo => {
+        const notificationTime = eventInfo.eventTime.getTime() - NOTIFICATION_THRESHOLD_MS;
         const delay = notificationTime - now.getTime();
 
         if (delay > 0) {
-          if (backgroundTimeoutRef.current) {
-            clearTimeout(backgroundTimeoutRef.current);
-          }
-          backgroundTimeoutRef.current = setTimeout(() => {
-            navigator.serviceWorker.ready.then(registration => {
-              registration.active?.postMessage({
-                type: 'SHOW_NOTIFICATION',
-                payload: {
-                  title: 'Upcoming Event: ' + nextEvent.entry.title,
-                  options: {
-                    body: `${nextEvent.entry.title} is starting soon!`,
-                    tag: nextEvent.entry.id,
+            setTimeout(() => {
+              navigator.serviceWorker.ready.then(registration => {
+                registration.showNotification('Upcoming Event: ' + eventInfo.entry.title, {
+                    body: `${eventInfo.entry.title} is starting soon!`,
+                    tag: eventInfo.entry.id,
                     renotify: true,
                     vibrate: [200, 100, 200],
-                  }
-                }
+                    sound: '/notification.mp3',
+                    icon: '/icons/icon.svg',
+                });
               });
-            });
-          }, delay);
+            }, delay);
         }
-      }
+      });
     };
     
-    const cancelBackgroundNotification = () => {
-      if (backgroundTimeoutRef.current) {
-        clearTimeout(backgroundTimeoutRef.current);
-        backgroundTimeoutRef.current = null;
+    const cancelBackgroundNotifications = () => {
+       if (navigator.serviceWorker && navigator.serviceWorker.ready) {
+        navigator.serviceWorker.ready.then(registration => {
+            registration.getNotifications().then(notifications => {
+                notifications.forEach(notification => notification.close());
+            });
+        });
       }
     };
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
         scheduleBackgroundNotification();
+        // Clear foreground alarms when going to background
+        alarmingEvents.forEach(id => stopAlarming(id));
       } else {
-        cancelBackgroundNotification();
+        cancelBackgroundNotifications();
         requestNotificationPermission(); // Re-check permission on focus
       }
     };
@@ -198,9 +241,9 @@ export function EventNotification() {
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-      cancelBackgroundNotification();
+      cancelBackgroundNotifications();
     };
-  }, [entries, user, requestNotificationPermission]);
+  }, [entries, user, requestNotificationPermission, alarmingEvents]);
 
   return null;
 }

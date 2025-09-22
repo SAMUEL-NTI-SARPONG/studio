@@ -40,11 +40,13 @@ export default withPWA({
   register: true,
   skipWaiting: true,
   customWorker: 'worker',
-  dynamicStartUrl: false, // We will use our own manifest.
-  fallbacks: {}, // We don't need fallbacks for this app.
-  cacheStartUrl: false,
-  generateSW: true,
-  sw: 'sw.js',
+  dynamicStartUrl: false,
+  workboxOptions: {
+    // Ensure the notification sound is cached
+    additionalManifestEntries: [
+      { url: '/notification.mp3', revision: '1' }
+    ]
+  },
   // Turn off manifest generation
   manifest: false,
 })(nextConfig);
