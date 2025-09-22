@@ -23,7 +23,6 @@ self.addEventListener('message', (event) => {
       self.registration.showNotification(title, {
         ...options,
         icon: '/icons/icon.svg',
-        sound: '/notification.mp3', // Note: sound is not supported by all browsers
       })
     );
   }
