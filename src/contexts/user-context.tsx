@@ -36,7 +36,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const supabase = createClient();
   const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
-  const [colors, setColorsState] = useState<UserColors>({ personal: '#84cc16', general: '#000000' });
+  const [colors, setColorsState] = useState<UserColors>({ personal: '#84cc16', general: '#347433' });
   const [isInitialColorPickerOpen, setInitialColorPickerOpen] = useState(false);
 
   const mapSupabaseUserToAppUser = (supabaseUser: SupabaseUser): AppUser => {
