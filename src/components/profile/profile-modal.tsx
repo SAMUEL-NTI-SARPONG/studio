@@ -191,3 +191,5 @@ export function ProfileModal({ updateUserEntries }: { updateUserEntries: (userId
     </Dialog>
   );
 }
+
+    
