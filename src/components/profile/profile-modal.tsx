@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { useUser } from '@/contexts/user-context';
 import { useProfileModal } from '@/hooks/use-profile-modal';
