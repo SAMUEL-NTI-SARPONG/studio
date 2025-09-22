@@ -4,7 +4,6 @@
 import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
-import { useTheme } from 'next-themes';
 
 // This is a more app-specific user type.
 export type AppUser = {
@@ -25,6 +24,7 @@ type UserContextType = {
   loading: boolean;
   colors: UserColors;
   setColors: (colors: Pick<UserColors, 'personal'>) => Promise<void>;
+  setGeneralColor: (color: string) => Promise<void>;
   updateUserName: (newName: string) => Promise<void>;
   signOut: () => Promise<void>;
   isInitialColorPickerOpen: boolean;
@@ -39,17 +39,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [colors, setColorsState] = useState<UserColors>({ personal: '#84cc16', general: '#a1a1aa' });
   const [isInitialColorPickerOpen, setInitialColorPickerOpen] = useState(false);
-  const { resolvedTheme } = useTheme();
-
-  useEffect(() => {
-    const root = document.documentElement;
-    const primaryColor = getComputedStyle(root).getPropertyValue('--primary').trim();
-    if(primaryColor) {
-      // In a real app, you might want to adjust general color based on theme,
-      // but for now we'll keep it consistent.
-    }
-  }, [resolvedTheme]);
-
 
   const mapSupabaseUserToAppUser = (supabaseUser: SupabaseUser): AppUser => {
     const personalColor = supabaseUser.user_metadata?.personal_color || '#84cc16';
@@ -95,6 +84,41 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
     return () => subscription.unsubscribe();
   }, [supabase.auth, getSession]);
+  
+  // Fetch and subscribe to global settings
+  useEffect(() => {
+    const fetchGeneralColor = async () => {
+      const { data, error } = await supabase
+        .from('global_settings')
+        .select('general_event_color')
+        .eq('id', 1)
+        .single();
+      
+      if (data) {
+        setColorsState(prev => ({ ...prev, general: data.general_event_color }));
+      }
+    };
+    
+    fetchGeneralColor();
+
+    const channel = supabase
+      .channel('global-settings-channel')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'global_settings' },
+        (payload) => {
+          if (payload.eventType === 'UPDATE' && payload.new.general_event_color) {
+            setColorsState(prev => ({ ...prev, general: payload.new.general_event_color }));
+          }
+        }
+      )
+      .subscribe();
+      
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [supabase]);
+
 
   const setColors = async (newColors: Pick<UserColors, 'personal'>) => {
     if (user) {
@@ -110,6 +134,17 @@ export function UserProvider({ children }: { children: ReactNode }) {
       }
     }
   };
+
+  const setGeneralColor = async (newColor: string) => {
+    // Optimistic update
+    setColorsState(prev => ({ ...prev, general: newColor }));
+    const { error } = await supabase.rpc('update_general_event_color', { new_color: newColor });
+    if (error) {
+      console.error('Error updating general color:', error);
+      // Optional: rollback on error
+    }
+  };
+
 
   const updateUserName = async (newName: string) => {
     if (user) {
@@ -133,7 +168,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <UserContext.Provider value={{ user, loading, colors: { personal: user?.personal_color || '#84cc16', general: colors.general }, setColors, updateUserName, signOut, isInitialColorPickerOpen, setInitialColorPickerOpen }}>
+    <UserContext.Provider value={{ user, loading, colors: { personal: user?.personal_color || '#84cc16', general: colors.general }, setColors, setGeneralColor, updateUserName, signOut, isInitialColorPickerOpen, setInitialColorPickerOpen }}>
       {children}
     </UserContext.Provider>
   );

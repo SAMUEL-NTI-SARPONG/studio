@@ -35,6 +35,7 @@ import { useToast } from '@/hooks/use-toast';
 const profileFormSchema = z.object({
   name: z.string().min(1, 'Name is required').max(50, 'Name is too long'),
   personalColor: z.string(),
+  generalColor: z.string(),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -48,9 +49,15 @@ const COLOR_SWATCHES = [
   '#78716c', '#a16207', '#d2b48c', '#854d0e', '#a52a2a',
 ];
 
+const GENERAL_COLOR_SWATCHES = [
+  '#78716c', '#a1a1aa', '#52525b',
+  '#134686', '#1e3a8a', '#312e81',
+  '#86198f', '#881337', '#7f1d1d',
+];
+
 export function ProfileModal({ updateUserEntries }: { updateUserEntries: (userId: string, newName: string, newColor: string) => Promise<void> }) {
   const { isOpen, closeModal } = useProfileModal();
-  const { user, colors, setColors, updateUserName, isInitialColorPickerOpen, setInitialColorPickerOpen } = useUser();
+  const { user, colors, setColors, setGeneralColor, updateUserName, isInitialColorPickerOpen, setInitialColorPickerOpen } = useUser();
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
 
@@ -62,6 +69,7 @@ export function ProfileModal({ updateUserEntries }: { updateUserEntries: (userId
     defaultValues: {
       name: '',
       personalColor: '',
+      generalColor: '',
     },
   });
 
@@ -70,6 +78,7 @@ export function ProfileModal({ updateUserEntries }: { updateUserEntries: (userId
       form.reset({
         name: user.name || '',
         personalColor: colors.personal,
+        generalColor: colors.general,
       });
     }
   }, [user, colors, isModalOpen, form]);
@@ -92,18 +101,22 @@ export function ProfileModal({ updateUserEntries }: { updateUserEntries: (userId
     if (!user) return;
     
     const hasNameChanged = data.name !== user.name;
-    const hasColorChanged = data.personalColor !== user.personal_color;
+    const hasPersonalColorChanged = data.personalColor !== user.personal_color;
+    const hasGeneralColorChanged = data.generalColor !== colors.general;
 
     if (hasNameChanged) {
       await updateUserName(data.name);
     }
-    if (hasColorChanged) {
+    if (hasPersonalColorChanged) {
       await setColors({
           personal: data.personalColor,
       });
     }
+    if (hasGeneralColorChanged) {
+        await setGeneralColor(data.generalColor);
+    }
 
-    if (hasNameChanged || hasColorChanged) {
+    if (hasNameChanged || hasPersonalColorChanged) {
       await updateUserEntries(user.id, data.name, data.personalColor);
     }
 
@@ -121,7 +134,7 @@ export function ProfileModal({ updateUserEntries }: { updateUserEntries: (userId
 
   return (
     <Dialog open={isModalOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent onInteractOutside={isFirstTimeSetup ? (e) => e.preventDefault() : undefined}>
+      <DialogContent onInteractOutside={isFirstTimeSetup ? (e) => e.preventDefault() : undefined} className="max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{isFirstTimeSetup ? "Welcome! Let's get you set up." : 'Edit Profile'}</DialogTitle>
           {isFirstTimeSetup && (
@@ -177,11 +190,42 @@ export function ProfileModal({ updateUserEntries }: { updateUserEntries: (userId
                   </FormItem>
                 )}
               />
+
+              {!isFirstTimeSetup && (
+                <FormField
+                  control={form.control}
+                  name="generalColor"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>General Schedule Color</FormLabel>
+                       <FormControl>
+                            <div className="grid grid-cols-6 gap-2">
+                            {GENERAL_COLOR_SWATCHES.map(color => (
+                                <button
+                                type="button"
+                                key={color}
+                                className={cn(
+                                    'h-8 w-8 rounded-full border-2 flex items-center justify-center',
+                                    field.value === color ? 'border-primary' : 'border-transparent'
+                                )}
+                                style={{ backgroundColor: color }}
+                                onClick={() => field.onChange(color)}
+                                >
+                                {field.value === color && <Check className="h-4 w-4 text-white" />}
+                                </button>
+                            ))}
+                            </div>
+                       </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
               
               <div className="flex justify-end">
                 <Button type="submit" disabled={form.formState.isSubmitting}>
                   {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  {isFirstTimeSetup ? 'Continue' : 'Save Profile'}
+                  {isFirstTimeSetup ? 'Continue' : 'Save Changes'}
                 </Button>
               </div>
             </form>

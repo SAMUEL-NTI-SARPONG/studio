@@ -59,9 +59,26 @@ export type Database = {
           user_color?: string | null;
         };
       };
+      global_settings: {
+        Row: {
+          id: number;
+          general_event_color: string;
+        };
+        Insert: {
+          id?: number;
+          general_event_color: string;
+        };
+        Update: {
+          id?: number;
+          general_event_color?: string;
+        };
+      }
     };
     Functions: {
-      [_ in never]: never;
+      update_general_event_color: {
+        Args: { new_color: string };
+        Returns: undefined;
+      };
     };
     Enums: {
       [_ in never]: never;
