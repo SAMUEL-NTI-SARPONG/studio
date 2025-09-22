@@ -4,6 +4,7 @@
 import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
+import { useTheme } from 'next-themes';
 
 // This is a more app-specific user type.
 export type AppUser = {
@@ -38,6 +39,24 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [colors, setColorsState] = useState<UserColors>({ personal: '#84cc16', general: '#347433' });
   const [isInitialColorPickerOpen, setInitialColorPickerOpen] = useState(false);
+  const { resolvedTheme } = useTheme();
+
+  useEffect(() => {
+    // This function will be defined in a style tag by ThemeProvider
+    // and is safe to call here.
+    const root = document.documentElement;
+    const primaryColor = getComputedStyle(root).getPropertyValue('--primary').trim();
+    
+    // Convert HSL string to hex if necessary, or just use the HSL value.
+    // For now, let's assume we can get the hex value.
+    // Let's get the raw HSL values and re-compose it.
+    if(primaryColor) {
+      const generalColor = `hsl(${primaryColor})`;
+      setColorsState(currentColors => ({...currentColors, general: generalColor}));
+    }
+    
+  }, [resolvedTheme]);
+
 
   const mapSupabaseUserToAppUser = (supabaseUser: SupabaseUser): AppUser => {
     const personalColor = supabaseUser.user_metadata?.personal_color || '#84cc16';
