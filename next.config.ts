@@ -39,7 +39,6 @@ export default withPWA({
   disable: process.env.NODE_ENV === 'development',
   register: true,
   skipWaiting: true,
-  customWorker: 'sw',
   dynamicStartUrl: false,
   workboxOptions: {
     additionalManifestEntries: [
@@ -51,7 +50,7 @@ export default withPWA({
     short_name: 'ScheduleMe',
     description: 'A real-time collaborative timetable application.',
     background_color: '#ffffff',
-    theme_color: '#347433',
+    theme_color: '#3F7D58',
     display: 'standalone',
     icons: [
       {

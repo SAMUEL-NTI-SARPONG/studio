@@ -56,4 +56,11 @@ self.addEventListener('notificationclick', (event) => {
   );
 });
 
+// This is required to make the service worker installable.
+self.addEventListener('fetch', (event) => {
+  // You can add custom fetch handling here if needed,
+  // but for a basic PWA, this is often sufficient to just have the event listener.
+});
+
+
 export {};

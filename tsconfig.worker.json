@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "lib": ["webworker", "es2020"],
+    "moduleResolution": "node",
+    "module": "commonjs",
+    "noEmit": false,
+    "outDir": "public",
+    "declaration": false,
+    "declarationMap": false
+  },
+  "include": ["src/app/sw.ts"]
+}
