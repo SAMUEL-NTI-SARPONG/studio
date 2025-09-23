@@ -123,16 +123,11 @@ export function useTimetableData() {
           if (error) throw error;
         } else if (action.type === 'toggle_engagement') {
           const { entryId, userId } = action.payload;
-          const { data: currentEntry } = await supabase.from('timetable_entries').select('engaging_user_ids').eq('id', entryId).single();
-          if (currentEntry) {
-            const currentEngagedUsers = currentEntry.engaging_user_ids || [];
-            const isEngaged = currentEngagedUsers.includes(userId);
-            const newEngagedUsers = isEngaged
-              ? currentEngagedUsers.filter(id => id !== userId)
-              : [...currentEngagedUsers, userId];
-            const { error } = await supabase.from('timetable_entries').update({ engaging_user_ids: newEngagedUsers }).eq('id', entryId);
-            if (error) throw error;
-          }
+          const { error } = await supabase.rpc('toggle_user_engagement', {
+            p_user_id: userId,
+            p_entry_id: entryId,
+          });
+          if (error) throw error;
         } else if (action.type === 'update_user_entries') {
           const { userId, newName, newColor } = action.payload;
           const { error } = await supabase.from('timetable_entries').update({ user_name: newName, user_color: newColor }).eq('user_id', userId);
@@ -308,56 +303,39 @@ export function useTimetableData() {
 
     // Optimistic UI Update
     setEntries(prevEntries => 
-        prevEntries.map(entry => {
-            // If this is the target event, toggle engagement
-            if (entry.id === entryId) {
-                const engagedUsers = entry.engaging_user_ids || [];
-                return {
-                    ...entry,
-                    engaging_user_ids: isCurrentlyEngaged 
-                        ? engagedUsers.filter(id => id !== userId)
-                        : [...engagedUsers, userId]
-                };
-            }
-            // If this is any other event, disengage the user
-            if (entry.engaging_user_ids?.includes(userId)) {
-                return {
-                    ...entry,
-                    engaging_user_ids: entry.engaging_user_ids.filter(id => id !== userId)
-                };
-            }
-            return entry;
-        })
+      prevEntries.map(entry => {
+          if (entry.id === entryId) {
+              const engagedUsers = entry.engaging_user_ids || [];
+              return {
+                  ...entry,
+                  engaging_user_ids: isCurrentlyEngaged 
+                      ? engagedUsers.filter(id => id !== userId)
+                      : [...engagedUsers, userId]
+              };
+          }
+          if (entry.engaging_user_ids?.includes(userId)) {
+              return {
+                  ...entry,
+                  engaging_user_ids: entry.engaging_user_ids.filter(id => id !== userId)
+              };
+          }
+          return entry;
+      })
     );
 
     // Offline and API logic
     if (isOffline) {
-      // For simplicity in offline queue, we can just queue the toggle.
-      // The single-engagement rule will be enforced on sync.
       setActionQueue(prev => [...prev, { type: 'toggle_engagement', payload: { entryId, userId } }]);
       return;
     }
 
     try {
-        // Disengage from all other events first
-        const { error: disengageError } = await supabase
-            .rpc('disengage_user_from_all_events', { p_user_id: userId });
+        const { error } = await supabase.rpc('toggle_user_engagement', {
+          p_user_id: userId,
+          p_entry_id: entryId,
+        });
 
-        if (disengageError) throw disengageError;
-
-        // If the user was not already engaged with the target event, engage them.
-        if (!isCurrentlyEngaged) {
-            const { data: currentEntry } = await supabase.from('timetable_entries').select('engaging_user_ids').eq('id', entryId).single();
-            if (currentEntry) {
-                const newEngagedUsers = [...(currentEntry.engaging_user_ids || []), userId];
-                const { error: engageError } = await supabase
-                    .from('timetable_entries')
-                    .update({ engaging_user_ids: newEngagedUsers })
-                    .eq('id', entryId);
-                if (engageError) throw engageError;
-            }
-        }
-        // If they were already engaged, clicking again serves to disengage, which is covered by the RPC call.
+        if (error) throw error;
 
     } catch (error: any) {
         console.error('Engagement error:', error);

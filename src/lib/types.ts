@@ -79,6 +79,10 @@ export type Database = {
         Args: { new_color: string };
         Returns: undefined;
       };
+      toggle_user_engagement: {
+        Args: { p_user_id: string; p_entry_id: string };
+        Returns: undefined;
+      };
     };
     Enums: {
       [_ in never]: never;
