@@ -296,30 +296,25 @@ export function useTimetableData() {
     if (!user) return;
 
     const originalEntries = entries;
-    const targetEntry = entries.find(e => e.id === entryId);
-    if (!targetEntry) return;
-
-    const isCurrentlyEngaged = targetEntry.engaging_user_ids?.includes(userId) ?? false;
-
+    
     // Optimistic UI Update
     setEntries(prevEntries => 
       prevEntries.map(entry => {
-          if (entry.id === entryId) {
-              const engagedUsers = entry.engaging_user_ids || [];
-              return {
-                  ...entry,
-                  engaging_user_ids: isCurrentlyEngaged 
-                      ? engagedUsers.filter(id => id !== userId)
-                      : [...engagedUsers, userId]
-              };
+        // Disengage from all other events
+        let newEngagingIds = entry.engaging_user_ids?.filter(id => id !== userId) || [];
+
+        // For the target event, toggle engagement
+        if (entry.id === entryId) {
+          const isCurrentlyEngaged = entry.engaging_user_ids?.includes(userId) ?? false;
+          if (!isCurrentlyEngaged) {
+            newEngagingIds.push(userId);
           }
-          if (entry.engaging_user_ids?.includes(userId)) {
-              return {
-                  ...entry,
-                  engaging_user_ids: entry.engaging_user_ids.filter(id => id !== userId)
-              };
-          }
-          return entry;
+        }
+        
+        return {
+          ...entry,
+          engaging_user_ids: newEngagingIds
+        };
       })
     );
 
@@ -342,7 +337,7 @@ export function useTimetableData() {
         toast({ title: 'Error', description: 'Could not update engagement status.', variant: 'destructive' });
         setEntries(originalEntries); // Rollback on error
     }
-  }, [entries, supabase, user, toast, isOffline]);
+  }, [entries, supabase, user, toast, isOffline, setActionQueue]);
 
   
   const clearPersonalScheduleForDay = useCallback(async (dayOfWeek: number) => {
@@ -500,3 +495,5 @@ export function useTimetable() {
   }
   return context;
 }
+
+    
